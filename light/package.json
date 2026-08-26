@@ -7,11 +7,10 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "prisma:seed": "prisma db seed",
-    
     "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.9.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",

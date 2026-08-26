@@ -7,10 +7,51 @@ datasource db {
 
 }
 
-model Note{
-  id   Int @id @default(autoincrement())
-  title String
-  content String
-  name String
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String?
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Supabase Auth ID (pour lier les deux)
+  authId    String?  @unique // ID de Supabase Auth
+  
+  // Relations
+  profile   Profile?
+  projects  Project[]
+  // ...
 }
 
+// Créer une table Profile si tu veux séparer les données
+model Profile {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @unique
+  fullName   String?
+  avatar     String?
+  bio        String?
+  phone      String?
+  location   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  name        String
+  description String?
+  status      String   @default("DRAFT")
+  category    String?
+  progress    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  
+  
+}
