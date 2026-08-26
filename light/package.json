@@ -8,7 +8,7 @@
     "start": "next start",
     "prisma:seed": "prisma db seed",
     
-    "vercel-build": "npm run prepare && next build"
+    "vercel-build": "prisma generate && next build"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
