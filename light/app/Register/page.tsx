@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -34,143 +35,68 @@ export default function RegisterPage() {
     }
 
     try {
-      // Simulation d'inscription (à remplacer par Firebase)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // 1. Créer l'utilisateur avec Supabase Auth
+      const supabase = createClient();
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name }
+        }
+      });
+
+      if (authError) {
+        console.error("Auth Error:", authError);
+        throw new Error(authError.message);
+      }
+
+      if (!authData.user) {
+        throw new Error("Erreur lors de l'inscription");
+      }
+
+      console.log("✅ Utilisateur créé dans Supabase Auth:", authData.user.id);
+
+      // 2. Créer le profil dans la base de données
+      const response = await fetch('/api/auth/create-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: authData.user.id,
+          email: authData.user.email,
+          name: name,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Erreur lors de la création du profil");
+      }
+
+      console.log("✅ Profil créé dans la base de données");
+
+      // 3. Rediriger vers la page de bienvenue
+      router.push('/onboarding/welcome');
       
-      console.log("Nom:", name);
-      console.log("Email:", email);
-      console.log("Mot de passe:", password);
+    } catch (err: any) {
+      console.error("❌ Erreur d'inscription:", err);
       
-      // ✅ Afficher l'écran de succès
-      setIsSuccess(true);
-    } catch (err) {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      // Messages d'erreur Firebase en français
+      const errorMessages: Record<string, string> = {
+        'auth/email-already-in-use': 'Cet email est déjà utilisé.',
+        'auth/invalid-email': 'Email invalide.',
+        'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
+        'auth/network-request-failed': 'Erreur réseau. Vérifie ta connexion.',
+      };
+      setError(errorMessages[err.code] || err.message || 'Une erreur est survenue. Veuillez réessayer.');
+      
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ===== ÉCRAN DE SUCCÈS =====
-  if (isSuccess) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "20px",
-          position: "relative",
-          overflow: "hidden",
-          background: "#000000",
-        }}
-      >
-        {/* Fond */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 0,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat",
-              opacity: 0.08,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "radial-gradient(ellipse at center, rgba(26,10,46,0.6) 0%, rgba(0,0,0,0.85) 100%)",
-            }}
-          />
-        </div>
-
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            textAlign: "center",
-            maxWidth: "500px",
-            padding: "40px 24px",
-          }}
-        >
-          <div
-            style={{
-              width: "80px",
-              height: "80px",
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #10B981, #059669)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 24px",
-              boxShadow: "0 8px 40px rgba(16, 185, 129, 0.2)",
-            }}
-          >
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-          <h2 style={{ fontSize: "28px", fontWeight: 700, color: "#FFFFFF", marginBottom: "12px" }}>
-            Inscription réussie ! 
-          </h2>
-          <p style={{ fontSize: "16px", color: "rgba(255,255,255,0.6)", lineHeight: "1.7", marginBottom: "28px" }}>
-            Bienvenue, <strong style={{ color: "#F4D03F" }}>{name.split(" ")[0]}</strong> ! <br />
-            Ton compte a été créé avec succès. 
-            <br />
-            <span style={{ color: "rgba(255,255,255,0.4)" }}>Prêt à commencer ton aventure ?</span>
-          </p>
-          
-          {/* ✅ Bouton vers la page de bienvenue */}
-          <Link
-            href="/onboarding/welcome"
-            style={{
-              display: "inline-block",
-              padding: "14px 40px",
-              background: "linear-gradient(135deg, #C9A200, #F4D03F)",
-              color: "#1A1A2E",
-              borderRadius: "50px",
-              fontSize: "15px",
-              fontWeight: 700,
-              textDecoration: "none",
-              transition: "all 0.3s ease",
-              boxShadow: "0 4px 24px rgba(201, 162, 0, 0.2)",
-              fontFamily: "'Inter', sans-serif",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-3px) scale(1.02)";
-              e.currentTarget.style.boxShadow = "0 8px 48px rgba(201, 162, 0, 0.35)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0) scale(1)";
-              e.currentTarget.style.boxShadow = "0 4px 24px rgba(201, 162, 0, 0.2)";
-            }}
-          >
-            Continuer vers la page de bienvenue →
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // ===== FORMULAIRE D'INSCRIPTION =====
   return (
     <div
       style={{
@@ -497,6 +423,7 @@ export default function RegisterPage() {
                   e.currentTarget.style.boxShadow = "none";
                 }}
                 required
+                minLength={6}
               />
             </div>
           </div>
@@ -574,4 +501,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
