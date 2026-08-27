@@ -1,27 +1,19 @@
 // lib/prisma.ts
-import { PrismaClient } from '@prisma/client'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool } from 'pg'
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+const globalForPrisma = global as unknown as {
+    prisma: PrismaClient | undefined;
+};
 
-// Créer le pool de connexion PostgreSQL
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-})
+// L'adaptateur traduit les requêtes Prisma vers le driver "pg" (node-postgres)
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 
-// Créer l'adapter
-const adapter = new PrismaPg(pool)
-
-// Créer le client Prisma avec l'adapter
-const prismaClientSingleton = () => {
-  return new PrismaClient({ adapter })
-}
-
-const prisma = globalForPrisma.prisma ?? prismaClientSingleton()
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
+    globalForPrisma.prisma = prisma;
 }
 
-export default prisma
+// ✅ Export par défaut (optionnel mais recommandé)
+export default prisma;

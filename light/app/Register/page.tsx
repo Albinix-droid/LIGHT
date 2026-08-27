@@ -4,7 +4,21 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from '@/lib/supabase/client'
+import { createBrowserClient } from "@supabase/ssr";
+
+
+const createClient = () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !anonKey) {
+    throw new Error(
+      "Configuration Supabase manquante : NEXT_PUBLIC_SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_ANON_KEY."
+    );
+  }
+
+  return createBrowserClient(url, anonKey);
+};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,7 +28,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
+  
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -80,17 +94,11 @@ export default function RegisterPage() {
       // 3. Rediriger vers la page de bienvenue
       router.push('/onboarding/welcome');
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ Erreur d'inscription:", err);
       
-      // Messages d'erreur Firebase en français
-      const errorMessages: Record<string, string> = {
-        'auth/email-already-in-use': 'Cet email est déjà utilisé.',
-        'auth/invalid-email': 'Email invalide.',
-        'auth/weak-password': 'Le mot de passe doit faire au moins 6 caractères.',
-        'auth/network-request-failed': 'Erreur réseau. Vérifie ta connexion.',
-      };
-      setError(errorMessages[err.code] || err.message || 'Une erreur est survenue. Veuillez réessayer.');
+      const message = err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.';
+      setError(message);
       
     } finally {
       setIsLoading(false);
@@ -473,7 +481,7 @@ export default function RegisterPage() {
         <p className="fade-in-up delay-7" style={{ textAlign: "center", color: "#A0A0A0", fontSize: "14px", marginTop: "20px" }}>
           Déjà un compte ?{" "}
           <Link
-            href="/Login"
+            href="/login"
             style={{ color: "#C9A200", textDecoration: "none", fontWeight: 600, transition: "all 0.3s ease" }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "#F4D03F")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#C9A200")}
