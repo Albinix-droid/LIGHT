@@ -2,7 +2,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware'; // 
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     //  Ne pas bloquer les routes API
     if (request.nextUrl.pathname.startsWith('/api')) {
         return NextResponse.next();

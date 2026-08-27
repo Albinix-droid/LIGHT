@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     try {
         const { userId, email, fullName } = await request.json();
 
-        // ✅ Vérifier que userId existe
+        //  Vérifier que userId existe
         if (!userId || !email) {
             return NextResponse.json(
                 { error: 'userId et email sont requis' },
