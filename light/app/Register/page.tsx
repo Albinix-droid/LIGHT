@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
-
 const createClient = () => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -22,84 +21,142 @@ const createClient = () => {
 
 export default function RegisterPage() {
   const router = useRouter();
+
   const [scrollY, setScrollY] = useState(0);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
+  const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
 
-    // Validation simple
-    if (!name || !email || !password) {
+    if (isLoading) return;
+
+    setError("");
+    setSuccess("");
+
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (!cleanName || !cleanEmail || !password) {
       setError("Veuillez remplir tous les champs.");
-      setIsLoading(false);
       return;
     }
 
+    if (password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères.");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      // 1. Créer l'utilisateur avec Supabase Auth
       const supabase = createClient();
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: name }
-        }
-      });
+
+      /*
+       * ============================================================
+       * INSCRIPTION 100 % SUPABASE
+       * ============================================================
+       *
+       * Nous ne faisons PLUS de :
+       *
+       * fetch("/api/auth/create-profile")
+       *
+       * L'ancien appel provoquait :
+       * Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+       *
+       * Le profil de base est stocké dans les métadonnées Supabase
+       * au moment de la création du compte.
+       */
+      const { data: authData, error: authError } =
+        await supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: {
+            data: {
+              full_name: cleanName,
+              name: cleanName,
+            },
+          },
+        });
 
       if (authError) {
-        console.error("Auth Error:", authError);
-        throw new Error(authError.message);
+        console.error("Supabase Auth Error:", authError);
+        throw authError;
       }
 
       if (!authData.user) {
-        throw new Error("Erreur lors de l'inscription");
+        throw new Error("Supabase n'a pas retourné l'utilisateur créé.");
       }
 
-      console.log("✅ Utilisateur créé dans Supabase Auth:", authData.user.id);
+      console.log(
+        "✅ Utilisateur créé dans Supabase Auth:",
+        authData.user.id
+      );
 
-      // 2. Créer le profil dans la base de données
-      const response = await fetch('/api/auth/create-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: authData.user.id,
-          email: authData.user.email,
-          name: name,
-        }),
-      });
+      /*
+       * CAS 1 :
+       * Confirmation email activée dans Supabase.
+       * Supabase crée l'utilisateur mais ne fournit pas encore
+       * de session.
+       */
+      if (!authData.session) {
+        setSuccess(
+          "Votre compte a bien été créé. Vérifiez votre adresse email pour confirmer votre compte."
+        );
 
-      const data = await response.json();
+        setName("");
+        setEmail("");
+        setPassword("");
 
-      if (!response.ok) {
-        throw new Error(data.message || "Erreur lors de la création du profil");
+        return;
       }
 
-      console.log("✅ Profil créé dans la base de données");
-
-      // 3. Rediriger vers la page de bienvenue
-      router.push('/onboarding/welcome');
-      
+      /*
+       * CAS 2 :
+       * Confirmation email désactivée.
+       * L'utilisateur possède déjà une session.
+       */
+      router.replace("/onboarding/welcome");
+      router.refresh();
     } catch (err: unknown) {
-      console.error("❌ Erreur d'inscription:", err);
-      
-      const message = err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.';
-      setError(message);
-      
+      console.error("❌ Erreur d'inscription Supabase:", err);
+
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Une erreur est survenue. Veuillez réessayer.";
+
+      const normalizedMessage = message.toLowerCase();
+
+      if (
+        normalizedMessage.includes("user already registered") ||
+        normalizedMessage.includes("already registered")
+      ) {
+        setError("Cette adresse email est déjà utilisée.");
+      } else if (normalizedMessage.includes("invalid email")) {
+        setError("Veuillez saisir une adresse email valide.");
+      } else if (normalizedMessage.includes("password")) {
+        setError("Le mot de passe doit contenir au moins 6 caractères.");
+      } else if (normalizedMessage.includes("rate limit")) {
+        setError(
+          "Trop de tentatives. Veuillez patienter quelques instants puis réessayer."
+        );
+      } else {
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +175,9 @@ export default function RegisterPage() {
         background: "#000000",
       }}
     >
-      {/* ===== FOND : image en parallaxe ===== */}
+      {/* =========================================================
+          FOND
+      ========================================================== */}
       <div
         aria-hidden="true"
         style={{
@@ -139,32 +198,38 @@ export default function RegisterPage() {
             transition: "transform 0.05s ease-out",
           }}
         />
+
         <div
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(135deg, rgba(0,0,0,0.85), rgba(26,10,46,0.7), rgba(0,0,0,0.55))",
+            background:
+              "linear-gradient(135deg, rgba(0,0,0,0.85), rgba(26,10,46,0.7), rgba(0,0,0,0.55))",
           }}
         />
+
         <div
           style={{
             position: "absolute",
             width: "600px",
             height: "600px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,162,0,0.1), transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(201,162,0,0.1), transparent 70%)",
             top: "-250px",
             right: "-150px",
             animation: "floatBg 8s ease-in-out infinite",
           }}
         />
+
         <div
           style={{
             position: "absolute",
             width: "400px",
             height: "400px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,162,0,0.07), transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(201,162,0,0.07), transparent 70%)",
             bottom: "-150px",
             left: "-120px",
             animation: "floatBg 10s ease-in-out infinite reverse",
@@ -174,57 +239,118 @@ export default function RegisterPage() {
 
       <style jsx>{`
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(50px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
+          from {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
+
         @keyframes floatBg {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, -20px) scale(1.1); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          50% {
+            transform: translate(20px, -20px) scale(1.1);
+          }
         }
+
         @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
+          0% {
+            background-position: -200% center;
+          }
+          100% {
+            background-position: 200% center;
+          }
         }
+
         @keyframes iconPulse {
-          0%, 100% { transform: scale(1) rotate(0deg); }
-          25% { transform: scale(1.05) rotate(-3deg); }
-          75% { transform: scale(1.05) rotate(3deg); }
+          0%,
+          100% {
+            transform: scale(1) rotate(0deg);
+          }
+          25% {
+            transform: scale(1.05) rotate(-3deg);
+          }
+          75% {
+            transform: scale(1.05) rotate(3deg);
+          }
         }
+
         @keyframes inputFocus {
-          0% { transform: scaleX(0); }
-          100% { transform: scaleX(1); }
+          0% {
+            transform: scaleX(0);
+          }
+          100% {
+            transform: scaleX(1);
+          }
         }
+
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
 
         .fade-in-up {
           opacity: 0;
           transform: translateY(50px) scale(0.95);
-          animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+          animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)
+            forwards;
         }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.25s; }
-        .delay-3 { animation-delay: 0.4s; }
-        .delay-4 { animation-delay: 0.55s; }
-        .delay-5 { animation-delay: 0.7s; }
-        .delay-6 { animation-delay: 0.85s; }
-        .delay-7 { animation-delay: 1s; }
 
-        .input-wrapper { position: relative; }
+        .delay-1 {
+          animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+          animation-delay: 0.25s;
+        }
+
+        .delay-3 {
+          animation-delay: 0.4s;
+        }
+
+        .delay-4 {
+          animation-delay: 0.55s;
+        }
+
+        .delay-5 {
+          animation-delay: 0.7s;
+        }
+
+        .delay-6 {
+          animation-delay: 0.85s;
+        }
+
+        .delay-7 {
+          animation-delay: 1s;
+        }
+
+        .input-wrapper {
+          position: relative;
+        }
+
         .input-wrapper::after {
-          content: '';
+          content: "";
           position: absolute;
           bottom: 0;
           left: 0;
           width: 100%;
           height: 2px;
-          background: linear-gradient(90deg, #C9A200, #F4D03F, #C9A200);
+          background: linear-gradient(90deg, #c9a200, #f4d03f, #c9a200);
           background-size: 200% auto;
           transform: scaleX(0);
           transition: transform 0.4s ease;
         }
+
         .input-wrapper:focus-within::after {
           animation: inputFocus 0.4s ease forwards;
         }
@@ -234,7 +360,7 @@ export default function RegisterPage() {
           width: 20px;
           height: 20px;
           border: 2px solid rgba(26, 26, 46, 0.2);
-          border-top: 2px solid #1A1A2E;
+          border-top: 2px solid #1a1a2e;
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
@@ -246,11 +372,41 @@ export default function RegisterPage() {
           margin-bottom: 16px;
           background: rgba(239, 68, 68, 0.1);
           border: 1px solid rgba(239, 68, 68, 0.2);
-          color: #EF4444;
+          color: #ef4444;
+        }
+
+        .success-message {
+          padding: 14px 16px;
+          border-radius: 12px;
+          font-size: 14px;
+          margin-bottom: 16px;
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.25);
+          color: #059669;
+          line-height: 1.5;
+        }
+
+        .password-toggle {
+          position: absolute;
+          right: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          border: 0;
+          background: transparent;
+          color: #8b8b99;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        .password-toggle:hover {
+          color: #c9a200;
         }
       `}</style>
 
-      {/* ===== CARTE EN VERRE ===== */}
+      {/* =========================================================
+          CARTE
+      ========================================================== */}
       <div
         className="fade-in-up delay-1"
         style={{
@@ -266,8 +422,15 @@ export default function RegisterPage() {
           border: "1px solid rgba(255, 255, 255, 0.25)",
         }}
       >
-        {/* Logo LIGHT */}
-        <div className="fade-in-up delay-2" style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+        {/* Logo */}
+        <div
+          className="fade-in-up delay-2"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "16px",
+          }}
+        >
           <div
             style={{
               width: "72px",
@@ -286,7 +449,8 @@ export default function RegisterPage() {
               fontFamily: "'Inter', sans-serif",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.08) rotate(-3deg)";
+              e.currentTarget.style.transform =
+                "scale(1.08) rotate(-3deg)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "scale(1) rotate(0deg)";
@@ -317,29 +481,70 @@ export default function RegisterPage() {
 
         <p
           className="fade-in-up delay-3"
-          style={{ fontSize: "15px", color: "#6B6B7B", textAlign: "center", marginBottom: "32px", lineHeight: "1.6" }}
+          style={{
+            fontSize: "15px",
+            color: "#6B6B7B",
+            textAlign: "center",
+            marginBottom: "32px",
+            lineHeight: "1.6",
+          }}
         >
-          Rejoins la communauté <strong style={{ color: "#C9A200" }}>LIGHT</strong> et fais briller ton idée
+          Rejoins la communauté{" "}
+          <strong style={{ color: "#C9A200" }}>LIGHT</strong> et fais briller
+          ton idée
         </p>
 
-        {/* Message d'erreur */}
-        {error && (
-          <div className="fade-in-up delay-3 error-message">
-            {error}
+        {/* Message de succès */}
+        {success && (
+          <div className="fade-in-up delay-3 success-message">
+            {success}
+            <div style={{ marginTop: "12px" }}>
+              <Link
+                href="/login"
+                style={{
+                  color: "#059669",
+                  fontWeight: 700,
+                  textDecoration: "underline",
+                }}
+              >
+                Aller à la connexion
+              </Link>
+            </div>
           </div>
         )}
 
+        {/* Message d'erreur */}
+        {error && (
+          <div className="fade-in-up delay-3 error-message">{error}</div>
+        )}
+
         <form onSubmit={handleSubmit}>
-          <div className="fade-in-up delay-3" style={{ marginBottom: "18px" }}>
-            <label style={{ display: "block", color: "#6B6B7B", fontSize: "13px", fontWeight: 600, marginBottom: "6px", letterSpacing: "0.3px" }}>
+          {/* Nom */}
+          <div
+            className="fade-in-up delay-3"
+            style={{ marginBottom: "18px" }}
+          >
+            <label
+              style={{
+                display: "block",
+                color: "#6B6B7B",
+                fontSize: "13px",
+                fontWeight: 600,
+                marginBottom: "6px",
+                letterSpacing: "0.3px",
+              }}
+            >
               Nom complet
             </label>
+
             <div className="input-wrapper">
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Votre nom"
+                autoComplete="name"
+                disabled={isLoading}
                 style={{
                   width: "100%",
                   padding: "14px 18px",
@@ -351,10 +556,12 @@ export default function RegisterPage() {
                   outline: "none",
                   transition: "all 0.3s ease",
                   fontFamily: "inherit",
+                  boxSizing: "border-box",
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.borderColor = "#C9A200";
-                  e.currentTarget.style.boxShadow = "0 0 0 4px rgba(201, 162, 0, 0.12)";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 4px rgba(201, 162, 0, 0.12)";
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = "#E8E8E8";
@@ -365,16 +572,32 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="fade-in-up delay-4" style={{ marginBottom: "18px" }}>
-            <label style={{ display: "block", color: "#6B6B7B", fontSize: "13px", fontWeight: 600, marginBottom: "6px", letterSpacing: "0.3px" }}>
+          {/* Email */}
+          <div
+            className="fade-in-up delay-4"
+            style={{ marginBottom: "18px" }}
+          >
+            <label
+              style={{
+                display: "block",
+                color: "#6B6B7B",
+                fontSize: "13px",
+                fontWeight: 600,
+                marginBottom: "6px",
+                letterSpacing: "0.3px",
+              }}
+            >
               Adresse email
             </label>
+
             <div className="input-wrapper">
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Votre email"
+                autoComplete="email"
+                disabled={isLoading}
                 style={{
                   width: "100%",
                   padding: "14px 18px",
@@ -386,10 +609,12 @@ export default function RegisterPage() {
                   outline: "none",
                   transition: "all 0.3s ease",
                   fontFamily: "inherit",
+                  boxSizing: "border-box",
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.borderColor = "#C9A200";
-                  e.currentTarget.style.boxShadow = "0 0 0 4px rgba(201, 162, 0, 0.12)";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 4px rgba(201, 162, 0, 0.12)";
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = "#E8E8E8";
@@ -400,19 +625,35 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="fade-in-up delay-5" style={{ marginBottom: "28px" }}>
-            <label style={{ display: "block", color: "#6B6B7B", fontSize: "13px", fontWeight: 600, marginBottom: "6px", letterSpacing: "0.3px" }}>
+          {/* Mot de passe */}
+          <div
+            className="fade-in-up delay-5"
+            style={{ marginBottom: "28px" }}
+          >
+            <label
+              style={{
+                display: "block",
+                color: "#6B6B7B",
+                fontSize: "13px",
+                fontWeight: 600,
+                marginBottom: "6px",
+                letterSpacing: "0.3px",
+              }}
+            >
               Mot de passe
             </label>
-            <div className="input-wrapper">
+
+            <div className="input-wrapper" style={{ position: "relative" }}>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Votre mot de passe"
+                autoComplete="new-password"
+                disabled={isLoading}
                 style={{
                   width: "100%",
-                  padding: "14px 18px",
+                  padding: "14px 90px 14px 18px",
                   backgroundColor: "rgba(255, 248, 231, 0.8)",
                   color: "#1A1A2E",
                   border: "2px solid #E8E8E8",
@@ -421,10 +662,12 @@ export default function RegisterPage() {
                   outline: "none",
                   transition: "all 0.3s ease",
                   fontFamily: "inherit",
+                  boxSizing: "border-box",
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.borderColor = "#C9A200";
-                  e.currentTarget.style.boxShadow = "0 0 0 4px rgba(201, 162, 0, 0.12)";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 4px rgba(201, 162, 0, 0.12)";
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.borderColor = "#E8E8E8";
@@ -433,9 +676,19 @@ export default function RegisterPage() {
                 required
                 minLength={6}
               />
+
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((value) => !value)}
+                disabled={isLoading}
+              >
+                {showPassword ? "Masquer" : "Afficher"}
+              </button>
             </div>
           </div>
 
+          {/* Bouton */}
           <div className="fade-in-up delay-6">
             <button
               type="submit"
@@ -443,31 +696,43 @@ export default function RegisterPage() {
               style={{
                 width: "100%",
                 padding: "16px",
-                background: "linear-gradient(135deg, #C9A200, #F4D03F)",
+                background:
+                  "linear-gradient(135deg, #C9A200, #F4D03F)",
                 color: "#1A1A2E",
                 border: "none",
                 borderRadius: "12px",
                 fontSize: "16px",
                 fontWeight: 700,
                 cursor: isLoading ? "not-allowed" : "pointer",
-                transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                transition:
+                  "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
                 boxShadow: "0 4px 20px rgba(201, 162, 0, 0.3)",
                 letterSpacing: "0.5px",
                 opacity: isLoading ? 0.7 : 1,
               }}
               onMouseEnter={(e) => {
                 if (!isLoading) {
-                  e.currentTarget.style.transform = "translateY(-3px) scale(1.02)";
-                  e.currentTarget.style.boxShadow = "0 8px 40px rgba(201, 162, 0, 0.4)";
+                  e.currentTarget.style.transform =
+                    "translateY(-3px) scale(1.02)";
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 40px rgba(201, 162, 0, 0.4)";
                 }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0) scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 20px rgba(201, 162, 0, 0.3)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 20px rgba(201, 162, 0, 0.3)";
               }}
             >
               {isLoading ? (
-                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "12px",
+                  }}
+                >
                   <span className="spinner" />
                   Inscription en cours...
                 </span>
@@ -478,11 +743,24 @@ export default function RegisterPage() {
           </div>
         </form>
 
-        <p className="fade-in-up delay-7" style={{ textAlign: "center", color: "#A0A0A0", fontSize: "14px", marginTop: "20px" }}>
+        <p
+          className="fade-in-up delay-7"
+          style={{
+            textAlign: "center",
+            color: "#A0A0A0",
+            fontSize: "14px",
+            marginTop: "20px",
+          }}
+        >
           Déjà un compte ?{" "}
           <Link
-            href="/login"
-            style={{ color: "#C9A200", textDecoration: "none", fontWeight: 600, transition: "all 0.3s ease" }}
+            href="/Login"
+            style={{
+              color: "#C9A200",
+              textDecoration: "none",
+              fontWeight: 600,
+              transition: "all 0.3s ease",
+            }}
             onMouseEnter={(e) => (e.currentTarget.style.color = "#F4D03F")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#C9A200")}
           >
@@ -503,7 +781,9 @@ export default function RegisterPage() {
             textTransform: "uppercase",
           }}
         >
-          © 2026 <span style={{ color: "#C9A200" }}>LIGHT</span> · Entrepreneuriat Africain
+          © {new Date().getFullYear()}{" "}
+          <span style={{ color: "#C9A200" }}>LIGHT</span> · Entrepreneuriat
+          Africain
         </p>
       </div>
     </div>

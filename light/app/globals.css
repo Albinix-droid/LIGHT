@@ -2,6 +2,18 @@
 /* ========================================
    PALETTE DE COULEURS LIGHT
    ======================================== */
+   @import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #080812;
+}
 :root {
   /* Couleurs principales */
   --gold: #f8f7f4;

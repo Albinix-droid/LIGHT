@@ -1,14 +1,60 @@
 // app/dashboard/layout.tsx
+// LAYOUT DASHBOARD - VERSION SOMBRE & DYNAMIQUE
+// COHÉRENT AVEC LE NOUVEAU DESIGN DE LA PAGE DASHBOARD
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, FolderKanban, MessageSquare, Mail, Sparkles, Bell, Settings,
-  ChevronLeft, ChevronRight, Search,
+  ChevronLeft, ChevronRight, Search, Menu, X, LogOut, User, Sun, Moon,
 } from "lucide-react";
 
+// ============================================================
+// HOOK POUR LE SCROLL
+// ============================================================
+function useScroll() {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return scrollY;
+}
+
+// ============================================================
+// HOOK THEME (pour la cohérence)
+// ============================================================
+function useTheme() {
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("theme") as "light" | "dark" | null;
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initial = stored || (prefersDark ? "dark" : "light");
+    setTheme(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  };
+
+  return { theme, toggleTheme };
+}
+
+// ============================================================
+// DONNÉES
+// ============================================================
 const PROJETS = ["Projet Innov'Afrique", "Projet EcoGreen", "Projet Digital Hub"];
 
 const MENU_ITEMS = [
@@ -21,61 +67,293 @@ const MENU_ITEMS = [
   { icon: Settings, label: "Paramètres", href: "/dashboard/parametres" },
 ];
 
+// ============================================================
+// COMPOSANT PRINCIPAL
+// ============================================================
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const scrollY = useScroll();
+  const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeProject, setActiveProject] = useState(PROJETS[0]);
 
+  // Auto-fermer le menu mobile sur les grands écrans
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMobileMenuOpen]);
+
+  // ESC pour fermer le menu mobile
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Empêcher le scroll quand le menu mobile est ouvert
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isMobileMenuOpen]);
+
+  // ============================================================
+  // RENDU
+  // ============================================================
   return (
-    <div style={{ display: "flex", minHeight: "100vh", position: "relative", fontFamily: "'Inter', sans-serif" }}>
-      {/* ===== FOND : halos dorés discrets, cohérents avec l'accueil ===== */}
-      <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", backgroundColor: "#F8F9FA" }}>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        position: "relative",
+        fontFamily: "'Inter', -apple-system, sans-serif",
+        background: "#000000",
+        overflow: "hidden",
+      }}
+    >
+      {/* ===== FOND AVEC IMAGE ET PARALLAX ===== */}
+      <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
         <div
           style={{
             position: "absolute",
-            width: "700px",
-            height: "700px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,162,0,0.05), transparent 70%)",
-            top: "-350px",
-            right: "-250px",
+            inset: 0,
+            background:
+              "url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat",
+            opacity: 0.08,
+            transform: `translateY(${scrollY * 0.03}px) scale(1.1)`,
+            transition: "transform 0.05s ease-out",
           }}
         />
         <div
           style={{
             position: "absolute",
-            width: "500px",
-            height: "500px",
+            inset: 0,
+            background: "radial-gradient(ellipse at 30% 20%, rgba(26,10,46,0.5) 0%, rgba(0,0,0,0.85) 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: "600px",
+            height: "600px",
             borderRadius: "50%",
             background: "radial-gradient(circle, rgba(201,162,0,0.04), transparent 70%)",
-            bottom: "-250px",
-            left: "-200px",
+            top: "-200px",
+            right: "-100px",
+            animation: "floatBg 8s ease-in-out infinite",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: "400px",
+            height: "400px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(201,162,0,0.025), transparent 70%)",
+            bottom: "-100px",
+            left: "-80px",
+            animation: "floatBg 10s ease-in-out infinite reverse",
           }}
         />
       </div>
 
-      <style jsx global>{`
-        ::selection { background: rgba(201, 162, 0, 0.2); }
-        a:focus-visible, button:focus-visible, select:focus-visible {
-          outline: 2px solid #C9A200;
-          outline-offset: 2px;
-          border-radius: 8px;
+      <style>{`
+        @keyframes floatBg {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(20px, -20px) scale(1.1); }
+        }
+        @keyframes fadeInSlide {
+          from { opacity: 0; transform: translateX(-10px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulseGlow {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+
+        .fade-in-slide {
+          animation: fadeInSlide 0.3s ease forwards;
+        }
+
+        .sidebar-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 14px;
+          border-radius: 12px;
+          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          text-decoration: none;
+          cursor: pointer;
+          position: relative;
+        }
+
+        .sidebar-item:hover {
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-item-active {
+          background: rgba(201, 162, 0, 0.12);
+          border-left: 3px solid #C9A200;
+        }
+
+        .sidebar-item-active:hover {
+          background: rgba(201, 162, 0, 0.18);
+        }
+
+        .topbar-select {
+          padding: 6px 14px 6px 12px;
+          border-radius: 10px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(255, 255, 255, 0.04);
+          color: #FFFFFF;
+          font-size: 13px;
+          font-weight: 500;
+          outline: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 10px center;
+          padding-right: 32px;
+        }
+
+        .topbar-select:hover {
+          border-color: rgba(255, 255, 255, 0.15);
+          background: rgba(255, 255, 255, 0.06);
+        }
+
+        .topbar-select:focus {
+          border-color: rgba(201, 162, 0, 0.3);
+          box-shadow: 0 0 0 3px rgba(201, 162, 0, 0.06);
+        }
+
+        .topbar-select option {
+          background: #1A1A2E;
+          color: #FFFFFF;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: 8px 16px 8px 36px;
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          background: rgba(255, 255, 255, 0.04);
+          color: #FFFFFF;
+          font-size: 13px;
+          outline: none;
+          transition: all 0.3s ease;
+        }
+
+        .search-input::placeholder {
+          color: rgba(255, 255, 255, 0.25);
+        }
+
+        .search-input:focus {
+          border-color: rgba(201, 162, 0, 0.2);
+          background: rgba(255, 255, 255, 0.06);
+          box-shadow: 0 0 0 3px rgba(201, 162, 0, 0.04);
+        }
+
+        .icon-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: none;
+          background: rgba(255, 255, 255, 0.04);
+          color: rgba(255, 255, 255, 0.5);
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+          background: rgba(201, 162, 0, 0.1);
+          color: #F4D03F;
+          transform: scale(1.05);
+        }
+
+        .icon-btn-active {
+          background: rgba(201, 162, 0, 0.12);
+          color: #F4D03F;
+        }
+
+        .avatar-circle {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #C9A200, #F4D03F);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: 700;
+          color: #1A1A2E;
+          flex-shrink: 0;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+          width: 4px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+          background: rgba(201, 162, 0, 0.2);
+          border-radius: 2px;
+        }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+          background: rgba(201, 162, 0, 0.4);
+        }
+
+        @media (max-width: 768px) {
+          .sidebar-desktop {
+            display: none;
+          }
+          .topbar-search {
+            display: none;
+          }
+        }
+
+        @media (min-width: 769px) {
+          .sidebar-mobile {
+            display: none;
+          }
+          .topbar-mobile-search {
+            display: none;
+          }
         }
       `}</style>
 
-      {/* ===== SIDEBAR ===== */}
+      {/* ============================================================
+          SIDEBAR DESKTOP
+          ============================================================ */}
       <aside
+        className="sidebar-desktop"
         style={{
           position: "fixed",
           top: 0,
           left: 0,
           height: "100vh",
-          width: sidebarOpen ? "268px" : "84px",
-          background: "rgba(255, 255, 255, 0.75)",
+          width: sidebarOpen ? "268px" : "80px",
+          background: "rgba(0, 0, 0, 0.6)",
           backdropFilter: "blur(20px)",
-          borderRight: "1px solid rgba(0,0,0,0.04)",
-          transition: "width 0.3s ease",
+          borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+          transition: "width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           overflow: "hidden",
           zIndex: 1000,
           display: "flex",
@@ -85,144 +363,317 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div
           style={{
-            padding: sidebarOpen ? "22px 24px" : "22px 16px",
-            borderBottom: "1px solid rgba(0,0,0,0.04)",
+            padding: sidebarOpen ? "20px 24px" : "20px 12px",
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
             display: "flex",
             alignItems: "center",
             justifyContent: sidebarOpen ? "flex-start" : "center",
             gap: "12px",
             minHeight: "72px",
+            flexShrink: 0,
           }}
         >
-          <div
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "11px",
-              background: "linear-gradient(135deg, #C9A200, #F4D03F)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#1A1A2E",
-              flexShrink: 0,
-            }}
-          >
-            L
-          </div>
-          {sidebarOpen && (
-            <span style={{ fontSize: "18px", fontWeight: 700, color: "#1A1A2E" }}>
-              LIGHT
-            </span>
-          )}
+          <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+            <div
+              style={{
+                width: "38px",
+                height: "38px",
+                borderRadius: "11px",
+                background: "linear-gradient(135deg, #C9A200, #F4D03F)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "16px",
+                fontWeight: 700,
+                color: "#1A1A2E",
+                flexShrink: 0,
+                boxShadow: "0 4px 20px rgba(201, 162, 0, 0.2)",
+              }}
+            >
+              IAI
+            </div>
+            {sidebarOpen && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.5px" }}
+              >
+                Entrepreneur
+              </motion.span>
+            )}
+          </Link>
         </div>
 
         {/* Menu */}
-        <nav style={{ flex: 1, padding: "16px 12px", overflowY: "auto" }} aria-label="Navigation principale">
+        <nav
+          style={{
+            flex: 1,
+            padding: "16px 12px",
+            overflowY: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+          }}
+          className="scrollbar-custom"
+          aria-label="Navigation principale"
+        >
           {MENU_ITEMS.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                className={`sidebar-item ${isActive ? "sidebar-item-active" : ""}`}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  padding: "11px 14px",
-                  borderRadius: "12px",
-                  background: isActive ? "linear-gradient(135deg, rgba(201,162,0,0.14), rgba(244,208,63,0.1))" : "transparent",
-                  borderLeft: isActive ? "3px solid #C9A200" : "3px solid transparent",
-                  color: isActive ? "#1A1A2E" : "#6B6B7B",
-                  textDecoration: "none",
-                  transition: "all 0.2s ease",
-                  marginBottom: "4px",
                   justifyContent: sidebarOpen ? "flex-start" : "center",
+                  padding: sidebarOpen ? "10px 14px" : "10px 12px",
                 }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.03)";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.backgroundColor = "transparent";
-                }}
+                title={!sidebarOpen ? item.label : undefined}
               >
-                <item.icon size={19} style={{ color: isActive ? "#C9A200" : "#9A9A9A", flexShrink: 0 }} aria-hidden="true" />
+                <item.icon
+                  size={19}
+                  style={{
+                    color: isActive ? "#F4D03F" : "rgba(255,255,255,0.35)",
+                    flexShrink: 0,
+                    transition: "color 0.3s ease",
+                  }}
+                  aria-hidden="true"
+                />
                 {sidebarOpen && (
-                  <span style={{ fontSize: "14px", fontWeight: isActive ? 600 : 500, whiteSpace: "nowrap" }}>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.6)",
+                      whiteSpace: "nowrap",
+                      transition: "color 0.3s ease",
+                    }}
+                  >
                     {item.label}
                   </span>
+                )}
+                {isActive && sidebarOpen && (
+                  <motion.div
+                    layoutId="active-nav-indicator"
+                    style={{
+                      marginLeft: "auto",
+                      width: "4px",
+                      height: "20px",
+                      borderRadius: "2px",
+                      background: "#C9A200",
+                      boxShadow: "0 0 12px rgba(201, 162, 0, 0.3)",
+                    }}
+                  />
+                )}
+                {isActive && !sidebarOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      width: "3px",
+                      height: "24px",
+                      borderRadius: "2px",
+                      background: "#C9A200",
+                    }}
+                  />
                 )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer sidebar - Profil + toggle */}
+        {/* Footer sidebar */}
         <div
           style={{
             padding: sidebarOpen ? "16px 20px" : "16px 12px",
-            borderTop: "1px solid rgba(0,0,0,0.04)",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
             display: "flex",
             alignItems: "center",
             justifyContent: sidebarOpen ? "space-between" : "center",
             gap: "12px",
+            flexShrink: 0,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-            <div
-              style={{
-                width: "34px",
-                height: "34px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #C9A200, #F4D03F)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "#1A1A2E",
-                flexShrink: 0,
-              }}
-            >
-              JD
-            </div>
+            <div className="avatar-circle">JD</div>
             {sidebarOpen && (
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: "13px", fontWeight: 600, color: "#1A1A2E", margin: 0 }}>Jean Dupont</p>
-                <p style={{ fontSize: "11px", color: "#9A9A9A", margin: 0 }}>Étudiant</p>
+                <p style={{ fontSize: "13px", fontWeight: 600, color: "#FFFFFF", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  Jean Dupont
+                </p>
+                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  Directeur de projet
+                </p>
               </div>
             )}
           </div>
 
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={sidebarOpen ? "Réduire le menu" : "Ouvrir le menu"}
-            style={{
-              background: "rgba(0,0,0,0.03)",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              width: "28px",
-              height: "28px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#6B6B7B",
-              flexShrink: 0,
-            }}
-          >
-            {sidebarOpen ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+            <button
+              onClick={toggleTheme}
+              className="icon-btn"
+              aria-label="Changer le thème"
+              style={{ width: "28px", height: "28px", fontSize: "12px" }}
+            >
+              {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+            </button>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="icon-btn"
+              aria-label={sidebarOpen ? "Réduire le menu" : "Ouvrir le menu"}
+              style={{ width: "28px", height: "28px", fontSize: "12px" }}
+            >
+              {sidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* ===== CONTENU PRINCIPAL ===== */}
+      {/* ============================================================
+          SIDEBAR MOBILE (overlay)
+          ============================================================ */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.7)",
+                backdropFilter: "blur(4px)",
+                zIndex: 999,
+              }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                height: "100vh",
+                width: "280px",
+                background: "rgba(0, 0, 0, 0.9)",
+                backdropFilter: "blur(24px)",
+                borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+                zIndex: 1000,
+                display: "flex",
+                flexDirection: "column",
+                padding: "20px 16px",
+              }}
+            >
+              {/* Logo + fermeture */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+                <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+                  <div
+                    style={{
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "11px",
+                      background: "linear-gradient(135deg, #C9A200, #F4D03F)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "16px",
+                      fontWeight: 700,
+                      color: "#1A1A2E",
+                      boxShadow: "0 4px 20px rgba(201, 162, 0, 0.2)",
+                    }}
+                  >
+                    IAI
+                  </div>
+                  <span style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>Entrepreneur</span>
+                </Link>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="icon-btn"
+                  aria-label="Fermer le menu"
+                  style={{ width: "32px", height: "32px" }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Menu mobile */}
+              <nav style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
+                {MENU_ITEMS.map((item) => {
+                  const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`sidebar-item ${isActive ? "sidebar-item-active" : ""}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      style={{ padding: "12px 14px" }}
+                    >
+                      <item.icon
+                        size={19}
+                        style={{ color: isActive ? "#F4D03F" : "rgba(255,255,255,0.35)" }}
+                        aria-hidden="true"
+                      />
+                      <span
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: isActive ? 600 : 500,
+                          color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.6)",
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                      {isActive && (
+                        <div
+                          style={{
+                            marginLeft: "auto",
+                            width: "4px",
+                            height: "20px",
+                            borderRadius: "2px",
+                            background: "#C9A200",
+                          }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Footer mobile */}
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div className="avatar-circle">JD</div>
+                  <div>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#FFFFFF", margin: 0 }}>Jean Dupont</p>
+                    <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", margin: 0 }}>Directeur de projet</p>
+                  </div>
+                </div>
+                <button
+                  onClick={toggleTheme}
+                  className="icon-btn"
+                  aria-label="Changer le thème"
+                  style={{ width: "32px", height: "32px" }}
+                >
+                  {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ============================================================
+          CONTENU PRINCIPAL
+          ============================================================ */}
       <div
         style={{
           flex: 1,
-          marginLeft: sidebarOpen ? "268px" : "84px",
-          transition: "margin-left 0.3s ease",
+          marginLeft: sidebarOpen ? "268px" : "80px",
+          transition: "margin-left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
@@ -233,137 +684,141 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* ===== TOPBAR ===== */}
         <header
           style={{
-            background: "rgba(255, 255, 255, 0.75)",
-            backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(0,0,0,0.04)",
-            padding: "12px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
             position: "sticky",
             top: 0,
             zIndex: 100,
+            background: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(20px)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.04)",
+            padding: "10px 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             gap: "16px",
+            flexShrink: 0,
           }}
         >
-          {/* Sélecteur de projet */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-            <span style={{ fontSize: "13px", color: "#9A9A9A" }}>Projet actif :</span>
-            <select
-              value={activeProject}
-              onChange={(e) => setActiveProject(e.target.value)}
-              style={{
-                padding: "7px 14px",
-                borderRadius: "10px",
-                border: "1px solid rgba(0,0,0,0.08)",
-                backgroundColor: "rgba(255,255,255,0.6)",
-                fontSize: "13px",
-                fontWeight: 500,
-                color: "#1A1A2E",
-                outline: "none",
-                cursor: "pointer",
-              }}
+          {/* Gauche : Menu mobile + sélecteur projet */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="icon-btn"
+              aria-label="Ouvrir le menu"
+              style={{ display: "inline-flex", width: "36px", height: "36px" }}
             >
-              {PROJETS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
+              <Menu size={18} />
+            </button>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", fontWeight: 500, letterSpacing: "0.3px" }}>
+                Projet
+              </span>
+              <select
+                value={activeProject}
+                onChange={(e) => setActiveProject(e.target.value)}
+                className="topbar-select"
+              >
+                {PROJETS.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Barre de recherche */}
-          <div style={{ flex: 1, maxWidth: "380px", position: "relative" }}>
-            <Search size={15} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "#B0B0B0" }} aria-hidden="true" />
+          {/* Centre : Recherche */}
+          <div className="topbar-search" style={{ flex: 1, maxWidth: "400px", position: "relative" }}>
+            <Search
+              size={14}
+              style={{
+                position: "absolute",
+                left: "14px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "rgba(255,255,255,0.25)",
+              }}
+              aria-hidden="true"
+            />
             <input
               type="text"
-              placeholder="Rechercher..."
+              placeholder="Rechercher un projet, une tâche..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "9px 16px 9px 38px",
-                borderRadius: "20px",
-                border: "1px solid rgba(0,0,0,0.08)",
-                backgroundColor: "rgba(255,255,255,0.6)",
-                fontSize: "13px",
-                outline: "none",
-                transition: "all 0.3s ease",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#C9A200";
-                e.currentTarget.style.boxShadow = "0 0 0 3px rgba(201, 162, 0, 0.12)";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
+              className="search-input"
             />
           </div>
 
-          {/* Droite : Notifications + Profil */}
-          <div style={{ display: "flex", alignItems: "center", gap: "14px", flexShrink: 0 }}>
+          {/* Droite : Actions */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+            {/* Recherche mobile */}
+            <button
+              className="icon-btn topbar-mobile-search"
+              aria-label="Rechercher"
+              style={{ display: "inline-flex", width: "36px", height: "36px" }}
+            >
+              <Search size={16} />
+            </button>
+
+            {/* Notifications */}
             <Link
               href="/dashboard/notifications"
+              className="icon-btn"
               aria-label="Voir les notifications"
-              style={{
-                position: "relative",
-                display: "inline-flex",
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "rgba(0,0,0,0.03)",
-                transition: "background 0.2s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(201,162,0,0.12)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.03)")}
+              style={{ position: "relative", display: "inline-flex", width: "36px", height: "36px" }}
             >
-              <Bell size={17} style={{ color: "#6B6B7B" }} aria-hidden="true" />
+              <Bell size={16} />
               <span
                 style={{
                   position: "absolute",
-                  top: "2px",
-                  right: "2px",
-                  width: "8px",
-                  height: "8px",
+                  top: "6px",
+                  right: "6px",
+                  width: "6px",
+                  height: "6px",
                   borderRadius: "50%",
-                  background: "#F28B82",
-                  border: "2px solid #FFFFFF",
+                  background: "#E4736B",
+                  border: "2px solid #000",
                 }}
               />
             </Link>
 
+            {/* Theme toggle (mobile) */}
+            <button
+              onClick={toggleTheme}
+              className="icon-btn"
+              aria-label="Changer le thème"
+              style={{ display: "inline-flex", width: "36px", height: "36px" }}
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            {/* Profil */}
             <Link
               href="/dashboard/profil"
-              style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none", padding: "4px 10px 4px 4px", borderRadius: "20px", transition: "background 0.2s ease" }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.03)")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                textDecoration: "none",
+                padding: "4px 10px 4px 4px",
+                borderRadius: "20px",
+                transition: "all 0.3s ease",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
-              <div
-                style={{
-                  width: "30px",
-                  height: "30px",
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #C9A200, #F4D03F)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "11px",
-                  fontWeight: 700,
-                  color: "#1A1A2E",
-                }}
-              >
-                JD
-              </div>
-              <span style={{ fontSize: "13px", color: "#1A1A2E", fontWeight: 500 }}>Jean</span>
+              <div className="avatar-circle">JD</div>
+              <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.8)", fontWeight: 500, display: "none", "@media (min-width: 640px)": { display: "inline" } }}>
+                Jean
+              </span>
             </Link>
           </div>
         </header>
 
         {/* ===== CONTENU DE LA PAGE ===== */}
-        <main style={{ flex: 1, padding: "24px" }}>{children}</main>
+        <main style={{ flex: 1, padding: "24px" }}>
+          {children}
+        </main>
       </div>
     </div>
   );

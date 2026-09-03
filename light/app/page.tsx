@@ -58,10 +58,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, []);
-
-  useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") setIsMenuOpen(false);
     }
@@ -78,7 +74,7 @@ export default function HomePage() {
         minHeight: "100vh",
         position: "relative",
         padding: "24px 0 0 0", // Supprimé le padding bottom pour le footer
-        overflow: "hidden",
+        overflowX: "hidden",
       }}
     >
       {/* ===== IMAGE DE FOND ANIMÉE (PARALLAXE) ===== */}
@@ -140,7 +136,7 @@ export default function HomePage() {
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, sans-serif; }
+        body { font-family: 'Inter', -apple-system, sans-serif; overflow-x: hidden; }
 
         .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
         .section { padding: 40px 0; }
@@ -212,9 +208,7 @@ export default function HomePage() {
           margin: 0 -24px; /* Pour dépasser du container */
           border-radius: 0;
           box-shadow: 0 8px 48px rgba(0, 0, 0, 0.2);
-          width: 100vw;
-          left: 50%;
-          transform: translateX(-50%);
+          width: 100%;
         }
         .hero-bg { position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat; opacity: 0.4; z-index: 0; animation: heroZoom 12s ease-in-out infinite alternate; }
         @keyframes heroZoom { 0% { transform: scale(1.05); } 100% { transform: scale(1.2); } }
@@ -246,7 +240,7 @@ export default function HomePage() {
           .title-md { font-size: 24px; }
           .section { padding: 24px 0; }
           .box { padding: 28px 20px; }
-          .hero { min-height: 70vh; padding: 40px 24px; margin: 0 -12px; }
+          .hero { min-height: 70vh; padding: 40px 24px; margin: 0; width: 100%; }
           .hero-glow { width: 300px; height: 300px; top: -100px; right: -100px; }
           .hero-glow-2 { width: 200px; height: 200px; bottom: -50px; left: -50px; }
           .navbar { margin: 0 12px 16px; padding: 0 12px; border-radius: 12px; }
@@ -258,11 +252,11 @@ export default function HomePage() {
         .footer-full {
           width: 100vw;
           margin-left: calc(-50vw + 50%);
-          padding: 24px 24px;
+          padding: 24px;
           text-align: center;
-          backdropFilter: "blur(8px)",
-          background: "rgba(255,255,255,0.2)",
-          borderTop: "1px solid rgba(255,255,255,0.15)",
+          backdrop-filter: blur(8px);
+          background: rgba(255,255,255,0.2);
+          border-top: 1px solid rgba(255,255,255,0.15);
         }
       `}</style>
 
