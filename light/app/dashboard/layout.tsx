@@ -1,6 +1,5 @@
 // app/dashboard/layout.tsx
-// LAYOUT DASHBOARD - VERSION SOMBRE & DYNAMIQUE
-// COHÉRENT AVEC LE NOUVEAU DESIGN DE LA PAGE DASHBOARD
+// LAYOUT DASHBOARD - VERSION CORRIGÉE
 
 "use client";
 
@@ -9,27 +8,39 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard, FolderKanban, MessageSquare, Mail, Sparkles, Bell, Settings,
-  ChevronLeft, ChevronRight, Search, Menu, X, LogOut, User, Sun, Moon,
+  LayoutDashboard,
+  FolderKanban,
+  MessageSquare,
+  Mail,
+  Sparkles,
+  Bell,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Menu,
+  X,
+  LogOut,
+  User,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 // ============================================================
-// HOOK POUR LE SCROLL
+// HOOK SCROLL
 // ============================================================
 function useScroll() {
   const [scrollY, setScrollY] = useState(0);
-
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   return scrollY;
 }
 
 // ============================================================
-// HOOK THEME (pour la cohérence)
+// HOOK THEME
 // ============================================================
 function useTheme() {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
@@ -119,7 +130,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         minHeight: "100vh",
         position: "relative",
         fontFamily: "'Inter', -apple-system, sans-serif",
-        background: "#000000",
+        background: "#0A1628",
         overflow: "hidden",
       }}
     >
@@ -140,7 +151,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           style={{
             position: "absolute",
             inset: 0,
-            background: "radial-gradient(ellipse at 30% 20%, rgba(26,10,46,0.5) 0%, rgba(0,0,0,0.85) 100%)",
+            background: "radial-gradient(ellipse at 30% 20%, rgba(10,22,40,0.6) 0%, rgba(10,22,40,0.85) 100%)",
           }}
         />
         <div
@@ -149,7 +160,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             width: "600px",
             height: "600px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,162,0,0.04), transparent 70%)",
+            background: "radial-gradient(circle, rgba(212,175,55,0.04), transparent 70%)",
             top: "-200px",
             right: "-100px",
             animation: "floatBg 8s ease-in-out infinite",
@@ -161,10 +172,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             width: "400px",
             height: "400px",
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,162,0,0.025), transparent 70%)",
+            background: "radial-gradient(circle, rgba(212,175,55,0.025), transparent 70%)",
             bottom: "-100px",
             left: "-80px",
             animation: "floatBg 10s ease-in-out infinite reverse",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "200px",
+            background: "linear-gradient(180deg, transparent, rgba(10,22,40,0.4))",
           }}
         />
       </div>
@@ -177,10 +198,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         @keyframes fadeInSlide {
           from { opacity: 0; transform: translateX(-10px); }
           to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes pulseGlow {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 1; }
         }
 
         .fade-in-slide {
@@ -198,73 +215,65 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           cursor: pointer;
           position: relative;
         }
-
         .sidebar-item:hover {
           background: rgba(255, 255, 255, 0.06);
         }
-
         .sidebar-item-active {
-          background: rgba(201, 162, 0, 0.12);
-          border-left: 3px solid #C9A200;
+          background: rgba(212, 175, 55, 0.12);
+          border-left: 3px solid #D4AF37;
         }
-
         .sidebar-item-active:hover {
-          background: rgba(201, 162, 0, 0.18);
+          background: rgba(212, 175, 55, 0.18);
         }
 
         .topbar-select {
           padding: 6px 14px 6px 12px;
           border-radius: 10px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(180, 200, 230, 0.1);
           background: rgba(255, 255, 255, 0.04);
-          color: #FFFFFF;
+          color: #E8EDF5;
           font-size: 13px;
           font-weight: 500;
           outline: none;
           cursor: pointer;
           transition: all 0.3s ease;
           appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(200,215,235,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
           background-repeat: no-repeat;
           background-position: right 10px center;
           padding-right: 32px;
         }
-
         .topbar-select:hover {
-          border-color: rgba(255, 255, 255, 0.15);
+          border-color: rgba(180, 200, 230, 0.2);
           background: rgba(255, 255, 255, 0.06);
         }
-
         .topbar-select:focus {
-          border-color: rgba(201, 162, 0, 0.3);
-          box-shadow: 0 0 0 3px rgba(201, 162, 0, 0.06);
+          border-color: rgba(212, 175, 55, 0.3);
+          box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.06);
         }
-
         .topbar-select option {
-          background: #1A1A2E;
-          color: #FFFFFF;
+          background: #0A1628;
+          color: #E8EDF5;
         }
 
         .search-input {
           width: 100%;
           padding: 8px 16px 8px 36px;
           border-radius: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(180, 200, 230, 0.08);
           background: rgba(255, 255, 255, 0.04);
-          color: #FFFFFF;
+          color: #E8EDF5;
           font-size: 13px;
           outline: none;
           transition: all 0.3s ease;
         }
-
         .search-input::placeholder {
-          color: rgba(255, 255, 255, 0.25);
+          color: rgba(200, 215, 235, 0.25);
         }
-
         .search-input:focus {
-          border-color: rgba(201, 162, 0, 0.2);
+          border-color: rgba(212, 175, 55, 0.2);
           background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 0 0 3px rgba(201, 162, 0, 0.04);
+          box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.04);
         }
 
         .icon-btn {
@@ -276,66 +285,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           border-radius: 50%;
           border: none;
           background: rgba(255, 255, 255, 0.04);
-          color: rgba(255, 255, 255, 0.5);
+          color: rgba(200, 215, 235, 0.5);
           cursor: pointer;
           transition: all 0.3s ease;
         }
-
         .icon-btn:hover {
-          background: rgba(201, 162, 0, 0.1);
-          color: #F4D03F;
+          background: rgba(212, 175, 55, 0.1);
+          color: #F5D76E;
           transform: scale(1.05);
         }
-
         .icon-btn-active {
-          background: rgba(201, 162, 0, 0.12);
-          color: #F4D03F;
+          background: rgba(212, 175, 55, 0.12);
+          color: #F5D76E;
         }
 
         .avatar-circle {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #C9A200, #F4D03F);
+          background: linear-gradient(135deg, #D4AF37, #F5D76E);
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 11px;
           font-weight: 700;
-          color: #1A1A2E;
+          color: #0A1628;
           flex-shrink: 0;
         }
 
-        .scrollbar-custom::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-          background: rgba(201, 162, 0, 0.2);
-          border-radius: 2px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-          background: rgba(201, 162, 0, 0.4);
-        }
+        .scrollbar-custom::-webkit-scrollbar { width: 4px; }
+        .scrollbar-custom::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-custom::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.2); border-radius: 2px; }
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.4); }
 
         @media (max-width: 768px) {
-          .sidebar-desktop {
-            display: none;
-          }
-          .topbar-search {
-            display: none;
-          }
+          .sidebar-desktop { display: none; }
+          .topbar-search { display: none; }
         }
-
         @media (min-width: 769px) {
-          .sidebar-mobile {
-            display: none;
-          }
-          .topbar-mobile-search {
-            display: none;
-          }
+          .sidebar-mobile { display: none; }
+          .topbar-mobile-search { display: none; }
         }
       `}</style>
 
@@ -350,9 +339,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           left: 0,
           height: "100vh",
           width: sidebarOpen ? "268px" : "80px",
-          background: "rgba(0, 0, 0, 0.6)",
+          background: "rgba(10, 22, 40, 0.85)",
           backdropFilter: "blur(20px)",
-          borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+          borderRight: "1px solid rgba(180, 200, 230, 0.06)",
           transition: "width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           overflow: "hidden",
           zIndex: 1000,
@@ -364,7 +353,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div
           style={{
             padding: sidebarOpen ? "20px 24px" : "20px 12px",
-            borderBottom: "1px solid rgba(255,255,255,0.05)",
+            borderBottom: "1px solid rgba(180, 200, 230, 0.06)",
             display: "flex",
             alignItems: "center",
             justifyContent: sidebarOpen ? "flex-start" : "center",
@@ -379,15 +368,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 width: "38px",
                 height: "38px",
                 borderRadius: "11px",
-                background: "linear-gradient(135deg, #C9A200, #F4D03F)",
+                background: "linear-gradient(135deg, #D4AF37, #F5D76E)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "16px",
                 fontWeight: 700,
-                color: "#1A1A2E",
+                color: "#0A1628",
                 flexShrink: 0,
-                boxShadow: "0 4px 20px rgba(201, 162, 0, 0.2)",
+                boxShadow: "0 4px 20px rgba(212, 175, 55, 0.2)",
               }}
             >
               IAI
@@ -396,7 +385,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <motion.span
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF", letterSpacing: "-0.5px" }}
+                style={{ fontSize: "18px", fontWeight: 700, color: "#E8EDF5", letterSpacing: "-0.5px" }}
               >
                 Entrepreneur
               </motion.span>
@@ -433,7 +422,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <item.icon
                   size={19}
                   style={{
-                    color: isActive ? "#F4D03F" : "rgba(255,255,255,0.35)",
+                    color: isActive ? "#F5D76E" : "rgba(200, 215, 235, 0.35)",
                     flexShrink: 0,
                     transition: "color 0.3s ease",
                   }}
@@ -444,7 +433,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     style={{
                       fontSize: "14px",
                       fontWeight: isActive ? 600 : 500,
-                      color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.6)",
+                      color: isActive ? "#E8EDF5" : "rgba(200, 215, 235, 0.6)",
                       whiteSpace: "nowrap",
                       transition: "color 0.3s ease",
                     }}
@@ -460,8 +449,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       width: "4px",
                       height: "20px",
                       borderRadius: "2px",
-                      background: "#C9A200",
-                      boxShadow: "0 0 12px rgba(201, 162, 0, 0.3)",
+                      background: "#D4AF37",
+                      boxShadow: "0 0 12px rgba(212, 175, 55, 0.3)",
                     }}
                   />
                 )}
@@ -473,7 +462,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       width: "3px",
                       height: "24px",
                       borderRadius: "2px",
-                      background: "#C9A200",
+                      background: "#D4AF37",
                     }}
                   />
                 )}
@@ -486,7 +475,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div
           style={{
             padding: sidebarOpen ? "16px 20px" : "16px 12px",
-            borderTop: "1px solid rgba(255,255,255,0.05)",
+            borderTop: "1px solid rgba(180, 200, 230, 0.06)",
             display: "flex",
             alignItems: "center",
             justifyContent: sidebarOpen ? "space-between" : "center",
@@ -498,10 +487,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="avatar-circle">JD</div>
             {sidebarOpen && (
               <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: "13px", fontWeight: 600, color: "#FFFFFF", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <p style={{ fontSize: "13px", fontWeight: 600, color: "#E8EDF5", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   Jean Dupont
                 </p>
-                <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.35)", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   Directeur de projet
                 </p>
               </div>
@@ -543,7 +532,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               style={{
                 position: "fixed",
                 inset: 0,
-                background: "rgba(0,0,0,0.7)",
+                background: "rgba(0,0,0,0.6)",
                 backdropFilter: "blur(4px)",
                 zIndex: 999,
               }}
@@ -560,9 +549,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 left: 0,
                 height: "100vh",
                 width: "280px",
-                background: "rgba(0, 0, 0, 0.9)",
+                background: "rgba(10, 22, 40, 0.95)",
                 backdropFilter: "blur(24px)",
-                borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+                borderRight: "1px solid rgba(180, 200, 230, 0.06)",
                 zIndex: 1000,
                 display: "flex",
                 flexDirection: "column",
@@ -577,19 +566,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       width: "38px",
                       height: "38px",
                       borderRadius: "11px",
-                      background: "linear-gradient(135deg, #C9A200, #F4D03F)",
+                      background: "linear-gradient(135deg, #D4AF37, #F5D76E)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: "16px",
                       fontWeight: 700,
-                      color: "#1A1A2E",
-                      boxShadow: "0 4px 20px rgba(201, 162, 0, 0.2)",
+                      color: "#0A1628",
+                      boxShadow: "0 4px 20px rgba(212, 175, 55, 0.2)",
                     }}
                   >
                     IAI
                   </div>
-                  <span style={{ fontSize: "18px", fontWeight: 700, color: "#FFFFFF" }}>Entrepreneur</span>
+                  <span style={{ fontSize: "18px", fontWeight: 700, color: "#E8EDF5" }}>Entrepreneur</span>
                 </Link>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -615,14 +604,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     >
                       <item.icon
                         size={19}
-                        style={{ color: isActive ? "#F4D03F" : "rgba(255,255,255,0.35)" }}
+                        style={{ color: isActive ? "#F5D76E" : "rgba(200,215,235,0.35)" }}
                         aria-hidden="true"
                       />
                       <span
                         style={{
                           fontSize: "14px",
                           fontWeight: isActive ? 600 : 500,
-                          color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.6)",
+                          color: isActive ? "#E8EDF5" : "rgba(200,215,235,0.6)",
                         }}
                       >
                         {item.label}
@@ -634,7 +623,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             width: "4px",
                             height: "20px",
                             borderRadius: "2px",
-                            background: "#C9A200",
+                            background: "#D4AF37",
                           }}
                         />
                       )}
@@ -644,12 +633,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </nav>
 
               {/* Footer mobile */}
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ borderTop: "1px solid rgba(180,200,230,0.06)", paddingTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                   <div className="avatar-circle">JD</div>
                   <div>
-                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#FFFFFF", margin: 0 }}>Jean Dupont</p>
-                    <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.35)", margin: 0 }}>Directeur de projet</p>
+                    <p style={{ fontSize: "13px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>Jean Dupont</p>
+                    <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.35)", margin: 0 }}>Directeur de projet</p>
                   </div>
                 </div>
                 <button
@@ -687,9 +676,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             position: "sticky",
             top: 0,
             zIndex: 100,
-            background: "rgba(0, 0, 0, 0.5)",
+            background: "rgba(10, 22, 40, 0.6)",
             backdropFilter: "blur(20px)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.04)",
+            borderBottom: "1px solid rgba(180, 200, 230, 0.06)",
             padding: "10px 24px",
             display: "flex",
             alignItems: "center",
@@ -710,7 +699,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
 
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.35)", fontWeight: 500, letterSpacing: "0.3px" }}>
+              <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.35)", fontWeight: 500, letterSpacing: "0.3px" }}>
                 Projet
               </span>
               <select
@@ -736,7 +725,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 left: "14px",
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "rgba(255,255,255,0.25)",
+                color: "rgba(200,215,235,0.25)",
               }}
               aria-hidden="true"
             />
@@ -777,7 +766,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   height: "6px",
                   borderRadius: "50%",
                   background: "#E4736B",
-                  border: "2px solid #000",
+                  border: "2px solid #0A1628",
                 }}
               />
             </Link>
@@ -808,7 +797,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               <div className="avatar-circle">JD</div>
-              <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.8)", fontWeight: 500, display: "none", "@media (min-width: 640px)": { display: "inline" } }}>
+              {/* ✅ CORRECTION : utilisation de Tailwind pour le responsive */}
+              <span className="hidden sm:inline" style={{ fontSize: "13px", color: "rgba(200,215,235,0.8)", fontWeight: 500 }}>
                 Jean
               </span>
             </Link>
