@@ -1,12 +1,14 @@
 // lib/supabase/middleware.ts
+// Rafraîchit la session Supabase à chaque requête et protège les espaces privés
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-// ✅ Exporter la fonction updateSession
+const PRIVATE_PREFIXES = ['/dashboard', '/encadrant'];
+// Pages réservées aux visiteurs non connectés
+const GUEST_ONLY = ['/login', '/register'];
+
 export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
-        request,
-    });
+    let supabaseResponse = NextResponse.next({ request });
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,12 +19,8 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll();
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) =>
-                        request.cookies.set(name, value)
-                    );
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    });
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+                    supabaseResponse = NextResponse.next({ request });
                     cookiesToSet.forEach(({ name, value, options }) =>
                         supabaseResponse.cookies.set(name, value, options)
                     );
@@ -33,23 +31,28 @@ export async function updateSession(request: NextRequest) {
 
     // ✅ Rafraîchir la session
     const { data: { user } } = await supabase.auth.getUser();
+    const { pathname, search } = request.nextUrl;
 
-    // 🔒 Protéger les routes du dashboard
-    if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/login';
-        return NextResponse.redirect(url);
+    // Une redirection doit conserver les cookies de session rafraîchis
+    const redirectTo = (target: string) => {
+        const url = new URL(target, request.url);
+        const response = NextResponse.redirect(url);
+        supabaseResponse.cookies.getAll().forEach((cookie) => response.cookies.set(cookie));
+        return response;
+    };
+
+    // 🔒 Espaces privés : connexion requise, en gardant la page demandée
+    if (!user && PRIVATE_PREFIXES.some((p) => pathname.startsWith(p))) {
+        return redirectTo(`/login?next=${encodeURIComponent(pathname + search)}`);
     }
 
-    // ✅ Rediriger les utilisateurs connectés depuis la page login
-    if (request.nextUrl.pathname === '/login' && user) {
-        const url = request.nextUrl.clone();
-        url.pathname = '/dashboard';
-        return NextResponse.redirect(url);
+    // ✅ Déjà connecté : pas besoin des pages de connexion / inscription
+    // (le layout du dashboard renvoie ensuite les encadrants vers /encadrant)
+    if (user && GUEST_ONLY.includes(pathname)) {
+        return redirectTo('/dashboard');
     }
 
     return supabaseResponse;
 }
 
-// ✅ Exporter par défaut (optionnel)
 export default updateSession;

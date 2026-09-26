@@ -1,6 +1,15 @@
-// middleware.ts
+// proxy.ts (ex-middleware.ts, renommé en Next.js 16)
 import { NextResponse, type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/middleware'; // 
+import { updateSession } from '@/lib/supabase/middleware';
+
+// Anciennes adresses et variantes courantes des pages d'authentification
+// (comparaison exacte, sensible à la casse : pas de boucle de redirection)
+const ALIASES: Record<string, string> = {
+    '/Login': '/login',
+    '/connexion': '/login',
+    '/Register': '/register',
+    '/inscription': '/register',
+};
 
 export async function proxy(request: NextRequest) {
     //  Ne pas bloquer les routes API
@@ -8,13 +17,14 @@ export async function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // ✅ Routes publiques
-    const publicRoutes = ['/', '/login', '/register', '/auth'];
-    if (publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))) {
-        return NextResponse.next();
+    const alias = ALIASES[request.nextUrl.pathname];
+    if (alias) {
+        const url = request.nextUrl.clone();
+        url.pathname = alias;
+        return NextResponse.redirect(url);
     }
 
-    //  Appeler updateSession (exporté)
+    // Rafraîchit la session Supabase sur toutes les pages et protège les espaces privés
     return await updateSession(request);
 }
 

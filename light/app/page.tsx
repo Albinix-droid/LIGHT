@@ -6,6 +6,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 import {
   Menu, X, Home, Info, LogIn, UserPlus,
   Lightbulb, Palette, Settings, Rocket,
@@ -14,7 +15,7 @@ import {
   Zap, Award, Building2, Cloud, ArrowRight,
   Globe2, GraduationCap, Briefcase, Heart,
   Cpu, Shield, ChevronRight, CheckCircle,
-  BarChart3, MessageCircle, Mail
+  BarChart3, MessageCircle, Mail, LayoutDashboard
 } from "lucide-react";
 
 // ============================================================
@@ -90,6 +91,12 @@ const TRUSTED_BY = [
 export default function HomePage() {
   const scrollY = useScroll();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Visiteur déjà connecté : on lui propose d'aller directement à son espace
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -466,12 +473,20 @@ export default function HomePage() {
               <Info size={15} aria-hidden="true" /> Fonctionnalités
             </Link>
             <span style={{ width: "1px", height: "24px", background: "rgba(180,200,230,0.1)", margin: "0 4px" }} />
-            <Link href="/connexion" className="nav-link">
-              <LogIn size={15} aria-hidden="true" /> Connexion
-            </Link>
-            <Link href="/inscription" className="btn-primary" style={{ padding: "8px 20px", fontSize: "13px" }}>
-              <UserPlus size={15} aria-hidden="true" /> S'inscrire
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="btn-primary" style={{ padding: "8px 20px", fontSize: "13px" }}>
+                <LayoutDashboard size={15} aria-hidden="true" /> Mon espace
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="nav-link">
+                  <LogIn size={15} aria-hidden="true" /> Connexion
+                </Link>
+                <Link href="/register" className="btn-primary" style={{ padding: "8px 20px", fontSize: "13px" }}>
+                  <UserPlus size={15} aria-hidden="true" /> S'inscrire
+                </Link>
+              </>
+            )}
           </nav>
 
           <button
@@ -512,12 +527,20 @@ export default function HomePage() {
             <Info size={20} /> Fonctionnalités
           </Link>
           <div style={{ width: "60px", height: "1px", background: "rgba(180,200,230,0.1)", margin: "8px 0" }} />
-          <Link href="/connexion" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
-            <LogIn size={20} /> Connexion
-          </Link>
-          <Link href="/inscription" className="btn-primary" style={{ fontSize: "18px", padding: "16px 48px", marginTop: "8px" }} onClick={() => setIsMenuOpen(false)}>
-            <UserPlus size={20} /> S'inscrire
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard" className="btn-primary" style={{ fontSize: "18px", padding: "16px 48px", marginTop: "8px" }} onClick={() => setIsMenuOpen(false)}>
+              <LayoutDashboard size={20} /> Mon espace
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
+                <LogIn size={20} /> Connexion
+              </Link>
+              <Link href="/register" className="btn-primary" style={{ fontSize: "18px", padding: "16px 48px", marginTop: "8px" }} onClick={() => setIsMenuOpen(false)}>
+                <UserPlus size={20} /> S'inscrire
+              </Link>
+            </>
+          )}
         </div>
       )}
 
@@ -558,7 +581,7 @@ export default function HomePage() {
               L'application intelligente qui guide les entrepreneurs de l'idée à la réussite.
             </p>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: "12px" }}>
-              <Link href="/inscription" className="btn-primary">
+              <Link href={isLoggedIn ? "/dashboard" : "/register"} className="btn-primary">
                 Commençons !
                 <ArrowRight size={18} aria-hidden="true" />
               </Link>
@@ -763,7 +786,7 @@ export default function HomePage() {
             <p style={{ fontSize: "16px", color: "rgba(200,215,235,0.5)", marginBottom: "28px" }}>
               Rejoins la communauté IAI Entrepreneur et fais briller ton idée
             </p>
-            <Link href="/inscription" className="btn-primary">
+            <Link href={isLoggedIn ? "/dashboard" : "/register"} className="btn-primary">
               S'inscrire gratuitement
               <ArrowRight size={18} aria-hidden="true" />
             </Link>

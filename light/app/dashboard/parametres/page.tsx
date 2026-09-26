@@ -37,7 +37,8 @@ import {
   Calendar,
   Clock,
   Zap,
-  Sparkles
+  Sparkles,
+  X
 } from "lucide-react";
 
 // ============================================================
@@ -520,22 +521,16 @@ export default function ParametresPage() {
               </button>
             ))}
             <div style={{ borderTop: "1px solid rgba(200,210,220,0.1)", margin: "8px 0" }} />
-            <button
-              className="section-nav-btn"
-              style={{ color: "#E4736B" }}
-              onClick={() => {
-                if (confirm("Êtes-vous sûr de vouloir vous déconnecter ?")) {
-                  // Logout logic
-                }
-              }}
-            >
-              <LogOut size={18} />
-              Déconnexion
-            </button>
+            <form action="/logout" method="post">
+              <button type="submit" className="section-nav-btn" style={{ color: "#E4736B" }}>
+                <LogOut size={18} />
+                Déconnexion
+              </button>
+            </form>
           </div>
 
           {/* ---- CONTENU ---- */}
-          <div className="glass-card-dark" style={{ padding: "24px", maxHeight: "660px", overflowY: "auto" }} className="scrollbar-custom">
+          <div className="glass-card-dark scrollbar-custom" style={{ padding: "24px", maxHeight: "660px", overflowY: "auto" }}>
 
             {/* ---- SECTION PROFIL ---- */}
             {activeSection === "profil" && (

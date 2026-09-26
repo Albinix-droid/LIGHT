@@ -1,10 +1,10 @@
-// app/dashboard/projets/[id]/messagerie/page.tsx
+// app/dashboard/messagerie/page.tsx
 // PAGE DE MESSAGERIE - VERSION CLAIRE & ÉLÉGANTE
 
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -68,7 +68,6 @@ interface Conversation {
   unreadCount: number;
   online: boolean;
   messages: Message[];
-  projectId: string;
 }
 
 // ============================================================
@@ -88,9 +87,7 @@ function useScroll() {
 // COMPOSANT PRINCIPAL
 // ============================================================
 export default function MessageriePage() {
-  const params = useParams();
   const router = useRouter();
-  const projectId = params.id as string;
   const scrollY = useScroll();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -112,7 +109,6 @@ export default function MessageriePage() {
       lastMessageTime: "14:32",
       unreadCount: 3,
       online: true,
-      projectId: projectId,
       messages: [
         { id: "1", senderId: "user1", content: "Bonjour Jean, comment avance le projet ?", type: "text", timestamp: "10:15", status: "read" },
         { id: "2", senderId: "me", content: "Salut Marie ! Très bien, j'ai fini la partie backend.", type: "text", timestamp: "10:18", status: "read" },
@@ -130,7 +126,6 @@ export default function MessageriePage() {
       lastMessageTime: "11:45",
       unreadCount: 0,
       online: false,
-      projectId: projectId,
       messages: [
         { id: "1", senderId: "me", content: "Bonjour Marie, j'ai terminé le rapport.", type: "text", timestamp: "09:30", status: "read" },
         { id: "2", senderId: "user2", content: "Le rapport est excellent !", type: "text", timestamp: "11:45", status: "read" },
@@ -145,7 +140,6 @@ export default function MessageriePage() {
       lastMessageTime: "09:12",
       unreadCount: 1,
       online: true,
-      projectId: projectId,
       messages: [
         { id: "1", senderId: "me", content: "Paul, peux-tu t'occuper des tests ?", type: "text", timestamp: "08:45", status: "read" },
         { id: "2", senderId: "user3", content: "OK je m'en occupe.", type: "text", timestamp: "09:12", status: "delivered" },
@@ -160,7 +154,6 @@ export default function MessageriePage() {
       lastMessageTime: "Hier",
       unreadCount: 0,
       online: false,
-      projectId: projectId,
       messages: [
         { id: "1", senderId: "user4", content: "La réunion est confirmée pour demain.", type: "text", timestamp: "18:30", status: "read" },
       ]
@@ -174,7 +167,6 @@ export default function MessageriePage() {
       lastMessageTime: "15:20",
       unreadCount: 2,
       online: false,
-      projectId: projectId,
       messages: [
         { id: "1", senderId: "user1", content: "Qui est disponible pour une réunion vendredi ?", type: "text", timestamp: "15:00", status: "read" },
         { id: "2", senderId: "user2", content: "Moi je suis disponible.", type: "text", timestamp: "15:10", status: "read" },
@@ -238,7 +230,7 @@ export default function MessageriePage() {
       setConversations(prev => prev.map(conv => {
         if (conv.id === activeConversation) {
           const updatedMessages = conv.messages.map(msg =>
-            msg.id === newMsg.id ? { ...msg, status: "delivered" } : msg
+            msg.id === newMsg.id ? { ...msg, status: "delivered" as const } : msg
           );
           return { ...conv, messages: updatedMessages };
         }
@@ -607,7 +599,7 @@ export default function MessageriePage() {
         <div className="fade-in-up delay-1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Link
-              href={`/dashboard/projets/${projectId}`}
+              href="/dashboard"
               className="btn-secondary"
               style={{
                 padding: "8px 16px",
