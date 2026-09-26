@@ -94,12 +94,17 @@ export default function DashboardShell({
   user,
   projects,
   unreadMessages = 0,
+  pendingRequests = 0,
 }: {
   children: React.ReactNode;
   user: ShellUser;
   projects: ShellProject[];
   unreadMessages?: number;
+  pendingRequests?: number;
 }) {
+  // Pastilles du menu : messages non lus, demandes reçues en attente
+  const badgeFor = (href: string) =>
+    href === "/dashboard/messagerie" ? unreadMessages : href === "/dashboard/invitations" ? pendingRequests : 0;
   const pathname = usePathname();
   const router = useRouter();
   const scrollY = useScroll();
@@ -471,16 +476,16 @@ export default function DashboardShell({
                     {item.label}
                   </span>
                 )}
-                {item.href === "/dashboard/messagerie" && unreadMessages > 0 && (
+                {badgeFor(item.href) > 0 && (
                   <span
-                    aria-label={`${unreadMessages} message${unreadMessages > 1 ? "s" : ""} non lu${unreadMessages > 1 ? "s" : ""}`}
+                    aria-label={`${badgeFor(item.href)} élément${badgeFor(item.href) > 1 ? "s" : ""} en attente`}
                     style={{
                       minWidth: "18px", height: "18px", padding: "0 5px", borderRadius: "9px", background: "#E4736B", color: "#fff",
                       fontSize: "10px", fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center",
                       ...(sidebarOpen ? { marginLeft: "auto" } : { position: "absolute", top: "4px", right: "6px" }),
                     }}
                   >
-                    {unreadMessages}
+                    {badgeFor(item.href)}
                   </span>
                 )}
                 {isActive && sidebarOpen && (
@@ -669,9 +674,9 @@ export default function DashboardShell({
                       >
                         {item.label}
                       </span>
-                      {item.href === "/dashboard/messagerie" && unreadMessages > 0 && (
+                      {badgeFor(item.href) > 0 && (
                         <span style={{ minWidth: "18px", height: "18px", padding: "0 5px", borderRadius: "9px", background: "#E4736B", color: "#fff", fontSize: "10px", fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: "auto" }}>
-                          {unreadMessages}
+                          {badgeFor(item.href)}
                         </span>
                       )}
                       {isActive && (

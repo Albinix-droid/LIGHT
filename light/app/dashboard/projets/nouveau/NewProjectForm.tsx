@@ -527,7 +527,7 @@ export default function NewProjectForm({ encadrants }: { encadrants: { id: strin
                 <label htmlFor="supervisor" className="label">
                   Encadrant
                   <span style={{ color: "rgba(200,215,235,0.3)", fontWeight: 400, fontSize: "12px", marginLeft: "8px" }}>
-                    (il validera chacune de vos étapes)
+                    (il recevra une demande d'encadrement)
                   </span>
                 </label>
                 <select

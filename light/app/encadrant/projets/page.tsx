@@ -26,7 +26,7 @@ export default async function EncadrantProjectsPage() {
       {projects.length === 0 ? (
         <div className="enc-card enc-empty" style={{ padding: "60px 20px" }}>
           <FolderKanban size={36} style={{ color: "rgba(212,175,55,0.4)", marginBottom: "12px" }} />
-          <p style={{ margin: 0 }}>Les étudiants vous choisissent depuis la page de leur projet. Leurs projets apparaîtront ici.</p>
+          <p style={{ margin: 0 }}>Les étudiants vous envoient des demandes d'encadrement (menu Demandes). Les projets que vous acceptez apparaîtront ici.</p>
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>

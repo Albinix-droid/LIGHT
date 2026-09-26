@@ -63,6 +63,20 @@ enum AssistantRole {
   ASSISTANT
 }
 
+// ===== DEMANDES ET INVITATIONS =====
+enum RequestType {
+  PROJECT_INVITATION // le porteur invite un étudiant dans son équipe
+  JOIN_REQUEST // un étudiant demande à rejoindre un projet
+  SUPERVISION_REQUEST // le porteur demande à un encadrant de suivre son projet
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
 enum TaskStatus {
   TODO
   IN_PROGRESS
@@ -103,6 +117,8 @@ model User {
   conversationMembers  ConversationMember[]
   messages             Message[]
   assistantThreads     AssistantThread[]
+  requestsSent         ProjectRequest[]     @relation("RequestSender")
+  requestsReceived     ProjectRequest[]     @relation("RequestRecipient")
   submissions          StepSubmission[]     @relation("SubmissionAuthor")
   reviews              StepSubmission[]     @relation("SubmissionReviewer")
 }
@@ -127,6 +143,7 @@ model Project {
   steps            ProjectStep[]
   conversations    Conversation[]
   assistantThreads AssistantThread[]
+  requests         ProjectRequest[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
@@ -301,4 +318,29 @@ model AssistantMessage {
   thread AssistantThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@index([threadId, createdAt])
+}
+
+// ============================================================
+// DEMANDES ET INVITATIONS
+// ============================================================
+model ProjectRequest {
+  id              String        @id @default(cuid())
+  type            RequestType
+  status          RequestStatus @default(PENDING)
+  projectId       String
+  senderId        String
+  recipientId     String
+  role            ProjectRole? // rôle proposé dans l'équipe (invitation / demande pour rejoindre)
+  message         String?
+  responseMessage String?
+  createdAt       DateTime      @default(now())
+  respondedAt     DateTime?
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sender    User    @relation("RequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient User    @relation("RequestRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, status])
+  @@index([senderId, status])
+  @@index([projectId, type, status])
 }

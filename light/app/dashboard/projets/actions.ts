@@ -52,20 +52,24 @@ export async function createProject(input: {
             sector: input.sector,
             teamSize,
             ownerId: user.id,
-            supervisorId,
             members: { create: { userId: user.id, role: 'OWNER' } },
             // L'idéalisation démarre avec les informations saisies à la création
             steps: { create: { stage: 'IDEALISATION', data: { title, description } } },
         },
     });
 
+    // L'encadrant choisi reçoit une demande d'encadrement : il accepte ou refuse de suivre le projet
     if (supervisorId) {
+        await prisma.projectRequest.create({
+            data: { type: 'SUPERVISION_REQUEST', projectId: project.id, senderId: user.id, recipientId: supervisorId },
+        });
         await notify([supervisorId], {
             projectId: project.id,
             type: 'INVITATION',
-            message: `${user.firstName} ${user.lastName} vous a choisi comme encadrant du projet « ${title} »`.replace(/\s+/g, ' '),
-            link: `/encadrant/projets/${project.id}`,
+            message: `${user.firstName} ${user.lastName} vous demande d'encadrer le projet « ${title} »`.replace(/\s+/g, ' '),
+            link: '/encadrant/demandes',
         });
+        revalidatePath('/encadrant', 'layout');
     }
 
     // 'layout' : le sélecteur de projet de la topbar doit aussi se mettre à jour
@@ -73,36 +77,7 @@ export async function createProject(input: {
     return { ok: true, projectId: project.id };
 }
 
-// ============================================================
-// CHOIX DE L'ENCADRANT
-// ============================================================
-export async function setSupervisor(projectId: string, supervisorId: string): Promise<ActionResult> {
-    const user = await getCurrentUser();
-    if (!user) return { ok: false, error: 'Session expirée. Veuillez vous reconnecter.' };
-
-    const project = await getAccessibleProject(projectId, user.id);
-    if (!project) return { ok: false, error: 'Projet introuvable.' };
-    if (project.ownerId !== user.id) return { ok: false, error: "Seul le porteur du projet peut choisir l'encadrant." };
-    if (project.supervisorId === supervisorId) return { ok: true };
-    if (!(await isEncadrant(supervisorId))) return { ok: false, error: 'Encadrant invalide.' };
-
-    // Pas de changement d'encadrant pendant qu'une étape attend sa décision
-    if (project.steps.some((s) => s.status === 'SUBMITTED')) {
-        return { ok: false, error: "Une étape est en cours d'examen : attendez la décision avant de changer d'encadrant." };
-    }
-
-    await prisma.project.update({ where: { id: projectId }, data: { supervisorId } });
-    await notify([supervisorId], {
-        projectId,
-        type: 'INVITATION',
-        message: `${user.firstName} ${user.lastName} vous a choisi comme encadrant du projet « ${project.title} »`.replace(/\s+/g, ' '),
-        link: `/encadrant/projets/${projectId}`,
-    });
-
-    revalidatePath(`/dashboard/projets/${projectId}`, 'layout');
-    revalidatePath('/encadrant', 'layout');
-    return { ok: true };
-}
+// Le choix de l'encadrant passe par une demande d'encadrement : voir lib/demandes/actions.ts
 
 // ============================================================
 // SAUVEGARDE D'UNE ÉTAPE

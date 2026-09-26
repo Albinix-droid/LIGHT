@@ -10,7 +10,9 @@ import {
 import { requireUser } from "@/lib/auth";
 import { getAccessibleProject, listEncadrants, fullName } from "@/lib/projects";
 import { STAGES, SECTOR_LABELS, getStageIndex } from "@/lib/parcours";
+import { getProjectTeam } from "@/lib/demandes/queries";
 import SupervisorPicker from "./SupervisorPicker";
+import TeamPanel from "./TeamPanel";
 import { Stars, formatDate } from "./StepStatusBanner";
 
 const STAGE_ICONS = [Lightbulb, PenTool, Code, Shield, Rocket];
@@ -29,6 +31,8 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
   const [project, encadrants] = await Promise.all([getAccessibleProject(id, user.id), listEncadrants()]);
   if (!project) notFound();
 
+  const { team, pendingInvitations, pendingSupervision } = await getProjectTeam(project.id, user.id);
+  const isOwner = project.ownerId === user.id;
   const currentIndex = getStageIndex(project.stage);
 
   return (
@@ -114,22 +118,32 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
             <GraduationCap size={18} style={{ color: project.supervisor ? "#34D399" : "#A5B4FC" }} />
             <div>
               <p style={{ fontSize: "14px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>
-                {project.supervisor ? `Encadrant : ${fullName(project.supervisor)}` : "Choisissez votre encadrant"}
+                {project.supervisor ? `Encadrant : ${fullName(project.supervisor)}` : "Demandez un encadrant"}
               </p>
               <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.5)", margin: "2px 0 0" }}>
                 {project.supervisor
                   ? "Il examine chaque étape que vous soumettez et vous accompagne jusqu'à la concrétisation."
-                  : "Chaque étape doit être validée par votre encadrant avant de débloquer la suivante."}
+                  : "L'encadrant choisi reçoit votre demande et l'accepte ; il validera ensuite chaque étape avant de débloquer la suivante."}
               </p>
             </div>
           </div>
           <SupervisorPicker
             projectId={project.id}
             currentId={project.supervisorId}
-            canEdit={project.ownerId === user.id}
+            canEdit={isOwner}
             encadrants={encadrants.map((e) => ({ id: e.id, name: fullName(e), email: e.email }))}
+            pendingRequest={pendingSupervision}
           />
         </div>
+
+        {/* ===== ÉQUIPE ===== */}
+        <TeamPanel
+          projectId={project.id}
+          isOwner={isOwner}
+          team={team}
+          pendingInvitations={pendingInvitations}
+          teamSize={project.teamSize}
+        />
 
         {/* ===== PROGRESSION ===== */}
         <div style={{ marginBottom: "28px" }}>

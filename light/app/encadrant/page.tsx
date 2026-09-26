@@ -10,6 +10,7 @@ import {
 } from "@/lib/projects";
 import { STAGES, getStageIndex } from "@/lib/parcours";
 import { Stars, formatDate } from "@/app/dashboard/projets/[id]/StepStatusBanner";
+import { countPendingReceived } from "@/lib/demandes/queries";
 import NotificationList from "./NotificationList";
 import { getFollowUpStatus } from "./projectStatus";
 
@@ -21,12 +22,13 @@ export default async function EncadrantDashboardPage() {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const [projects, pending, reviewed, notifications, approvedThisMonth] = await Promise.all([
+  const [projects, pending, reviewed, notifications, approvedThisMonth, pendingRequests] = await Promise.all([
     listSupervisedProjects(user.id),
     listPendingSubmissions(user.id),
     listReviewedSubmissions(user.id, 5),
     listUnreadNotifications(user.id, 6),
     prisma.stepSubmission.count({ where: { reviewerId: user.id, decision: "APPROVED", reviewedAt: { gte: startOfMonth } } }),
+    countPendingReceived(user.id),
   ]);
 
   const averageProgress = projects.length
@@ -51,6 +53,17 @@ export default async function EncadrantDashboardPage() {
             : "Aucune étape en attente. Voici l'avancement des projets que vous accompagnez."}
         </p>
       </div>
+
+      {/* ===== DEMANDES D'ENCADREMENT ===== */}
+      {pendingRequests > 0 && (
+        <Link href="/encadrant/demandes" className="enc-row" style={{ marginBottom: "22px", border: "1px solid rgba(212,175,55,0.3)", background: "rgba(212,175,55,0.08)" }}>
+          <GraduationCap size={18} style={{ color: "#F5D76E", flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: "14px", color: "#E8EDF5" }}>
+            {pendingRequests} demande{pendingRequests > 1 ? "s" : ""} d&apos;encadrement en attente de votre réponse
+          </span>
+          <ArrowRight size={16} style={{ color: "#F5D76E" }} />
+        </Link>
+      )}
 
       {/* ===== CHIFFRES CLÉS ===== */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px", marginBottom: "22px" }}>
