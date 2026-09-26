@@ -6,14 +6,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  MessageSquare, Users, Hash, Plus, Search, Send, Loader2, ArrowLeft, Info, PenSquare, Compass,
+  MessageSquare, Users, Hash, Plus, Search, Send, Loader2, ArrowLeft, Info, PenSquare, Compass, Paperclip, FolderOpen, Upload,
 } from "lucide-react";
 import { openConversation, pollChat, sendMessage } from "@/lib/messagerie/actions";
 import {
-  MAX_MESSAGE_LENGTH, TRACK_LABELS,
-  type ChatMessage, type ConversationDetail, type ConversationKind, type ConversationSummary, type Person,
+  ACCEPT_ATTACHMENTS, MAX_ATTACHMENTS_PER_MESSAGE, MAX_MESSAGE_LENGTH, TRACK_LABELS, messagePreview,
+  type ChatAttachment, type ChatMessage, type ConversationDetail, type ConversationKind, type ConversationSummary, type Person,
 } from "@/lib/messagerie/types";
 import { Avatar, BrowseChannelsDialog, MembersDialog, NewChannelDialog, NewDirectDialog, NewGroupDialog } from "./Dialogs";
+import { ImageLightbox, MessageAttachments, PendingTray, SharedFilesDialog, useAttachmentUploads } from "./Attachments";
 
 const POLL_INTERVAL = 4000;
 const TZ = "Africa/Douala";
@@ -35,7 +36,7 @@ function shortTime(iso: string) {
 }
 
 type Tab = "ALL" | ConversationKind;
-type DialogName = "direct" | "group" | "channel" | "browse" | "members" | null;
+type DialogName = "direct" | "group" | "channel" | "browse" | "members" | "files" | null;
 
 const TABS: { id: Tab; label: string; icon: typeof MessageSquare }[] = [
   { id: "ALL", label: "Tout", icon: MessageSquare },
@@ -68,6 +69,11 @@ export default function ChatApp({
   const [tab, setTab] = useState<Tab>("ALL");
   const [search, setSearch] = useState("");
   const [dialog, setDialog] = useState<DialogName>(null);
+  const [lightbox, setLightbox] = useState<{ images: ChatAttachment[]; index: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const uploads = useAttachmentUploads(selectedId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dragDepth = useRef(0);
 
   const listRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
@@ -157,29 +163,63 @@ export default function ChatApp({
   };
 
   // ===== Envoi =====
+  const canSend = !!detail && !sending && !uploads.uploading && (draft.trim().length > 0 || uploads.ready.length > 0);
+
   const send = async () => {
     const text = draft.trim();
-    if (!text || !selectedId || sending) return;
+    if (!selectedId || !canSend) return;
+    if (uploads.hasErrors) {
+      setError("Retirez les fichiers en erreur avant d'envoyer.");
+      return;
+    }
     setSending(true);
     setError("");
-    const result = await sendMessage(selectedId, text);
+    const result = await sendMessage(selectedId, text, uploads.ready);
     setSending(false);
     if (!result.ok) {
       setError(result.error);
       return;
     }
     setDraft("");
+    uploads.reset();
     stickToBottom.current = true;
     setMessages((prev) => (prev.some((m) => m.id === result.message.id) ? prev : [...prev, result.message]));
     setInbox((prev) => {
       const updated = prev.map((c) =>
         c.id === selectedId
-          ? { ...c, lastMessage: { content: text, senderName: me.name, mine: true }, lastMessageAt: result.message.createdAt }
+          ? { ...c, lastMessage: { content: messagePreview(text, result.message.attachments), senderName: me.name, mine: true }, lastMessageAt: result.message.createdAt }
           : c,
       );
       return updated.sort((a, b) => b.lastMessageAt.localeCompare(a.lastMessageAt));
     });
   };
+
+  // ===== Glisser-déposer de fichiers sur la conversation =====
+  const hasFiles = (e: React.DragEvent) => Array.from(e.dataTransfer.types).includes("Files");
+  const dropHandlers = detail
+    ? {
+        onDragEnter: (e: React.DragEvent) => {
+          if (!hasFiles(e)) return;
+          e.preventDefault();
+          dragDepth.current += 1;
+          setDragging(true);
+        },
+        onDragOver: (e: React.DragEvent) => {
+          if (hasFiles(e)) e.preventDefault();
+        },
+        onDragLeave: () => {
+          dragDepth.current = Math.max(0, dragDepth.current - 1);
+          if (dragDepth.current === 0) setDragging(false);
+        },
+        onDrop: (e: React.DragEvent) => {
+          if (!hasFiles(e)) return;
+          e.preventDefault();
+          dragDepth.current = 0;
+          setDragging(false);
+          uploads.addFiles(e.dataTransfer.files);
+        },
+      }
+    : {};
 
   // Après création / adhésion : recharger la liste puis ouvrir la conversation
   const openAfterChange = async (id: string) => {
@@ -290,7 +330,14 @@ export default function ChatApp({
       </aside>
 
       {/* ===================== CONVERSATION ===================== */}
-      <section className={`msg-thread ${selectedId ? "" : "msg-hide-mobile"}`}>
+      <section className={`msg-thread ${selectedId ? "" : "msg-hide-mobile"}`} {...dropHandlers} style={{ position: "relative" }}>
+        {dragging && (
+          <div className="msg-drop" aria-hidden>
+            <Upload size={30} />
+            <p style={{ margin: "10px 0 2px", fontSize: "16px", fontWeight: 700 }}>Déposez vos fichiers ici</p>
+            <p style={{ margin: 0, fontSize: "12px", opacity: 0.7 }}>Images, PDF, Word, Excel, PowerPoint… · {MAX_ATTACHMENTS_PER_MESSAGE} fichiers max · 20 Mo chacun</p>
+          </div>
+        )}
         {!selectedId ? (
           <div className="msg-empty">
             <MessageSquare size={40} style={{ color: "rgba(212,175,55,0.45)", marginBottom: "14px" }} />
@@ -321,6 +368,11 @@ export default function ChatApp({
                   {detail ? detail.subtitle.replace(/^Canal [^·]*· /, "") : ""}
                 </p>
               </div>
+              {detail && (
+                <button className="msg-icon-btn" onClick={() => setDialog("files")} aria-label="Fichiers partagés" title="Fichiers partagés">
+                  <FolderOpen size={16} />
+                </button>
+              )}
               {detail && detail.type !== "DIRECT" && (
                 <button className="msg-icon-btn" onClick={() => setDialog("members")} aria-label="Membres et informations" title="Membres et informations">
                   <Info size={16} />
@@ -358,10 +410,19 @@ export default function ChatApp({
                               {m.sender.name}{m.sender.role === "ENCADRANT" ? " · Encadrant" : ""}
                             </p>
                           )}
-                          <div className={`msg-bubble ${m.mine ? "msg-bubble-mine" : ""}`}>
-                            {m.content}
-                            <span className="msg-time">{timeFormat.format(new Date(m.createdAt))}</span>
-                          </div>
+                          {m.attachments.length > 0 && (
+                            <div style={{ marginBottom: m.content ? "4px" : 0 }}>
+                              <MessageAttachments attachments={m.attachments} mine={m.mine} onOpenImage={(images, index) => setLightbox({ images, index })} />
+                            </div>
+                          )}
+                          {m.content ? (
+                            <div className={`msg-bubble ${m.mine ? "msg-bubble-mine" : ""}`}>
+                              {m.content}
+                              <span className="msg-time">{timeFormat.format(new Date(m.createdAt))}</span>
+                            </div>
+                          ) : (
+                            <span className="msg-time" style={{ color: "rgba(200,215,235,0.6)", padding: "0 4px" }}>{timeFormat.format(new Date(m.createdAt))}</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -373,11 +434,40 @@ export default function ChatApp({
             {/* Saisie */}
             <footer className="msg-composer">
               {error && <p role="alert" style={{ color: "#F0928B", fontSize: "12px", margin: "0 0 8px" }}>{error}</p>}
+              {uploads.notice && <p role="status" style={{ color: "#F5B544", fontSize: "12px", margin: "0 0 8px" }}>{uploads.notice}</p>}
+              <PendingTray files={uploads.files} onRemove={uploads.remove} />
               <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept={ACCEPT_ATTACHMENTS}
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files?.length) uploads.addFiles(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+                <button
+                  className="msg-attach"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={!detail || uploads.files.length >= MAX_ATTACHMENTS_PER_MESSAGE}
+                  aria-label="Joindre des images ou des documents"
+                  title="Joindre des images ou des documents"
+                >
+                  <Paperclip size={18} />
+                </button>
                 <textarea
                   className="msg-input"
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
+                  onPaste={(e) => {
+                    // Coller une capture d'écran ou un fichier copié l'ajoute en pièce jointe
+                    if (e.clipboardData.files.length > 0) {
+                      e.preventDefault();
+                      uploads.addFiles(e.clipboardData.files);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -391,11 +481,11 @@ export default function ChatApp({
                   disabled={!detail}
                   style={{ resize: "none", minHeight: "44px", maxHeight: "140px", fieldSizing: "content" } as React.CSSProperties}
                 />
-                <button className="msg-send" onClick={send} disabled={!draft.trim() || sending || !detail} aria-label="Envoyer">
+                <button className="msg-send" onClick={send} disabled={!canSend} aria-label="Envoyer" title={uploads.uploading ? "Envoi des fichiers en cours…" : undefined}>
                   {sending ? <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={18} />}
                 </button>
               </div>
-              <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", margin: "6px 0 0" }}>Entrée pour envoyer · Maj + Entrée pour aller à la ligne</p>
+              <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", margin: "6px 0 0" }}>Entrée pour envoyer · Maj + Entrée pour aller à la ligne · glissez ou collez des fichiers pour les joindre</p>
             </footer>
           </>
         )}
@@ -406,6 +496,10 @@ export default function ChatApp({
       {dialog === "group" && <NewGroupDialog projects={projects} onClose={() => setDialog(null)} onOpen={openAfterChange} />}
       {dialog === "channel" && <NewChannelDialog onClose={() => setDialog(null)} onOpen={openAfterChange} />}
       {dialog === "browse" && <BrowseChannelsDialog onClose={() => setDialog(null)} onOpen={openAfterChange} />}
+      {dialog === "files" && selectedId && (
+        <SharedFilesDialog conversationId={selectedId} onClose={() => setDialog(null)} onOpenImage={(images, index) => setLightbox({ images, index })} />
+      )}
+      {lightbox && <ImageLightbox images={lightbox.images} index={lightbox.index} onClose={() => setLightbox(null)} />}
       {dialog === "members" && detail && (
         <MembersDialog
           detail={detail}
@@ -513,6 +607,23 @@ const STYLES = `
     background: linear-gradient(135deg, #D4AF37, #F5D76E); color: #0A1628; transition: transform 0.2s ease;
   }
   .msg-send:hover:not(:disabled) { transform: scale(1.06); }
+  .msg-attach {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(180,200,230,0.15); background: rgba(255,255,255,0.04); color: rgba(200,215,235,0.75); transition: all 0.2s ease;
+  }
+  .msg-attach:hover:not(:disabled) { color: #F5D76E; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1); }
+  .msg-attach:disabled { opacity: 0.4; cursor: not-allowed; }
+  .msg-file-card {
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(180,200,230,0.1);
+    background: rgba(255,255,255,0.05); text-decoration: none; width: min(320px, 100%); box-sizing: border-box; transition: border-color 0.2s ease;
+  }
+  .msg-file-card:hover { border-color: rgba(212,175,55,0.45) !important; }
+  .msg-image-btn { transition: opacity 0.2s ease; }
+  .msg-image-btn:hover { opacity: 0.88; }
+  .msg-drop {
+    position: absolute; inset: 10px; z-index: 20; border-radius: 16px; border: 2px dashed rgba(212,175,55,0.6); background: rgba(10,22,40,0.88);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: #F5D76E; pointer-events: none; text-align: center; padding: 20px;
+  }
   .msg-send:disabled { opacity: 0.4; cursor: not-allowed; }
   .msg-link { background: none; border: none; color: #F5D76E; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 13px; padding: 0; }
   .msg-chip {

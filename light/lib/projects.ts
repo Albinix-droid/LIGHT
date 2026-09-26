@@ -128,14 +128,6 @@ export function listStepRounds(stepId: string) {
     });
 }
 
-export function listUnreadNotifications(userId: string, take = 8) {
-    return prisma.notification.findMany({
-        where: { userId },
-        orderBy: [{ readAt: { sort: 'asc', nulls: 'first' } }, { createdAt: 'desc' }],
-        take,
-    });
-}
-
 export function fullName(p: { firstName: string; lastName: string } | null | undefined) {
     return p ? `${p.firstName} ${p.lastName}`.trim() : '';
 }

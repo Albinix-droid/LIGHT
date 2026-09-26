@@ -2,13 +2,14 @@
 // PAGE DE LISTE DES PROJETS - données réelles de l'utilisateur connecté
 
 import { requireUser } from "@/lib/auth";
+import { markReadForPath } from "@/lib/notifications/queries";
 import { listProjectsForUser } from "@/lib/projects";
 import { STAGES, SECTOR_LABELS } from "@/lib/parcours";
 import ProjectsList, { type ProjectSummary } from "./ProjectsList";
 
 export default async function ProjectsPage() {
   const user = await requireUser();
-  const projects = await listProjectsForUser(user.id);
+  const [projects] = await Promise.all([listProjectsForUser(user.id), markReadForPath(user.id, user.role, "/dashboard/projets")]);
 
   const summaries: ProjectSummary[] = projects.map((p) => ({
     id: p.id,

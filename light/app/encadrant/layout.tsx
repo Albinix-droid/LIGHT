@@ -6,15 +6,17 @@ import { requireRole } from "@/lib/auth";
 import { listSupervisedProjects } from "@/lib/projects";
 import { countUnreadMessages } from "@/lib/messagerie/queries";
 import { countPendingReceived } from "@/lib/demandes/queries";
+import { countUnreadNotifications } from "@/lib/notifications/queries";
 import EncadrantShell from "./EncadrantShell";
 
 export default async function EncadrantLayout({ children }: { children: React.ReactNode }) {
   const user = await requireRole("ENCADRANT");
-  const [projects, pendingCount, unreadMessages, pendingRequests] = await Promise.all([
+  const [projects, pendingCount, unreadMessages, pendingRequests, unreadNotifications] = await Promise.all([
     listSupervisedProjects(user.id),
     prisma.stepSubmission.count({ where: { decision: null, step: { project: { supervisorId: user.id } } } }),
     countUnreadMessages(user.id),
     countPendingReceived(user.id),
+    countUnreadNotifications(user.id),
   ]);
 
   return (
@@ -24,6 +26,7 @@ export default async function EncadrantLayout({ children }: { children: React.Re
       pendingCount={pendingCount}
       unreadMessages={unreadMessages}
       pendingRequests={pendingRequests}
+      unreadNotifications={unreadNotifications}
     >
       {children}
     </EncadrantShell>

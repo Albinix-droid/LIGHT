@@ -6,6 +6,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -95,16 +96,22 @@ export default function DashboardShell({
   projects,
   unreadMessages = 0,
   pendingRequests = 0,
+  unreadNotifications = 0,
 }: {
   children: React.ReactNode;
   user: ShellUser;
   projects: ShellProject[];
   unreadMessages?: number;
   pendingRequests?: number;
+  unreadNotifications?: number;
 }) {
-  // Pastilles du menu : messages non lus, demandes reçues en attente
-  const badgeFor = (href: string) =>
-    href === "/dashboard/messagerie" ? unreadMessages : href === "/dashboard/invitations" ? pendingRequests : 0;
+  // Pastilles du menu : messages non lus, demandes reçues en attente, notifications non lues
+  const badges: Record<string, number> = {
+    "/dashboard/messagerie": unreadMessages,
+    "/dashboard/invitations": pendingRequests,
+    "/dashboard/notifications": unreadNotifications,
+  };
+  const badgeFor = (href: string) => badges[href] ?? 0;
   const pathname = usePathname();
   const router = useRouter();
   const scrollY = useScroll();
@@ -827,26 +834,7 @@ export default function DashboardShell({
             </button>
 
             {/* Notifications */}
-            <Link
-              href="/dashboard/notifications"
-              className="icon-btn"
-              aria-label="Voir les notifications"
-              style={{ position: "relative", display: "inline-flex", width: "36px", height: "36px" }}
-            >
-              <Bell size={16} />
-              <span
-                style={{
-                  position: "absolute",
-                  top: "6px",
-                  right: "6px",
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  background: "#E4736B",
-                  border: "2px solid #0A1628",
-                }}
-              />
-            </Link>
+            <NotificationBell initialCount={unreadNotifications} allHref="/dashboard/notifications" buttonClassName="icon-btn" />
 
             {/* Theme toggle (mobile) */}
             <button

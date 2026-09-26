@@ -5,17 +5,24 @@
 
 import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
+import { createNotifications } from '@/lib/notifications/queries';
 import {
-    getConversationDetail, getInbox, getMessages, listChannels, toPerson,
+    attachmentSelect, getConversationDetail, getInbox, getMessages, listChannels, listSharedFiles, toMessage, toPerson,
 } from './queries';
+import { attachmentPrefix, createUploadTarget, getStoredFile, removeStoredFiles } from './storage';
 import {
-    MAX_GROUP_MEMBERS, MAX_MESSAGE_LENGTH,
+    ALLOWED_ATTACHMENT_TYPES, MAX_ATTACHMENT_NAME, MAX_ATTACHMENT_SIZE, MAX_ATTACHMENTS_PER_MESSAGE, MAX_GROUP_MEMBERS, MAX_MESSAGE_LENGTH,
+    formatFileSize, resolveMimeType,
     type ChannelListing, type ChannelTrack, type ChatMessage, type ConversationDetail,
-    type ConversationSummary, type PersonWithEmail, type Result,
+    type ConversationSummary, type PersonWithEmail, type Result, type SharedFile, type UploadedAttachment,
 } from './types';
 
 const NOT_LOGGED = { ok: false as const, error: 'Session expirée. Veuillez vous reconnecter.' };
 const NOT_FOUND = { ok: false as const, error: 'Conversation introuvable.' };
+
+// Nom affiché d'une pièce jointe : sans séparateurs de chemin ni caractères de contrôle
+const sanitizeFileName = (name: unknown) =>
+    String(name ?? '').replace(/[\\/]/g, '_').replace(/\p{Cc}/gu, '').trim().slice(0, MAX_ATTACHMENT_NAME) || 'fichier';
 
 async function membershipOf(conversationId: string, userId: string) {
     return prisma.conversationMember.findUnique({
@@ -26,6 +33,11 @@ async function membershipOf(conversationId: string, userId: string) {
 
 async function markRead(conversationId: string, userId: string) {
     await prisma.conversationMember.updateMany({ where: { conversationId, userId }, data: { lastReadAt: new Date() } });
+    // Ouvrir la conversation vaut lecture des notifications qui y mènent (ajout au groupe…)
+    await prisma.notification.updateMany({
+        where: { userId, readAt: null, type: 'MESSAGE', link: { endsWith: `?c=${conversationId}` } },
+        data: { readAt: new Date() },
+    });
 }
 
 // ============================================================
@@ -94,31 +106,112 @@ export async function searchUsers(query: string): Promise<Result<{ users: Person
 // ============================================================
 // ENVOI
 // ============================================================
-export async function sendMessage(conversationId: string, content: string): Promise<Result<{ message: ChatMessage }>> {
+// Étape 1 : le serveur valide chaque fichier et fournit une URL de dépôt signée à usage unique
+export async function prepareAttachmentUploads(
+    conversationId: string,
+    files: { name: string; size: number; type: string }[],
+): Promise<Result<{ uploads: { path: string; token: string }[] }>> {
+    const user = await getCurrentUser();
+    if (!user) return NOT_LOGGED;
+    if (!(await membershipOf(conversationId, user.id))) return NOT_FOUND;
+    if (!Array.isArray(files) || files.length === 0) return { ok: false, error: 'Aucun fichier sélectionné.' };
+    if (files.length > MAX_ATTACHMENTS_PER_MESSAGE) {
+        return { ok: false, error: `Vous pouvez joindre au maximum ${MAX_ATTACHMENTS_PER_MESSAGE} fichiers par message.` };
+    }
+    for (const file of files) {
+        if (!resolveMimeType(String(file.name ?? ''), String(file.type ?? ''))) {
+            return { ok: false, error: `« ${file.name} » : type de fichier non autorisé (images, PDF, Word, Excel, PowerPoint, texte, CSV ou ZIP).` };
+        }
+        if (!(file.size > 0) || file.size > MAX_ATTACHMENT_SIZE) {
+            return { ok: false, error: `« ${file.name} » dépasse la taille maximale de ${formatFileSize(MAX_ATTACHMENT_SIZE)}.` };
+        }
+    }
+    try {
+        const uploads = await Promise.all(
+            files.map((file) => createUploadTarget(conversationId, user.id, resolveMimeType(file.name, file.type)!)),
+        );
+        return { ok: true, uploads };
+    } catch (e) {
+        console.error('[messagerie] préparation des pièces jointes', e);
+        return { ok: false, error: "Le stockage des fichiers est momentanément indisponible. Réessayez dans un instant." };
+    }
+}
+
+// Étape 2 : envoi du message ; chaque fichier est revérifié dans le stockage (emplacement, taille, type réels)
+export async function sendMessage(
+    conversationId: string,
+    content: string,
+    attachments: UploadedAttachment[] = [],
+): Promise<Result<{ message: ChatMessage }>> {
     const user = await getCurrentUser();
     if (!user) return NOT_LOGGED;
 
-    const text = content.trim();
-    if (!text) return { ok: false, error: 'Le message est vide.' };
+    const text = (content ?? '').trim();
+    const files = Array.isArray(attachments) ? attachments : [];
+    if (!text && files.length === 0) return { ok: false, error: 'Le message est vide.' };
     if (text.length > MAX_MESSAGE_LENGTH) {
         return { ok: false, error: `Le message dépasse ${MAX_MESSAGE_LENGTH} caractères.` };
     }
+    if (files.length > MAX_ATTACHMENTS_PER_MESSAGE) {
+        return { ok: false, error: `Vous pouvez joindre au maximum ${MAX_ATTACHMENTS_PER_MESSAGE} fichiers par message.` };
+    }
     if (!(await membershipOf(conversationId, user.id))) return NOT_FOUND;
+
+    const prefix = attachmentPrefix(conversationId, user.id);
+    const paths = files.map((f) => String(f.path ?? ''));
+    if (paths.some((p) => !p.startsWith(prefix) || p.includes('..')) || new Set(paths).size !== paths.length) {
+        return { ok: false, error: 'Pièce jointe invalide.' };
+    }
+    if (paths.length && (await prisma.messageAttachment.count({ where: { path: { in: paths } } })) > 0) {
+        return { ok: false, error: 'Ces fichiers ont déjà été envoyés.' };
+    }
+
+    const verified = [];
+    for (const file of files) {
+        const stored = await getStoredFile(file.path);
+        const mimeType = stored ? resolveMimeType(String(file.name ?? ''), stored.mimeType) : null;
+        if (!stored || !mimeType || stored.size <= 0 || stored.size > MAX_ATTACHMENT_SIZE || !ALLOWED_ATTACHMENT_TYPES[stored.mimeType]) {
+            await removeStoredFiles(paths);
+            return { ok: false, error: `« ${file.name} » n'a pas pu être vérifié. Joignez-le à nouveau.` };
+        }
+        const dim = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v > 0 && v < 20000 ? Math.round(v) : null);
+        verified.push({
+            path: file.path,
+            name: sanitizeFileName(file.name),
+            mimeType,
+            size: stored.size,
+            width: dim(file.width),
+            height: dim(file.height),
+            conversationId,
+            uploaderId: user.id,
+        });
+    }
 
     const now = new Date();
     const [message] = await prisma.$transaction([
         prisma.message.create({
-            data: { conversationId, senderId: user.id, content: text, createdAt: now },
-            include: { sender: { select: { id: true, firstName: true, lastName: true, role: true } } },
+            data: {
+                conversationId, senderId: user.id, content: text, createdAt: now,
+                attachments: { create: verified.map((a) => ({ ...a, createdAt: now })) },
+            },
+            include: {
+                sender: { select: { id: true, firstName: true, lastName: true, role: true } },
+                attachments: { select: attachmentSelect, orderBy: { createdAt: 'asc' } },
+            },
         }),
         prisma.conversation.update({ where: { id: conversationId }, data: { lastMessageAt: now } }),
         prisma.conversationMember.updateMany({ where: { conversationId, userId: user.id }, data: { lastReadAt: now } }),
     ]);
 
-    return {
-        ok: true,
-        message: { id: message.id, content: message.content, createdAt: message.createdAt.toISOString(), sender: toPerson(message.sender), mine: true },
-    };
+    return { ok: true, message: toMessage(message, user.id) };
+}
+
+// Fichiers et images partagés dans la conversation
+export async function fetchSharedFiles(conversationId: string): Promise<Result<{ files: SharedFile[] }>> {
+    const user = await getCurrentUser();
+    if (!user) return NOT_LOGGED;
+    if (!(await membershipOf(conversationId, user.id))) return NOT_FOUND;
+    return { ok: true, files: await listSharedFiles(conversationId, user.id) };
 }
 
 // ============================================================
@@ -191,6 +284,12 @@ export async function createGroup(input: {
             },
         },
     });
+    await createNotifications(memberIds, {
+        type: 'MESSAGE',
+        message: `${user.firstName} ${user.lastName} vous a ajouté au groupe « ${name} »`,
+        link: `/dashboard/messagerie?c=${conversation.id}`,
+        projectId,
+    });
     return { ok: true, id: conversation.id };
 }
 
@@ -252,10 +351,18 @@ export async function addMembers(conversationId: string, userIds: string[]): Pro
     if (current + ids.length > MAX_GROUP_MEMBERS) return { ok: false, error: `Un groupe compte au maximum ${MAX_GROUP_MEMBERS} membres.` };
     const existing = await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true } });
 
+    const already = new Set((await prisma.conversationMember.findMany({ where: { conversationId, userId: { in: existing.map((u) => u.id) } }, select: { userId: true } })).map((m) => m.userId));
     await prisma.conversationMember.createMany({
         data: existing.map((u) => ({ conversationId, userId: u.id })),
         skipDuplicates: true,
     });
+    const group = await prisma.conversation.findUnique({ where: { id: conversationId }, select: { name: true, projectId: true } });
+    await createNotifications(existing.map((u) => u.id).filter((id) => !already.has(id)), {
+        type: 'MESSAGE',
+        message: `${user.firstName} ${user.lastName} vous a ajouté au groupe « ${group?.name ?? 'Groupe'} »`,
+        link: `/dashboard/messagerie?c=${conversationId}`,
+        projectId: group?.projectId,
+    }, { excludeUserId: user.id });
     return { ok: true };
 }
 

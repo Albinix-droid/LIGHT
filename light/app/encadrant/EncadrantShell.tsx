@@ -8,8 +8,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import {
-  LayoutDashboard, FolderKanban, CheckSquare, ChevronLeft, ChevronRight, Menu, X, GraduationCap, LogOut, MessageSquare, Inbox,
+  LayoutDashboard, FolderKanban, CheckSquare, ChevronLeft, ChevronRight, Menu, X, GraduationCap, LogOut, MessageSquare, Inbox, Bell,
 } from "lucide-react";
 
 export interface EncadrantShellProps {
@@ -19,9 +20,10 @@ export interface EncadrantShellProps {
   pendingCount: number;
   unreadMessages?: number;
   pendingRequests?: number;
+  unreadNotifications?: number;
 }
 
-export default function EncadrantShell({ children, user, projects, pendingCount, unreadMessages = 0, pendingRequests = 0 }: EncadrantShellProps) {
+export default function EncadrantShell({ children, user, projects, pendingCount, unreadMessages = 0, pendingRequests = 0, unreadNotifications = 0 }: EncadrantShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -33,6 +35,7 @@ export default function EncadrantShell({ children, user, projects, pendingCount,
     { icon: Inbox, label: "Demandes", href: "/encadrant/demandes", badge: pendingRequests },
     { icon: MessageSquare, label: "Messagerie", href: "/encadrant/messagerie", badge: unreadMessages },
     { icon: FolderKanban, label: "Projets suivis", href: "/encadrant/projets", badge: 0 },
+    { icon: Bell, label: "Notifications", href: "/encadrant/notifications", badge: unreadNotifications },
   ];
 
   const projectInUrl = pathname?.match(/^\/encadrant\/projets\/([^/]+)/)?.[1];
@@ -267,6 +270,7 @@ export default function EncadrantShell({ children, user, projects, pendingCount,
                 {pendingCount} à examiner
               </Link>
             )}
+            <NotificationBell initialCount={unreadNotifications} allHref="/encadrant/notifications" buttonClassName="enc-icon-btn" />
             <div className="enc-avatar" title={fullName}>{initials}</div>
           </div>
         </header>

@@ -4,6 +4,7 @@
 import 'server-only';
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
+import { markReadForPath } from '@/lib/notifications/queries';
 import { getAccessibleProject, isStageUnlocked, fullName } from '@/lib/projects';
 import { STAGES, getStageBySlug, getStageIndex, type StageSlug } from '@/lib/parcours';
 import type { StepReviewInfo, StepStatusKey } from './StepStatusBanner';
@@ -29,6 +30,7 @@ export async function loadStep<T>(params: Promise<{ id: string }>, slug: StageSl
     if (!project) notFound();
 
     const stage = getStageBySlug(slug)!;
+    await markReadForPath(user.id, user.role, `/dashboard/projets/${project.id}/${slug}`);
     const locked = !isStageUnlocked(project.stage, stage.stage);
     const stageIndex = getStageIndex(stage.stage);
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckSquare, Clock, MessageSquare, History, Inbox, ArrowRight } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { markReadForPath } from "@/lib/notifications/queries";
 import { listPendingSubmissions, listReviewedSubmissions, listStepRounds, fullName } from "@/lib/projects";
 import { STAGES } from "@/lib/parcours";
 import { Stars, formatDate } from "@/app/dashboard/projets/[id]/StepStatusBanner";
@@ -30,6 +31,11 @@ export default async function ValidationsPage({ searchParams }: { searchParams: 
         },
       })
     : null;
+  // Consulter une soumission (ou la file) vaut lecture des notifications correspondantes
+  await Promise.all([
+    markReadForPath(user.id, user.role, "/encadrant/validations"),
+    selected ? markReadForPath(user.id, user.role, `/encadrant/validations?id=${selected.id}`) : null,
+  ]);
   const previousRounds = selected
     ? (await listStepRounds(selected.stepId)).filter((r) => r.id !== selected.id && r.decision)
     : [];

@@ -3,6 +3,7 @@
 import 'server-only';
 import prisma from '@/lib/prisma';
 import { STAGES, getStageIndex, type StageKey } from '@/lib/parcours';
+import { createNotifications } from '@/lib/notifications/queries';
 import type { NotificationType } from '@/lib/generated/prisma/client';
 
 // Après validation d'une étape par l'encadrant : progression et déblocage de l'étape suivante
@@ -26,15 +27,13 @@ export async function advanceProjectAfterApproval(projectId: string, stage: Stag
     });
 }
 
+// Notifications : anti-doublon, purge et exclusion de l'auteur gérés par lib/notifications
 export async function notify(
     userIds: string[],
-    notification: { projectId: string; type: NotificationType; message: string; link: string },
+    notification: { projectId?: string | null; type: NotificationType; message: string; link: string },
+    options: { excludeUserId?: string } = {},
 ) {
-    const unique = [...new Set(userIds)];
-    if (unique.length === 0) return;
-    await prisma.notification.createMany({
-        data: unique.map((userId) => ({ userId, ...notification })),
-    });
+    await createNotifications(userIds, notification, options);
 }
 
 // Étudiants à prévenir d'une décision : propriétaire et membres du projet

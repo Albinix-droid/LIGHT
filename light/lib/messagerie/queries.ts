@@ -3,9 +3,9 @@
 import 'server-only';
 import prisma from '@/lib/prisma';
 import type {
-    ChannelListing, ChatMessage, ConversationDetail, ConversationSummary, Person, UserRole,
+    ChannelListing, ChatAttachment, ChatMessage, ConversationDetail, ConversationSummary, Person, SharedFile, UserRole,
 } from './types';
-import { TRACK_LABELS, ROLE_LABELS } from './types';
+import { IMAGE_MIME_TYPES, TRACK_LABELS, ROLE_LABELS, messagePreview } from './types';
 
 const personSelect = { id: true, firstName: true, lastName: true, role: true } as const;
 type PersonRow = { id: string; firstName: string; lastName: string; role: UserRole };
@@ -18,8 +18,25 @@ export function toPerson(u: PersonRow): Person {
     return { id: u.id, name, initials, role: u.role };
 }
 
-function toMessage(m: { id: string; content: string; createdAt: Date; sender: PersonRow }, meId: string): ChatMessage {
-    return { id: m.id, content: m.content, createdAt: m.createdAt.toISOString(), sender: toPerson(m.sender), mine: m.sender.id === meId };
+export const attachmentSelect = { id: true, name: true, mimeType: true, size: true, width: true, height: true } as const;
+type AttachmentRow = { id: string; name: string; mimeType: string; size: number; width: number | null; height: number | null };
+
+export function toAttachment(a: AttachmentRow): ChatAttachment {
+    return {
+        id: a.id, name: a.name, mimeType: a.mimeType, size: a.size, width: a.width, height: a.height,
+        isImage: IMAGE_MIME_TYPES.includes(a.mimeType),
+        url: `/api/messagerie/fichiers/${a.id}`,
+    };
+}
+
+export function toMessage(
+    m: { id: string; content: string; createdAt: Date; sender: PersonRow; attachments?: AttachmentRow[] },
+    meId: string,
+): ChatMessage {
+    return {
+        id: m.id, content: m.content, createdAt: m.createdAt.toISOString(), sender: toPerson(m.sender), mine: m.sender.id === meId,
+        attachments: (m.attachments ?? []).map(toAttachment),
+    };
 }
 
 // Nombre de messages non lus par conversation (une seule requête)
@@ -52,7 +69,10 @@ export async function getInbox(userId: string): Promise<ConversationSummary[]> {
                         _count: { select: { members: true } },
                         // Pour les messages privés : l'autre membre
                         members: { where: { userId: { not: userId } }, take: 1, include: { user: { select: personSelect } } },
-                        messages: { orderBy: { createdAt: 'desc' }, take: 1, include: { sender: { select: personSelect } } },
+                        messages: {
+                            orderBy: { createdAt: 'desc' }, take: 1,
+                            include: { sender: { select: personSelect }, attachments: { select: { mimeType: true } } },
+                        },
                     },
                 },
             },
@@ -72,7 +92,7 @@ export async function getInbox(userId: string): Promise<ConversationSummary[]> {
             track: c.track,
             unread: unread.get(c.id) ?? 0,
             lastMessage: last
-                ? { content: last.content, senderName: toPerson(last.sender).name, mine: last.senderId === userId }
+                ? { content: messagePreview(last.content, last.attachments), senderName: toPerson(last.sender).name, mine: last.senderId === userId }
                 : null,
             lastMessageAt: c.lastMessageAt.toISOString(),
             otherUser: other,
@@ -119,7 +139,7 @@ export async function getConversationDetail(conversationId: string, userId: stri
 export async function getMessages(conversationId: string, userId: string, after?: Date): Promise<ChatMessage[]> {
     const rows = await prisma.message.findMany({
         where: { conversationId, conversation: { members: { some: { userId } } }, ...(after ? { createdAt: { gt: after } } : {}) },
-        include: { sender: { select: personSelect } },
+        include: { sender: { select: personSelect }, attachments: { select: attachmentSelect, orderBy: { createdAt: 'asc' } } },
         orderBy: { createdAt: after ? 'asc' : 'desc' },
         take: MESSAGES_PAGE_SIZE,
     });
@@ -146,4 +166,15 @@ export async function listChannels(userId: string): Promise<ChannelListing[]> {
         joined: c.members.length > 0,
         createdByName: toPerson(c.createdBy).name,
     }));
+}
+
+// Fichiers partagés dans une conversation (les plus récents d'abord)
+export async function listSharedFiles(conversationId: string, userId: string): Promise<SharedFile[]> {
+    const rows = await prisma.messageAttachment.findMany({
+        where: { conversationId, conversation: { members: { some: { userId } } } },
+        select: { ...attachmentSelect, createdAt: true, uploader: { select: personSelect } },
+        orderBy: { createdAt: 'desc' },
+        take: 200,
+    });
+    return rows.map((a) => ({ ...toAttachment(a), createdAt: a.createdAt.toISOString(), senderName: toPerson(a.uploader).name }));
 }

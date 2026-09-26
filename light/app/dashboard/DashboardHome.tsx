@@ -11,6 +11,8 @@ import {
   Plus, X, ChevronDown, ChevronUp, RefreshCw, Check, AlertCircle,
   Sparkles, Brain, Target, Rocket, Star, Shield
 } from "lucide-react";
+import NotificationPreview from "@/components/notifications/NotificationPreview";
+import type { NotificationView } from "@/lib/notifications/types";
 
 // ============================================================
 // TYPES
@@ -31,14 +33,6 @@ interface TeamMember {
   role: string;
   avatar: string;
   status?: "online" | "offline" | "away";
-}
-
-interface Notification {
-  id: number;
-  type: "invitation" | "validation" | "message" | "system";
-  message: string;
-  time: string;
-  read: boolean;
 }
 
 // ============================================================
@@ -67,7 +61,17 @@ export interface HomeProject {
   budget: { estimated: number | null; spent: number };
 }
 
-export default function DashboardHome({ project: projectInfo }: { project: HomeProject }) {
+export default function DashboardHome({
+  project: projectInfo,
+  notifications,
+  unreadCount,
+  serverNow,
+}: {
+  project: HomeProject;
+  notifications: NotificationView[];
+  unreadCount: number;
+  serverNow: number;
+}) {
   const scrollY = useScroll();
 
   // ===== ROUTE DYNAMIQUE =====
@@ -80,27 +84,6 @@ export default function DashboardHome({ project: projectInfo }: { project: HomeP
   const budgetPercent = projectInfo.budget.estimated
     ? Math.min(Math.round((projectInfo.budget.spent / projectInfo.budget.estimated) * 100), 100)
     : 0;
-
-  // ===== NOTIFICATIONS =====
-  const [notifications, setNotifications] = useState<Notification[]>([
-    { id: 1, type: "invitation", message: "Paul Tchou a accepté votre invitation", time: "2 min", read: false },
-    { id: 2, type: "validation", message: "Jalon « Conception » validé par l'encadrant", time: "1h", read: false },
-    { id: 3, type: "message", message: "Nouveau message de Marie Claire", time: "3h", read: true },
-    { id: 4, type: "system", message: "Rappel : Soutenance dans 15 jours", time: "5h", read: true },
-  ]);
-
-  const notifIcons = {
-    invitation: Mail,
-    validation: CheckCircle2,
-    message: MessageCircle,
-    system: Bell,
-  };
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAsRead = (id: number) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  };
 
   // ===== TÂCHES =====
   const [tasks, setTasks] = useState<Task[]>([
@@ -1027,50 +1010,8 @@ export default function DashboardHome({ project: projectInfo }: { project: HomeP
               </Link>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "220px", overflowY: "auto" }} className="scrollbar-custom">
-              {notifications.slice(0, 4).map((notif, index) => {
-                const Icon = notifIcons[notif.type] || Bell;
-                return (
-                  <motion.div
-                    key={notif.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="notif-item"
-                    onClick={() => markAsRead(notif.id)}
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      alignItems: "flex-start",
-                      background: !notif.read ? "rgba(201, 162, 0, 0.05)" : "rgba(255,255,255,0.03)",
-                    }}
-                  >
-                    <div style={{
-                      width: "28px",
-                      height: "28px",
-                      borderRadius: "50%",
-                      background: "rgba(201, 162, 0, 0.08)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}>
-                      <Icon size={12} style={{ color: "#F4D03F" }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: "12px", color: !notif.read ? "#FFFFFF" : "rgba(255,255,255,0.5)", margin: 0, lineHeight: 1.4 }}>
-                        {notif.message}
-                      </p>
-                      <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.2)", margin: "2px 0 0 0" }}>
-                        Il y a {notif.time}
-                      </p>
-                    </div>
-                    {!notif.read && (
-                      <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#F4D03F", flexShrink: 0, marginTop: "4px" }} />
-                    )}
-                  </motion.div>
-                );
-              })}
+            <div style={{ maxHeight: "260px", overflowY: "auto" }} className="scrollbar-custom">
+              <NotificationPreview items={notifications} serverNow={serverNow} />
             </div>
           </div>
         </div>

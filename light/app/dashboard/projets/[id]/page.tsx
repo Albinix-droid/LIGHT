@@ -11,6 +11,7 @@ import { requireUser } from "@/lib/auth";
 import { getAccessibleProject, listEncadrants, fullName } from "@/lib/projects";
 import { STAGES, SECTOR_LABELS, getStageIndex } from "@/lib/parcours";
 import { getProjectTeam } from "@/lib/demandes/queries";
+import { markReadForPath } from "@/lib/notifications/queries";
 import SupervisorPicker from "./SupervisorPicker";
 import TeamPanel from "./TeamPanel";
 import { Stars, formatDate } from "./StepStatusBanner";
@@ -31,7 +32,10 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
   const [project, encadrants] = await Promise.all([getAccessibleProject(id, user.id), listEncadrants()]);
   if (!project) notFound();
 
-  const { team, pendingInvitations, pendingSupervision } = await getProjectTeam(project.id, user.id);
+  const [{ team, pendingInvitations, pendingSupervision }] = await Promise.all([
+    getProjectTeam(project.id, user.id),
+    markReadForPath(user.id, user.role, `/dashboard/projets/${project.id}`),
+  ]);
   const isOwner = project.ownerId === user.id;
   const currentIndex = getStageIndex(project.stage);
 

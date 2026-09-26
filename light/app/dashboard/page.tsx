@@ -6,11 +6,16 @@ import { Rocket, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { listProjectsForUser } from "@/lib/projects";
 import { getStageIndex } from "@/lib/parcours";
+import { countUnreadNotifications, listNotifications } from "@/lib/notifications/queries";
 import DashboardHome from "./DashboardHome";
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const [project] = await listProjectsForUser(user.id);
+  const [[project], { items: notifications }, unreadCount] = await Promise.all([
+    listProjectsForUser(user.id),
+    listNotifications(user.id, user.role, { take: 4 }),
+    countUnreadNotifications(user.id),
+  ]);
 
   if (!project) {
     return (
@@ -52,6 +57,9 @@ export default async function DashboardPage() {
         stageIndex: getStageIndex(project.stage),
         budget: { estimated: project.budgetEstimated, spent: project.budgetSpent },
       }}
+      notifications={notifications}
+      unreadCount={unreadCount}
+      serverNow={Date.now()}
     />
   );
 }

@@ -6,12 +6,13 @@ import { GraduationCap, Clock, Award, TrendingUp, Inbox, Bell, FolderKanban, His
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import {
-  listSupervisedProjects, listPendingSubmissions, listReviewedSubmissions, listUnreadNotifications, fullName,
+  listSupervisedProjects, listPendingSubmissions, listReviewedSubmissions, fullName,
 } from "@/lib/projects";
 import { STAGES, getStageIndex } from "@/lib/parcours";
 import { Stars, formatDate } from "@/app/dashboard/projets/[id]/StepStatusBanner";
 import { countPendingReceived } from "@/lib/demandes/queries";
-import NotificationList from "./NotificationList";
+import NotificationPreview from "@/components/notifications/NotificationPreview";
+import { listNotifications } from "@/lib/notifications/queries";
 import { getFollowUpStatus } from "./projectStatus";
 
 const stageLabel = (key: string) => STAGES.find((s) => s.stage === key)?.label ?? key;
@@ -26,7 +27,7 @@ export default async function EncadrantDashboardPage() {
     listSupervisedProjects(user.id),
     listPendingSubmissions(user.id),
     listReviewedSubmissions(user.id, 5),
-    listUnreadNotifications(user.id, 6),
+    listNotifications(user.id, user.role, { take: 6 }).then((r) => r.items),
     prisma.stepSubmission.count({ where: { reviewerId: user.id, decision: "APPROVED", reviewedAt: { gte: startOfMonth } } }),
     countPendingReceived(user.id),
   ]);
@@ -106,17 +107,11 @@ export default async function EncadrantDashboardPage() {
 
         {/* ===== NOTIFICATIONS ===== */}
         <div className="enc-card">
-          <h2 className="enc-h2" style={{ marginBottom: "14px" }}><Bell size={16} style={{ color: "#F5D76E" }} /> Notifications</h2>
-          <NotificationList
-            items={notifications.map((n) => ({
-              id: n.id,
-              type: n.type,
-              message: n.message,
-              link: n.link,
-              read: n.readAt !== null,
-              date: formatDate(n.createdAt.toISOString()),
-            }))}
-          />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+            <h2 className="enc-h2"><Bell size={16} style={{ color: "#F5D76E" }} /> Notifications</h2>
+            <Link href="/encadrant/notifications" style={{ fontSize: "12px", color: "#F5D76E" }}>Tout voir</Link>
+          </div>
+          <NotificationPreview items={notifications} serverNow={Date.now()} />
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle, Clock, AlertTriangle, Lock, Circle, MessageSquare, ArrowRight, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
+import { markReadForPath } from "@/lib/notifications/queries";
 import { getSupervisedProject, fullName } from "@/lib/projects";
 import { STAGES, SECTOR_LABELS, getStageIndex } from "@/lib/parcours";
 import { Stars, formatDate } from "@/app/dashboard/projets/[id]/StepStatusBanner";
@@ -25,6 +26,7 @@ export default async function EncadrantProjectPage({ params }: { params: Promise
   const user = await requireRole("ENCADRANT");
   const project = await getSupervisedProject(id, user.id);
   if (!project) notFound();
+  await markReadForPath(user.id, user.role, `/encadrant/projets/${project.id}`);
 
   const current = getStageIndex(project.stage);
   const status = getFollowUpStatus(project);

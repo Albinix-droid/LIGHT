@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { getAccessibleProject, isStageUnlocked } from '@/lib/projects';
-import { notify } from '@/lib/accompagnement';
+import { getProjectStudentIds, notify } from '@/lib/accompagnement';
 import {
     STAGES, SECTOR_LABELS, MIN_DESCRIPTION_LENGTH, getStageBySlug, getMissingRequirements, type StageSlug,
 } from '@/lib/parcours';
@@ -17,6 +17,7 @@ type ActionResult = { ok: true } | { ok: false; error: string };
 // Les maquettes sont stockées en data URL : on borne la taille d'une étape
 const MAX_STEP_SIZE = 4_000_000;
 const MAX_NOTE_LENGTH = 2000;
+const fullNameOf = (p: { firstName: string; lastName: string }) => `${p.firstName} ${p.lastName}`.trim();
 
 // ============================================================
 // CRÉATION D'UN PROJET
@@ -138,16 +139,24 @@ export async function submitStep(
     const step = await persistStep(projectId, stage.stage, data as Prisma.InputJsonValue, 'SUBMITTED');
 
     // Instantané : l'encadrant examine exactement ce qui a été soumis
-    await prisma.stepSubmission.create({
+    const submission = await prisma.stepSubmission.create({
         data: { stepId: step.id, authorId: user.id, note: trimmedNote, data: data as Prisma.InputJsonValue },
     });
 
+    const author = `${user.firstName} ${user.lastName}`.replace(/\s+/g, ' ').trim();
     await notify([project.supervisorId], {
         projectId,
         type: 'VALIDATION',
-        message: `${user.firstName} ${user.lastName} a soumis l'étape ${stage.label} du projet « ${project.title} »`.replace(/\s+/g, ' '),
-        link: `/encadrant/validations`,
+        message: `${author} a soumis l'étape ${stage.label} du projet « ${project.title} »`,
+        link: `/encadrant/validations?id=${submission.id}`,
     });
+    // Le reste de l'équipe sait que l'étape est partie chez l'encadrant
+    await notify(await getProjectStudentIds(projectId), {
+        projectId,
+        type: 'VALIDATION',
+        message: `${author} a soumis l'étape ${stage.label} de « ${project.title} » à ${fullNameOf(project.supervisor)}`,
+        link: `/dashboard/projets/${projectId}/${stage.slug}`,
+    }, { excludeUserId: user.id });
 
     revalidatePath('/dashboard', 'layout');
     revalidatePath('/encadrant', 'layout');

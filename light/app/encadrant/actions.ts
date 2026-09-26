@@ -71,13 +71,3 @@ export async function reviewSubmission(input: {
     return { ok: true };
 }
 
-export async function markNotificationRead(notificationId: string): Promise<ActionResult> {
-    const user = await getCurrentUser();
-    if (!user) return { ok: false, error: 'Session expirée.' };
-    await prisma.notification.updateMany({
-        where: { id: notificationId, userId: user.id, readAt: null },
-        data: { readAt: new Date() },
-    });
-    revalidatePath('/encadrant');
-    return { ok: true };
-}
