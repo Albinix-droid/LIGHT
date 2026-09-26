@@ -22,8 +22,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // Les maquettes de l'étape Conception sont envoyées en data URL
-      bodySizeLimit: "5mb",
+      // Les maquettes de l'étape Conception sont envoyées en data URL.
+      // Vercel refuse toute requête de plus de 4,5 Mo : inutile d'autoriser davantage.
+      bodySizeLimit: "4.5mb",
     },
   },
 };

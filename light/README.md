@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LIGHT — Plateforme d'accompagnement de projets étudiants
 
-## Getting Started
+Next.js 16 (App Router) · Prisma 7 + PostgreSQL (Supabase) · Supabase Auth & Storage · Claude (assistant IA).
 
-First, run the development server:
+## Développement local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # puis remplir les valeurs
+npm install
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script | Rôle |
+| --- | --- |
+| `npm run build` | Génère le client Prisma puis construit l'application |
+| `npm run db:migrate` | Applique les migrations en attente (`prisma migrate deploy`) |
+| `npm run db:status` | État des migrations |
+| `npm run role -- email@exemple.com ENCADRANT` | Change le rôle d'un compte |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Déploiement sur Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Importer le projet
 
-## Learn More
+1. Sur [vercel.com/new](https://vercel.com/new), importez le dépôt GitHub.
+2. **Root Directory : `light`** (l'application est dans ce sous-dossier). Laissez le reste par défaut : `vercel.json` fixe l'installation (`npm ci`), le build (`npm run build`) et la région.
+3. Node.js : 20.x ou plus récent (Project Settings → General).
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Variables d'environnement
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Project Settings → Environment Variables, pour **Production** et **Preview**. Toutes sont décrites dans [.env.example](.env.example).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Valeur |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé publique (anon / publishable) |
+| `SUPABASE_URL` | URL du projet Supabase |
+| `SUPABASE_SECRET_KEY` | Clé secrète (service_role) : pièces jointes de la messagerie |
+| `DATABASE_URL` | Pooler Supabase en **mode transaction, port 6543**, avec `?pgbouncer=true` |
+| `DIRECT_URL` | Pooler en mode session (port 5432) : migrations uniquement |
+| `ANTHROPIC_API_KEY` | Clé API Anthropic : assistant IA |
 
-## Deploy on Vercel
+> Sur Vercel, `DATABASE_URL` doit utiliser le **port 6543** (mode transaction). Le mode session (5432) ouvre une connexion par instance de fonction et sature vite le pooler.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Les variables `NEXT_PUBLIC_*` sont intégrées au build : après les avoir modifiées, redéployez.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 3. Supabase Auth
+
+Authentication → URL Configuration :
+
+- **Site URL** : `https://<votre-domaine>.vercel.app` (ou votre domaine personnalisé)
+- **Redirect URLs** : ajoutez `https://<votre-domaine>.vercel.app/**` et, pour les prévisualisations, `https://*-<votre-équipe>.vercel.app/**`
+
+Sans cela, les liens de confirmation d'inscription et de réinitialisation du mot de passe renvoient vers `localhost`.
+
+### 4. Base de données
+
+Les migrations ne sont **pas** exécutées pendant le build Vercel, pour éviter qu'un déploiement de prévisualisation modifie la base de production. Avant de déployer une version qui ajoute une migration :
+
+```bash
+npm run db:migrate    # utilise DIRECT_URL, ou DATABASE_URL à défaut
+```
+
+### 5. Région
+
+`vercel.json` place les fonctions à Londres (`lhr1`), au plus près de la base Supabase (`eu-west-2`). Si la base change de région, adaptez `regions`.
+
+### Limites à connaître
+
+- Requêtes limitées à **4,5 Mo** par Vercel : les maquettes de l'étape Conception doivent rester sous cette taille. Les pièces jointes de la messagerie, elles, vont directement dans Supabase Storage (jusqu'à 20 Mo).
+- L'assistant IA peut répondre pendant 5 minutes (`maxDuration = 300`), ce qui demande Fluid Compute (activé par défaut sur les nouveaux projets).
+- Le bucket de stockage `messagerie` est créé automatiquement au premier envoi de fichier.

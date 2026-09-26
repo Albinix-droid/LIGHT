@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "prisma generate",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "db:migrate": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
     "role": "node scripts/definir-role.mjs"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "@supabase/supabase-js": "^2.112.3",
     "dotenv": "^17.4.2",
     "firebase": "^12.17.0",
+    "framer-motion": "^13.4.0",
     "lucide-react": "^1.28.0",
     "motion": "^13.4.0",
     "next": "16.2.12",
@@ -42,5 +44,8 @@
     "tailwindcss": "^4.3.3",
     "ts-node": "^10.9.2",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   }
 }

@@ -14,7 +14,15 @@ const globalForPrisma = global as unknown as {
 
 function createClient() {
     // L'adaptateur traduit les requêtes Prisma vers le driver "pg" (node-postgres)
-    const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+    // Sur Vercel, chaque instance de fonction a son propre pool : on le garde petit pour ne pas saturer
+    // le pooler Supabase (DATABASE_URL doit pointer vers le mode transaction, port 6543).
+    const serverless = !!process.env.VERCEL;
+    const adapter = new PrismaPg({
+        connectionString: process.env.DATABASE_URL,
+        max: Number(process.env.DATABASE_POOL_MAX) || (serverless ? 3 : 10),
+        idleTimeoutMillis: serverless ? 5_000 : 30_000,
+        connectionTimeoutMillis: 10_000,
+    });
     return new PrismaClient({ adapter });
 }
 
