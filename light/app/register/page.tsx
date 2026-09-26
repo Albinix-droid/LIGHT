@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2, Sparkles, ArrowRight, Building2, Award, Cloud, UserPlus, GraduationCap, Rocket } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
+import CurrentSessionBanner from "@/components/CurrentSessionBanner";
 
 const createClient = () => {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -520,6 +521,8 @@ export default function RegisterPage() {
         {/* ============================================================
             FORMULAIRE
             ============================================================ */}
+        <CurrentSessionBanner />
+
         <form onSubmit={handleSubmit}>
           {/* Rôle */}
           <div className="fade-in-up delay-3" style={{ marginBottom: "18px" }}>

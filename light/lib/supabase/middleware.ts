@@ -4,8 +4,6 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PRIVATE_PREFIXES = ['/dashboard', '/encadrant'];
-// Pages réservées aux visiteurs non connectés
-const GUEST_ONLY = ['/login', '/register'];
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request });
@@ -46,11 +44,8 @@ export async function updateSession(request: NextRequest) {
         return redirectTo(`/login?next=${encodeURIComponent(pathname + search)}`);
     }
 
-    // ✅ Déjà connecté : pas besoin des pages de connexion / inscription
-    // (le layout du dashboard renvoie ensuite les encadrants vers /encadrant)
-    if (user && GUEST_ONLY.includes(pathname)) {
-        return redirectTo('/dashboard');
-    }
+    // /login et /register restent accessibles même connecté : on peut changer de compte
+    // ou en créer un autre (les pages signalent la session en cours).
 
     return supabaseResponse;
 }

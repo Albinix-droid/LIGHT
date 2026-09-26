@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2, Sparkles, ArrowRight, Building2, Award, Cloud } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import CurrentSessionBanner from "@/components/CurrentSessionBanner";
 
 // ============================================================
 // HOOK SCROLL
@@ -474,6 +475,8 @@ export default function LoginPage() {
         {/* ============================================================
             FORMULAIRE
             ============================================================ */}
+        <CurrentSessionBanner />
+
         <form onSubmit={handleSubmit}>
           {/* Email */}
           <div className="fade-in-up delay-3" style={{ marginBottom: "18px" }}>

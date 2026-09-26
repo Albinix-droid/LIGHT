@@ -5,7 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft, CheckCircle, ArrowRight, Lightbulb, PenTool, Code, Shield, Rocket,
-  Clock, AlertTriangle, GraduationCap, Compass,
+  Clock, AlertTriangle, GraduationCap, Compass, Sparkles,
 } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getAccessibleProject, listEncadrants, fullName } from "@/lib/projects";
@@ -86,6 +86,23 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
             {project.description}
           </p>
         )}
+
+        {/* ===== MENTOR IA ===== */}
+        <Link
+          href={`/dashboard/assistant?projet=${project.id}`}
+          style={{
+            display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", borderRadius: "16px", marginBottom: "16px",
+            background: "linear-gradient(135deg, rgba(212,175,55,0.14), rgba(212,175,55,0.04))", border: "1px solid rgba(212,175,55,0.25)",
+            textDecoration: "none",
+          }}
+        >
+          <Sparkles size={18} style={{ color: "#F5D76E", flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>
+            <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#E8EDF5" }}>Analyser ce projet avec le mentor IA</span>
+            <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.55)" }}>Forces, risques, marché, modèle économique, plan de lancement…</span>
+          </span>
+          <ArrowRight size={16} style={{ color: "#F5D76E" }} />
+        </Link>
 
         {/* ===== ENCADRANT ===== */}
         <div style={{

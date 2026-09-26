@@ -473,20 +473,17 @@ export default function HomePage() {
               <Info size={15} aria-hidden="true" /> Fonctionnalités
             </Link>
             <span style={{ width: "1px", height: "24px", background: "rgba(180,200,230,0.1)", margin: "0 4px" }} />
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="btn-primary" style={{ padding: "8px 20px", fontSize: "13px" }}>
+            {isLoggedIn && (
+              <Link href="/dashboard" className="nav-link">
                 <LayoutDashboard size={15} aria-hidden="true" /> Mon espace
               </Link>
-            ) : (
-              <>
-                <Link href="/login" className="nav-link">
-                  <LogIn size={15} aria-hidden="true" /> Connexion
-                </Link>
-                <Link href="/register" className="btn-primary" style={{ padding: "8px 20px", fontSize: "13px" }}>
-                  <UserPlus size={15} aria-hidden="true" /> S'inscrire
-                </Link>
-              </>
             )}
+            <Link href="/login" className="nav-link">
+              <LogIn size={15} aria-hidden="true" /> Connexion
+            </Link>
+            <Link href="/register" className="btn-primary" style={{ padding: "8px 20px", fontSize: "13px" }}>
+              <UserPlus size={15} aria-hidden="true" /> S'inscrire
+            </Link>
           </nav>
 
           <button
@@ -527,20 +524,17 @@ export default function HomePage() {
             <Info size={20} /> Fonctionnalités
           </Link>
           <div style={{ width: "60px", height: "1px", background: "rgba(180,200,230,0.1)", margin: "8px 0" }} />
-          {isLoggedIn ? (
-            <Link href="/dashboard" className="btn-primary" style={{ fontSize: "18px", padding: "16px 48px", marginTop: "8px" }} onClick={() => setIsMenuOpen(false)}>
+          {isLoggedIn && (
+            <Link href="/dashboard" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
               <LayoutDashboard size={20} /> Mon espace
             </Link>
-          ) : (
-            <>
-              <Link href="/login" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
-                <LogIn size={20} /> Connexion
-              </Link>
-              <Link href="/register" className="btn-primary" style={{ fontSize: "18px", padding: "16px 48px", marginTop: "8px" }} onClick={() => setIsMenuOpen(false)}>
-                <UserPlus size={20} /> S'inscrire
-              </Link>
-            </>
           )}
+          <Link href="/login" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
+            <LogIn size={20} /> Connexion
+          </Link>
+          <Link href="/register" className="btn-primary" style={{ fontSize: "18px", padding: "16px 48px", marginTop: "8px" }} onClick={() => setIsMenuOpen(false)}>
+            <UserPlus size={20} /> S'inscrire
+          </Link>
         </div>
       )}
 
@@ -581,7 +575,7 @@ export default function HomePage() {
               L'application intelligente qui guide les entrepreneurs de l'idée à la réussite.
             </p>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: "12px" }}>
-              <Link href={isLoggedIn ? "/dashboard" : "/register"} className="btn-primary">
+              <Link href="/register" className="btn-primary">
                 Commençons !
                 <ArrowRight size={18} aria-hidden="true" />
               </Link>
@@ -786,7 +780,7 @@ export default function HomePage() {
             <p style={{ fontSize: "16px", color: "rgba(200,215,235,0.5)", marginBottom: "28px" }}>
               Rejoins la communauté IAI Entrepreneur et fais briller ton idée
             </p>
-            <Link href={isLoggedIn ? "/dashboard" : "/register"} className="btn-primary">
+            <Link href="/register" className="btn-primary">
               S'inscrire gratuitement
               <ArrowRight size={18} aria-hidden="true" />
             </Link>

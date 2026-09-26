@@ -93,10 +93,12 @@ export default function DashboardShell({
   children,
   user,
   projects,
+  unreadMessages = 0,
 }: {
   children: React.ReactNode;
   user: ShellUser;
   projects: ShellProject[];
+  unreadMessages?: number;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -469,6 +471,18 @@ export default function DashboardShell({
                     {item.label}
                   </span>
                 )}
+                {item.href === "/dashboard/messagerie" && unreadMessages > 0 && (
+                  <span
+                    aria-label={`${unreadMessages} message${unreadMessages > 1 ? "s" : ""} non lu${unreadMessages > 1 ? "s" : ""}`}
+                    style={{
+                      minWidth: "18px", height: "18px", padding: "0 5px", borderRadius: "9px", background: "#E4736B", color: "#fff",
+                      fontSize: "10px", fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      ...(sidebarOpen ? { marginLeft: "auto" } : { position: "absolute", top: "4px", right: "6px" }),
+                    }}
+                  >
+                    {unreadMessages}
+                  </span>
+                )}
                 {isActive && sidebarOpen && (
                   <motion.div
                     layoutId="active-nav-indicator"
@@ -655,6 +669,11 @@ export default function DashboardShell({
                       >
                         {item.label}
                       </span>
+                      {item.href === "/dashboard/messagerie" && unreadMessages > 0 && (
+                        <span style={{ minWidth: "18px", height: "18px", padding: "0 5px", borderRadius: "9px", background: "#E4736B", color: "#fff", fontSize: "10px", fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: "auto" }}>
+                          {unreadMessages}
+                        </span>
+                      )}
                       {isActive && (
                         <div
                           style={{
