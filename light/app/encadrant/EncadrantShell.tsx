@@ -10,12 +10,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import {
-  LayoutDashboard, FolderKanban, CheckSquare, ChevronLeft, ChevronRight, Menu, X, GraduationCap, LogOut, MessageSquare, Inbox, Bell,
+  LayoutDashboard, FolderKanban, CheckSquare, ChevronLeft, ChevronRight, Menu, X, GraduationCap, LogOut, MessageSquare, Inbox, Bell, Settings,
 } from "lucide-react";
 
 export interface EncadrantShellProps {
   children: React.ReactNode;
-  user: { firstName: string; lastName: string };
+  user: { firstName: string; lastName: string; avatarUrl?: string | null };
   projects: { id: string; title: string }[];
   pendingCount: number;
   unreadMessages?: number;
@@ -36,12 +36,20 @@ export default function EncadrantShell({ children, user, projects, pendingCount,
     { icon: MessageSquare, label: "Messagerie", href: "/encadrant/messagerie", badge: unreadMessages },
     { icon: FolderKanban, label: "Projets suivis", href: "/encadrant/projets", badge: 0 },
     { icon: Bell, label: "Notifications", href: "/encadrant/notifications", badge: unreadNotifications },
+    { icon: Settings, label: "Paramètres", href: "/encadrant/parametres", badge: 0 },
   ];
 
   const projectInUrl = pathname?.match(/^\/encadrant\/projets\/([^/]+)/)?.[1];
   const activeProject = projects.find((p) => p.id === projectInUrl)?.id ?? "";
   const fullName = `${user.firstName} ${user.lastName}`.trim();
   const initials = [user.firstName, user.lastName].filter(Boolean).map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  // Photo de profil si elle existe, sinon initiales
+  const avatar = user.avatarUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={user.avatarUrl} alt="" className="enc-avatar" style={{ objectFit: "cover" }} />
+  ) : (
+    <div className="enc-avatar">{initials}</div>
+  );
 
   const isActive = (href: string) => (href === "/encadrant" ? pathname === href : pathname?.startsWith(href));
 
@@ -191,7 +199,7 @@ export default function EncadrantShell({ children, user, projects, pendingCount,
         <div style={{ padding: "16px", borderTop: "1px solid rgba(180,200,230,0.06)", display: "flex", alignItems: "center", gap: "10px", justifyContent: sidebarOpen ? "space-between" : "center" }}>
           {sidebarOpen && (
             <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-              <div className="enc-avatar">{initials}</div>
+              <Link href="/encadrant/parametres" title="Mon profil" style={{ display: "inline-flex" }}>{avatar}</Link>
               <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: "13px", fontWeight: 600, color: "#E8EDF5", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{fullName}</p>
                 <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.4)", margin: 0 }}>Encadrant académique</p>
@@ -271,7 +279,7 @@ export default function EncadrantShell({ children, user, projects, pendingCount,
               </Link>
             )}
             <NotificationBell initialCount={unreadNotifications} allHref="/encadrant/notifications" buttonClassName="enc-icon-btn" />
-            <div className="enc-avatar" title={fullName}>{initials}</div>
+            <Link href="/encadrant/parametres" title={`${fullName} · Paramètres`} aria-label="Paramètres du compte" style={{ display: "inline-flex" }}>{avatar}</Link>
           </div>
         </header>
         <main style={{ padding: "28px 24px 40px" }}>{children}</main>

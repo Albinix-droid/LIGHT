@@ -3,20 +3,10 @@
 // Le navigateur dépose les fichiers via une URL signée à usage unique ; la lecture passe par des URL signées temporaires.
 import 'server-only';
 import { randomUUID } from 'crypto';
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin as getAdmin } from '@/lib/supabase/admin';
 import { ALLOWED_ATTACHMENT_TYPES, ATTACHMENTS_BUCKET, MAX_ATTACHMENT_SIZE } from './types';
 
-let admin: SupabaseClient | null = null;
 let bucketReady: Promise<void> | null = null;
-
-function getAdmin() {
-    if (admin) return admin;
-    const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.SUPABASE_SECRET_KEY;
-    if (!url || !key) throw new Error('Stockage indisponible : SUPABASE_URL ou SUPABASE_SECRET_KEY manquant.');
-    admin = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-    return admin;
-}
 
 // Création du bucket au premier usage (privé, taille et types limités côté Supabase)
 function ensureBucket() {

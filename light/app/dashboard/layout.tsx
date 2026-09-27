@@ -23,7 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <DashboardShell
-      user={{ firstName: user.firstName, lastName: user.lastName }}
+      user={{ firstName: user.firstName, lastName: user.lastName, avatarUrl: user.avatarUrl }}
       projects={projects.map((p) => ({ id: p.id, title: p.title }))}
       unreadMessages={unreadMessages}
       pendingRequests={pendingRequests}

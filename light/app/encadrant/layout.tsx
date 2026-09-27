@@ -21,7 +21,7 @@ export default async function EncadrantLayout({ children }: { children: React.Re
 
   return (
     <EncadrantShell
-      user={{ firstName: user.firstName, lastName: user.lastName }}
+      user={{ firstName: user.firstName, lastName: user.lastName, avatarUrl: user.avatarUrl }}
       projects={projects.map((p) => ({ id: p.id, title: p.title }))}
       pendingCount={pendingCount}
       unreadMessages={unreadMessages}

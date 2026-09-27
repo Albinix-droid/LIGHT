@@ -23,7 +23,7 @@ npm run dev                  # http://localhost:3000
 
 1. Sur [vercel.com/new](https://vercel.com/new), importez le dépôt GitHub.
 2. **Root Directory : `light`** (l'application est dans ce sous-dossier). Laissez le reste par défaut : `vercel.json` fixe l'installation (`npm ci`), le build (`npm run build`) et la région.
-3. Node.js : 20.x ou plus récent (Project Settings → General).
+3. Node.js : 22.x (fixé par `engines` dans package.json).
 
 ### 2. Variables d'environnement
 

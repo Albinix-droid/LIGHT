@@ -80,6 +80,7 @@ const MENU_ITEMS = [
 export interface ShellUser {
   firstName: string;
   lastName: string;
+  avatarUrl?: string | null;
 }
 
 export interface ShellProject {
@@ -131,6 +132,18 @@ export default function DashboardShell({
     .join("")
     .toUpperCase()
     .slice(0, 2);
+  // Photo de profil si elle existe, sinon initiales
+  const avatarImage = user.avatarUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={user.avatarUrl} alt="" className="avatar-circle" style={{ objectFit: "cover" }} />
+  ) : (
+    <div className="avatar-circle">{initials}</div>
+  );
+  const avatar = (
+    <Link href="/dashboard/parametres" title="Mon profil" aria-label="Paramètres du compte" style={{ display: "inline-flex", flexShrink: 0 }}>
+      {avatarImage}
+    </Link>
+  );
 
   // Auto-fermer le menu mobile sur les grands écrans
   useEffect(() => {
@@ -538,7 +551,7 @@ export default function DashboardShell({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-            <div className="avatar-circle">{initials}</div>
+            {avatar}
             {sidebarOpen && (
               <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: "13px", fontWeight: 600, color: "#E8EDF5", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -705,7 +718,7 @@ export default function DashboardShell({
               {/* Footer mobile */}
               <div style={{ borderTop: "1px solid rgba(180,200,230,0.06)", paddingTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div className="avatar-circle">{initials}</div>
+                  {avatarImage}
                   <div>
                     <p style={{ fontSize: "13px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>{fullName}</p>
                     <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.35)", margin: 0 }}>Porteur de projet</p>
@@ -861,7 +874,7 @@ export default function DashboardShell({
               onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
-              <div className="avatar-circle">{initials}</div>
+              {avatarImage}
               {/* ✅ CORRECTION : utilisation de Tailwind pour le responsive */}
               <span className="hidden sm:inline" style={{ fontSize: "13px", color: "rgba(200,215,235,0.8)", fontWeight: 500 }}>
                 {user.firstName}

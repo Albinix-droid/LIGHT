@@ -103,6 +103,9 @@ model User {
   firstName    String
   lastName     String
   avatarUrl    String?
+  bio          String?
+  track        ChannelTrack? // filière : Génie Logiciel ou Systèmes et Réseaux
+  notificationPrefs Json? // { muted: NotificationType[] } : types de notifications désactivés
   role         Role     @default(STUDENT)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

@@ -17,7 +17,13 @@ export const getCurrentUser = cache(async () => {
 
     // Le profil Prisma utilise le même id que Supabase Auth
     const existing = await prisma.user.findUnique({ where: { id: user.id } });
-    if (existing) return existing;
+    if (existing) {
+        // Email modifié dans les paramètres puis confirmé : on aligne le profil sur Supabase Auth
+        if (existing.email !== user.email) {
+            return prisma.user.update({ where: { id: user.id }, data: { email: user.email } }).catch(() => existing);
+        }
+        return existing;
+    }
 
     const fullName: string = user.user_metadata?.full_name || user.email.split('@')[0];
     const [firstName, ...rest] = fullName.trim().split(/\s+/);

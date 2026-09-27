@@ -2,9 +2,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: process.cwd(),
-  },
+  // En local, un package-lock.json dans un dossier parent tromperait Next.js sur la racine du projet.
+  // Sur Vercel, la racine est déjà fixée (outputFileTracingRoot) : les deux réglages entreraient en conflit.
+  ...(process.env.VERCEL ? {} : { turbopack: { root: process.cwd() } }),
   images: {
     unoptimized: true,
   },

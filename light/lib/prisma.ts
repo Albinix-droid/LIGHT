@@ -19,7 +19,8 @@ function createClient() {
     const serverless = !!process.env.VERCEL;
     const adapter = new PrismaPg({
         connectionString: process.env.DATABASE_URL,
-        max: Number(process.env.DATABASE_POOL_MAX) || (serverless ? 3 : 10),
+        // En local, le pooler en mode session plafonne à 15 clients pour tous les serveurs réunis (dev, start, scripts)
+        max: Number(process.env.DATABASE_POOL_MAX) || (serverless ? 3 : 5),
         idleTimeoutMillis: serverless ? 5_000 : 30_000,
         connectionTimeoutMillis: 10_000,
     });

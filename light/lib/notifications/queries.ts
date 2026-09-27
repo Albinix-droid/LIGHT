@@ -4,6 +4,7 @@ import 'server-only';
 import prisma from '@/lib/prisma';
 import { STAGES } from '@/lib/parcours';
 import type { Prisma } from '@/lib/generated/prisma/client';
+import { readMutedKinds } from '@/lib/parametres/types';
 import {
     NOTIFICATIONS_PAGE_SIZE,
     type ActionItem, type NotificationFilter, type NotificationKind, type NotificationView,
@@ -24,7 +25,11 @@ export async function createNotifications(
     n: { type: NotificationKind; message: string; link?: string | null; projectId?: string | null },
     options: { excludeUserId?: string } = {},
 ) {
-    const recipients = [...new Set(userIds)].filter((id) => id && id !== options.excludeUserId);
+    const candidates = [...new Set(userIds)].filter((id) => id && id !== options.excludeUserId);
+    if (candidates.length === 0) return;
+    // Préférences : les types coupés dans les paramètres ne sont pas créés
+    const prefs = await prisma.user.findMany({ where: { id: { in: candidates } }, select: { id: true, notificationPrefs: true } });
+    const recipients = prefs.filter((u) => !readMutedKinds(u.notificationPrefs).includes(n.type)).map((u) => u.id);
     if (recipients.length === 0) return;
     const link = n.link ?? null;
     const projectId = n.projectId ?? null;
