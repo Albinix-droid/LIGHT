@@ -42,7 +42,7 @@ Project Settings → Environment Variables, pour **Production** et **Preview**. 
 | `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé publique (anon / publishable) |
 | `SUPABASE_URL` | URL du projet Supabase |
-| `SUPABASE_SECRET_KEY` | Clé secrète (service_role) : pièces jointes de la messagerie |
+| `SUPABASE_SECRET_KEY` | Clé secrète (service_role) : pièces jointes, photos de profil, suspension de comptes |
 | `DATABASE_URL` | Pooler Supabase en **mode transaction, port 6543**, avec `?pgbouncer=true` |
 | `DIRECT_URL` | Pooler en mode session (port 5432) : migrations uniquement |
 | `ANTHROPIC_API_KEY` | Clé API Anthropic : assistant IA |
@@ -50,6 +50,10 @@ Project Settings → Environment Variables, pour **Production** et **Preview**. 
 > Sur Vercel, `DATABASE_URL` doit utiliser le **port 6543** (mode transaction). Le mode session (5432) ouvre une connexion par instance de fonction et sature vite le pooler.
 
 Les variables `NEXT_PUBLIC_*` sont intégrées au build : après les avoir modifiées, redéployez.
+
+Le build commence par `scripts/verifier-env.mjs` : sur Vercel, une variable obligatoire manquante (ou une `DATABASE_URL`
+de production qui n'utilise pas le port 6543) arrête le déploiement avec un message explicite dans les logs.
+En local, `npm run env:check` fait la même vérification sans rien bloquer.
 
 ### 3. Supabase Auth
 
@@ -68,7 +72,19 @@ Les migrations ne sont **pas** exécutées pendant le build Vercel, pour éviter
 npm run db:migrate    # utilise DIRECT_URL, ou DATABASE_URL à défaut
 ```
 
-### 5. Région
+### 5. Premier administrateur
+
+Une fois le site en ligne, créez les identifiants du premier administrateur depuis votre poste (la commande écrit
+dans la base de production via `.env.local`) :
+
+```bash
+npm run identifiant -- ADMIN ADM-001 Prénom Nom email@exemple.com
+```
+
+Inscrivez-vous ensuite sur le site en choisissant « Administration », puis saisissez le matricule et le code affichés.
+Les identifiants suivants se créent dans `/admin/identifiants`.
+
+### 6. Région
 
 `vercel.json` place les fonctions à Londres (`lhr1`), au plus près de la base Supabase (`eu-west-2`). Si la base change de région, adaptez `regions`.
 
