@@ -9,7 +9,8 @@
     "lint": "next lint",
     "db:migrate": "prisma migrate deploy",
     "db:status": "prisma migrate status",
-    "role": "node scripts/definir-role.mjs"
+    "role": "node scripts/definir-role.mjs",
+    "identifiant": "node scripts/creer-identifiant.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",

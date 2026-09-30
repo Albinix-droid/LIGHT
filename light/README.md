@@ -16,6 +16,14 @@ npm run dev                  # http://localhost:3000
 | `npm run db:migrate` | Applique les migrations en attente (`prisma migrate deploy`) |
 | `npm run db:status` | État des migrations |
 | `npm run role -- email@exemple.com ENCADRANT` | Change le rôle d'un compte |
+| `npm run identifiant -- ADMIN MATRICULE Prénom Nom [email]` | Crée les identifiants école (matricule + code) d'un encadrant ou administrateur |
+
+### Encadrants et administrateurs
+
+Ces rôles ne sont jamais attribués à l'inscription. La personne choisit « Encadrant » ou « Administration », puis confirme
+son compte sur `/confirmation` avec le matricule et le code confidentiel remis par l'école (usage unique, bloqué 30 min
+après 5 essais incorrects). Les identifiants se créent dans `/admin/identifiants` ; pour le **tout premier administrateur**,
+utilisez `npm run identifiant` : le code s'affiche une seule fois dans le terminal.
 
 ## Déploiement sur Vercel
 

@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PRIVATE_PREFIXES = ['/dashboard', '/encadrant'];
+const PRIVATE_PREFIXES = ['/dashboard', '/encadrant', '/admin', '/confirmation'];
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({ request });

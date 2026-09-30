@@ -97,18 +97,29 @@ enum NotificationType {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String? // géré par Supabase Auth, conservé pour les données existantes
-  firstName    String
-  lastName     String
-  avatarUrl    String?
-  bio          String?
-  track        ChannelTrack? // filière : Génie Logiciel ou Systèmes et Réseaux
+  id                String        @id @default(cuid())
+  email             String        @unique
+  passwordHash      String? // géré par Supabase Auth, conservé pour les données existantes
+  firstName         String
+  lastName          String
+  avatarUrl         String?
+  bio               String?
+  track             ChannelTrack? // filière : Génie Logiciel ou Systèmes et Réseaux
   notificationPrefs Json? // { muted: NotificationType[] } : types de notifications désactivés
-  role         Role     @default(STUDENT)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role              Role          @default(STUDENT)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // ===== ENCADRANTS ET ADMINISTRATEURS =====
+  // Rôle demandé à l'inscription, attribué seulement après confirmation avec les identifiants de l'école
+  pendingRole     Role?
+  verifiedAt      DateTime? // identité confirmée par matricule + code de l'école
+  matricule       String?   @unique
+  grade           String? // encadrant : grade académique ; administrateur : fonction
+  specialty       String?
+  department      String? // département ou service
+  suspendedAt     DateTime? // compte suspendu par un administrateur
+  suspendedReason String?
 
   memberships   ProjectMember[]
   ownedProjects Project[]       @relation("ProjectOwner")
@@ -125,6 +136,10 @@ model User {
   requestsReceived     ProjectRequest[]     @relation("RequestRecipient")
   submissions          StepSubmission[]     @relation("SubmissionAuthor")
   reviews              StepSubmission[]     @relation("SubmissionReviewer")
+
+  staffCredential    StaffCredential?  @relation("CredentialUser")
+  credentialsCreated StaffCredential[] @relation("CredentialCreator")
+  adminLogs          AdminLog[]
 }
 
 model Project {
@@ -257,8 +272,8 @@ model Conversation {
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
 
-  createdBy User                 @relation("ConversationCreator", fields: [createdById], references: [id], onDelete: Cascade)
-  project   Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy   User                 @relation("ConversationCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  project     Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
   members     ConversationMember[]
   messages    Message[]
   attachments MessageAttachment[]
@@ -285,7 +300,7 @@ model Message {
   id             String   @id @default(cuid())
   conversationId String
   senderId       String
-  content        String   // peut être vide si le message ne contient que des pièces jointes
+  content        String // peut être vide si le message ne contient que des pièces jointes
   createdAt      DateTime @default(now())
 
   conversation Conversation        @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -371,4 +386,50 @@ model ProjectRequest {
   @@index([recipientId, status])
   @@index([senderId, status])
   @@index([projectId, type, status])
+}
+
+// ============================================================
+// ADMINISTRATION
+// ============================================================
+
+// Identifiants remis par l'école à un encadrant ou un administrateur.
+// Le code confidentiel n'est jamais stocké en clair (voir lib/staff.ts) et ne sert qu'une fois.
+model StaffCredential {
+  id             String    @id @default(cuid())
+  role           Role // ENCADRANT ou ADMIN
+  matricule      String    @unique
+  firstName      String
+  lastName       String
+  email          String? // si renseigné, le compte doit utiliser cette adresse
+  specialty      String?
+  department     String?
+  codeHash       String
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime? // verrouillé après trop d'essais
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  usedAt         DateTime?
+  usedById       String?   @unique
+  createdById    String?
+  createdAt      DateTime  @default(now())
+
+  usedBy    User? @relation("CredentialUser", fields: [usedById], references: [id], onDelete: SetNull)
+  createdBy User? @relation("CredentialCreator", fields: [createdById], references: [id], onDelete: SetNull)
+}
+
+// Journal des actions sensibles (administrateurs, confirmations d'identité)
+model AdminLog {
+  id         String   @id @default(cuid())
+  adminId    String?
+  action     String // ex. CREDENTIAL_CREATED, USER_SUSPENDED, STAFF_VERIFIED
+  targetType String? // USER, CREDENTIAL…
+  targetId   String?
+  summary    String
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  admin User? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([createdAt])
 }

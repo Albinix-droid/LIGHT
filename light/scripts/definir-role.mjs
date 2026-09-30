@@ -21,7 +21,7 @@ const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
 await client.connect();
 try {
     const { rows } = await client.query(
-        `UPDATE "User" SET role = $2::"Role", "updatedAt" = now() WHERE lower(email) = lower($1) RETURNING email, "firstName", "lastName", role`,
+        `UPDATE "User" SET role = $2::"Role", "pendingRole" = NULL, "updatedAt" = now() WHERE lower(email) = lower($1) RETURNING email, "firstName", "lastName", role`,
         [email, role],
     );
     if (rows.length === 0) {

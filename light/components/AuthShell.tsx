@@ -8,10 +8,15 @@ export default function AuthShell({
   title,
   subtitle,
   children,
+  maxWidth = 440,
+  footer,
 }: {
   title: string;
   subtitle: string;
   children: React.ReactNode;
+  maxWidth?: number;
+  // Remplace le lien « Retour à la connexion » (ex. formulaire de confirmation, déjà connecté)
+  footer?: React.ReactNode;
 }) {
   return (
     <div
@@ -57,7 +62,7 @@ export default function AuthShell({
         .auth-link:hover { color: #FFFFFF; }
       `}</style>
 
-      <div className="auth-card">
+      <div className="auth-card" style={{ maxWidth: `${maxWidth}px` }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "18px" }}>
           <Link
             href="/"
@@ -74,9 +79,11 @@ export default function AuthShell({
         <h1 style={{ fontSize: "26px", fontWeight: 700, textAlign: "center", color: "#F5D76E", margin: "0 0 6px" }}>{title}</h1>
         <p style={{ fontSize: "14px", color: "rgba(200,215,235,0.5)", textAlign: "center", margin: "0 0 28px", lineHeight: 1.6 }}>{subtitle}</p>
         {children}
-        <p style={{ textAlign: "center", fontSize: "14px", color: "rgba(200,215,235,0.4)", margin: "22px 0 0" }}>
-          <Link href="/login" className="auth-link">← Retour à la connexion</Link>
-        </p>
+        {footer ?? (
+          <p style={{ textAlign: "center", fontSize: "14px", color: "rgba(200,215,235,0.4)", margin: "22px 0 0" }}>
+            <Link href="/login" className="auth-link">← Retour à la connexion</Link>
+          </p>
+        )}
       </div>
     </div>
   );

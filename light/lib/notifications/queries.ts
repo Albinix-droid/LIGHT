@@ -139,6 +139,34 @@ const daysSince = (d: Date) => Math.floor((Date.now() - d.getTime()) / 86_400_00
 
 export async function getActionItems(userId: string, role: Role): Promise<ActionItem[]> {
     const items: ActionItem[] = [];
+    if (role === 'ADMIN') {
+        const [pendingStaff, locked] = await Promise.all([
+            prisma.user.count({ where: { pendingRole: { not: null } } }),
+            prisma.staffCredential.count({ where: { usedAt: null, revokedAt: null, lockedUntil: { gt: new Date() } } }),
+        ]);
+        if (pendingStaff) {
+            items.push({
+                key: 'pending-staff',
+                tone: 'warning',
+                title: `${plural(pendingStaff, 'compte')} en attente de confirmation`,
+                detail: "Encadrants ou administrateurs inscrits qui n'ont pas encore saisi leurs identifiants école.",
+                href: '/admin/utilisateurs?filtre=pending',
+                cta: 'Voir',
+            });
+        }
+        if (locked) {
+            items.push({
+                key: 'locked-credentials',
+                tone: 'urgent',
+                title: `${plural(locked, 'identifiant')} bloqué${locked > 1 ? 's' : ''} après des essais incorrects`,
+                detail: "Vérifiez avec la personne concernée, puis débloquez ou réémettez un code.",
+                href: '/admin/identifiants',
+                cta: 'Gérer',
+            });
+        }
+        return items;
+    }
+
     const pendingRequests = prisma.projectRequest.count({ where: { recipientId: userId, status: 'PENDING' } });
 
     if (role === 'ENCADRANT') {

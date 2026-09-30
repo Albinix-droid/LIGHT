@@ -10,7 +10,7 @@ import { Prisma, type Role } from '@/lib/generated/prisma/client';
 // cache() : un seul appel par requête, partagé entre layout, page et actions.
 // Sans lui, layout et page créaient le profil en parallèle à la première connexion
 // (erreur « Unique constraint failed on User_email_key »).
-export const getCurrentUser = cache(async () => {
+const getProfile = cache(async () => {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !user.email) return null;
@@ -28,9 +28,11 @@ export const getCurrentUser = cache(async () => {
     const fullName: string = user.user_metadata?.full_name || user.email.split('@')[0];
     const [firstName, ...rest] = fullName.trim().split(/\s+/);
 
-    // Rôle choisi à l'inscription : seuls Étudiant et Encadrant sont auto-déclarables (jamais ADMIN).
-    // Appliqué uniquement à la création du profil ; ensuite le rôle se gère en base (npm run role).
-    const role: Role = user.user_metadata?.role === 'ENCADRANT' ? 'ENCADRANT' : 'STUDENT';
+    // Rôle choisi à l'inscription : Encadrant et Administrateur ne sont jamais attribués directement.
+    // Le compte démarre en étudiant avec un rôle « en attente », confirmé ensuite avec les
+    // identifiants remis par l'école (page /confirmation, lib/staff.ts).
+    const requested = user.user_metadata?.role;
+    const pendingRole: Role | null = requested === 'ENCADRANT' || requested === 'ADMIN' ? requested : null;
 
     try {
         return await prisma.user.create({
@@ -39,7 +41,8 @@ export const getCurrentUser = cache(async () => {
                 email: user.email,
                 firstName: firstName || fullName,
                 lastName: rest.join(' '),
-                role,
+                role: 'STUDENT',
+                pendingRole,
             },
         });
     } catch (error) {
@@ -55,19 +58,31 @@ export const getCurrentUser = cache(async () => {
     }
 });
 
+// Utilisateur connecté, ou null. Un compte suspendu est traité comme déconnecté :
+// les pages, les actions serveur et les routes API qui passent par ici lui sont fermées.
+export const getCurrentUser = cache(async () => {
+    const profile = await getProfile();
+    return profile && !profile.suspendedAt ? profile : null;
+});
+
 export async function requireUser() {
-    const user = await getCurrentUser();
-    if (!user) redirect('/login');
-    return user;
+    const profile = await getProfile();
+    if (!profile) redirect('/login');
+    if (profile.suspendedAt) redirect('/login?erreur=suspendu');
+    return profile;
 }
 
-// Espace réservé à un rôle : les autres utilisateurs sont renvoyés vers leur espace
+// Espace réservé à un rôle : les autres utilisateurs sont renvoyés vers leur espace.
+// Un rôle encadrant / administrateur en attente de confirmation mène d'abord au formulaire.
 export async function requireRole(role: Role) {
     const user = await requireUser();
-    if (user.role !== role) redirect(homeFor(user.role));
+    if (user.role !== role) redirect(homeFor(user));
     return user;
 }
 
-export function homeFor(role: Role) {
-    return role === 'ENCADRANT' ? '/encadrant' : '/dashboard';
+export function homeFor(user: { role: Role; pendingRole?: Role | null }) {
+    if (user.pendingRole) return '/confirmation';
+    if (user.role === 'ADMIN') return '/admin';
+    if (user.role === 'ENCADRANT') return '/encadrant';
+    return '/dashboard';
 }

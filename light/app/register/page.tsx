@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Loader2, Sparkles, ArrowRight, Building2, Award, Cloud, UserPlus, GraduationCap, Rocket } from "lucide-react";
+import { Eye, EyeOff, Loader2, Sparkles, ArrowRight, Building2, Award, Cloud, UserPlus, GraduationCap, Rocket, ShieldCheck } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 import CurrentSessionBanner from "@/components/CurrentSessionBanner";
 
@@ -41,12 +41,16 @@ function useScroll() {
 // ============================================================
 // RÔLES PROPOSÉS À L'INSCRIPTION
 // ============================================================
-type SignupRole = "STUDENT" | "ENCADRANT";
+type SignupRole = "STUDENT" | "ENCADRANT" | "ADMIN";
 
 const ROLE_OPTIONS: { value: SignupRole; label: string; desc: string; icon: typeof Rocket }[] = [
   { value: "STUDENT", label: "Étudiant", desc: "Je porte un projet", icon: Rocket },
   { value: "ENCADRANT", label: "Encadrant", desc: "J'accompagne des projets", icon: GraduationCap },
+  { value: "ADMIN", label: "Administration", desc: "Je gère la plateforme", icon: ShieldCheck },
 ];
+
+// Encadrants et administrateurs confirment ensuite leur identité avec les identifiants de l'école
+const nextPathFor = (role: SignupRole) => (role === "STUDENT" ? "/onboarding/welcome" : "/confirmation");
 
 // ============================================================
 // COMPOSANT PRINCIPAL
@@ -98,7 +102,7 @@ export default function RegisterPage() {
         password,
         options: {
           // Si la confirmation d'email est activée dans Supabase, le lien reçu ouvre la session ici
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${role === "ENCADRANT" ? "/encadrant" : "/onboarding/welcome"}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${nextPathFor(role)}`,
           data: {
             full_name: cleanName,
             name: cleanName,
@@ -130,8 +134,8 @@ export default function RegisterPage() {
         return;
       }
 
-      // Chaque rôle arrive directement dans son espace
-      router.replace(role === "ENCADRANT" ? "/encadrant" : "/onboarding/welcome");
+      // Étudiant : accueil ; encadrant et administration : confirmation avec les identifiants de l'école
+      router.replace(nextPathFor(role));
       router.refresh();
     } catch (err: unknown) {
       console.error("❌ Erreur d'inscription Supabase:", err);
@@ -527,7 +531,7 @@ export default function RegisterPage() {
           {/* Rôle */}
           <div className="fade-in-up delay-3" style={{ marginBottom: "18px" }}>
             <span className="label" id="role-label">Je suis</span>
-            <div role="radiogroup" aria-labelledby="role-label" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div role="radiogroup" aria-labelledby="role-label" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "10px" }}>
               {ROLE_OPTIONS.map((option) => {
                 const selected = role === option.value;
                 return (

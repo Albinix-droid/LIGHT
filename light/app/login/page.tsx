@@ -32,6 +32,7 @@ const ARRIVAL_MESSAGES: Record<string, { type: "info" | "error"; text: string }>
   deconnecte: { type: "info", text: "Vous êtes déconnecté. À bientôt !" },
   reinitialise: { type: "info", text: "Votre mot de passe a été modifié. Connectez-vous avec le nouveau." },
   lien: { type: "error", text: "Ce lien a expiré ou a déjà été utilisé. Faites une nouvelle demande." },
+  suspendu: { type: "error", text: "Ce compte a été suspendu par l'administration. Contactez-la pour en savoir plus." },
 };
 
 // Traduit les erreurs Supabase en messages compréhensibles
@@ -77,7 +78,8 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const key = params.has("deconnecte") ? "deconnecte"
       : params.has("reinitialise") ? "reinitialise"
-      : params.get("erreur") === "lien" ? "lien" : null;
+      : params.get("erreur") === "lien" ? "lien"
+      : params.get("erreur") === "suspendu" ? "suspendu" : null;
     if (!key) return;
     const message = ARRIVAL_MESSAGES[key];
     if (message.type === "error") setError(message.text);
