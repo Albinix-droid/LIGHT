@@ -1,10 +1,14 @@
 // next.config.ts
 import type { NextConfig } from "next";
 
+// Sous Windows, le terminal de VS Code démarre parfois dans « c:\… » (lecteur en minuscule) :
+// Turbopack ne retrouve alors plus le paquet next (« Next.js package not found »).
+const projectRoot = process.cwd().replace(/^[a-z]:/, (drive) => drive.toUpperCase());
+
 const nextConfig: NextConfig = {
   // En local, un package-lock.json dans un dossier parent tromperait Next.js sur la racine du projet.
   // Sur Vercel, la racine est déjà fixée (outputFileTracingRoot) : les deux réglages entreraient en conflit.
-  ...(process.env.VERCEL ? {} : { turbopack: { root: process.cwd() } }),
+  ...(process.env.VERCEL ? {} : { turbopack: { root: projectRoot } }),
   images: {
     unoptimized: true,
   },
