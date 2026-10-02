@@ -1,75 +1,202 @@
-/* app/globals.css - Version inspirée d'IdeaBuddy */
-/* ========================================
-   PALETTE DE COULEURS LIGHT
-   ======================================== */
-   @import "tailwindcss";
+/* app/globals.css
+   ==========================================================================
+   SYSTÈME DE DESIGN LIGHT
+   Bleu roi pour l'action, touche d'or pour le prestige, neutres froids.
+   Les couleurs sont des variables CSS (thème clair / sombre) exposées à Tailwind :
+   bg-surface, text-ink, border-line, bg-brand, text-gold… s'adaptent seules au thème.
+   Le thème sombre s'active avec la classe .dark sur <html> (voir components/ui/ThemeToggle).
+   ========================================================================== */
+@import "tailwindcss";
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
-body {
-  background: #080812;
-}
 :root {
-  /* Couleurs principales */
-  --gold: #f8f7f4;
-  --gold-light: #f5d76e;
-  --gold-dark: #fcc920;
-  --bg-dark: #0a0a1a;
-  --bg-card: rgba(255, 255, 255, 0.03);
-  --text-white: #ffffff;
-  --text-muted: #9ca3af;
-  --text-gray: #6b7280;
-  --border-gold: rgba(212, 175, 55, 0.15);
-  --shadow-gold: rgba(212, 175, 55, 0.15);
-  --shadow-gold-hover: rgba(212, 175, 55, 0.3);
+  /* Fonds et surfaces */
+  --canvas: #f3f5fa;
+  --surface: #ffffff;
+  --surface-muted: #f7f9fc;
+  --line: #e6eaf2;
+  --line-strong: #d5dce8;
+
+  /* Texte */
+  --ink: #0e1726;
+  --ink-muted: #556074;
+  --ink-subtle: #8a94a6;
+
+  /* Bleu roi : action, sélection, information */
+  --brand: #1f4fd8;
+  --brand-strong: #173fae;
+  --brand-soft: #eaf0fd;
+  --brand-ink: #1a43b8;
+
+  /* Or : signature LIGHT, distinctions */
+  --gold: #a87c22;
+  --gold-bright: #d6b25e;
+  --gold-soft: #f7f0dc;
+
+  /* États */
+  --success: #0b8a5f;
+  --success-soft: #e6f5ee;
+  --warning: #b36b00;
+  --warning-soft: #fdf3e0;
+  --danger: #c93b3b;
+  --danger-soft: #fcebeb;
+
+  /* Barre latérale (toujours sombre) */
+  --sidebar: #0b1324;
+  --sidebar-raised: #131d33;
+  --sidebar-ink: #a3aec2;
+
+  --shadow-color: 220 40% 20%;
+  color-scheme: light;
 }
 
-/* ========================================
-   RESET & BASE
-   ======================================== */
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.dark {
+  --canvas: #090e19;
+  --surface: #111a2b;
+  --surface-muted: #0d1524;
+  --line: #1e2a3f;
+  --line-strong: #2a3852;
+
+  --ink: #e8edf6;
+  --ink-muted: #9aa6ba;
+  --ink-subtle: #6a768c;
+
+  --brand: #4d7cff;
+  --brand-strong: #3a68f0;
+  --brand-soft: rgb(77 124 255 / 0.14);
+  --brand-ink: #a9c1ff;
+
+  --gold: #e0bd62;
+  --gold-bright: #ecd08a;
+  --gold-soft: rgb(224 189 98 / 0.12);
+
+  --success: #3dd6a0;
+  --success-soft: rgb(61 214 160 / 0.12);
+  --warning: #f5b544;
+  --warning-soft: rgb(245 181 68 / 0.12);
+  --danger: #f47f7f;
+  --danger-soft: rgb(244 127 127 / 0.12);
+
+  --sidebar: #060a13;
+  --sidebar-raised: #0f182b;
+  --sidebar-ink: #95a1b6;
+
+  --shadow-color: 220 60% 2%;
+  color-scheme: dark;
 }
 
-html {
-  scroll-behavior: smooth;
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-soft: var(--gold-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-raised: var(--sidebar-raised);
+  --color-sidebar-ink: var(--sidebar-ink);
+
+  /* Polices chargées par next/font (app/layout.tsx) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Ombres douces, teintées plutôt que noires */
+  --shadow-card: 0 1px 2px hsl(var(--shadow-color) / 0.04), 0 2px 8px hsl(var(--shadow-color) / 0.04);
+  --shadow-raised: 0 4px 12px hsl(var(--shadow-color) / 0.06), 0 16px 40px hsl(var(--shadow-color) / 0.08);
+  --shadow-brand: 0 8px 24px -6px rgb(31 79 216 / 0.45);
+
+  --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-white);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
-  min-height: 100vh;
-  overflow-x: hidden;
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-a {
-  color: var(--gold);
-  text-decoration: none;
-  transition: color 0.3s ease;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-a:hover {
-  color: var(--gold-light);
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+/* ==========================================================================
+   STYLES HÉRITÉS (pages pas encore migrées vers le système de design)
+   Rangés en couche « components » : ils ne masquent plus les classes Tailwind.
+   À supprimer au fur et à mesure de la refonte.
+   ========================================================================== */
+@layer components {
+  :root {
+    --gold-legacy: #f8f7f4;
+    --gold-light: #f5d76e;
+    --gold-dark: #fcc920;
+    --bg-dark: #0a0a1a;
+    --bg-card: rgba(255, 255, 255, 0.03);
+    --text-white: #ffffff;
+    --text-muted: #9ca3af;
+    --text-gray: #6b7280;
+    --border-gold: rgba(212, 175, 55, 0.15);
+    --shadow-gold: rgba(212, 175, 55, 0.15);
+    --shadow-gold-hover: rgba(212, 175, 55, 0.3);
+  }
 
 /* ========================================
    CONTENEURS
@@ -89,7 +216,7 @@ img {
   font-weight: 700;
   text-align: center;
   margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  background: linear-gradient(135deg, var(--gold-legacy), var(--gold-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -280,7 +407,7 @@ img {
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  background: linear-gradient(135deg, var(--gold-legacy), var(--gold-dark));
   color: var(--bg-dark);
   box-shadow: 0 4px 30px var(--shadow-gold);
 }
@@ -288,13 +415,13 @@ img {
 .btn-gold:hover {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 8px 50px var(--shadow-gold-hover);
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-legacy));
   color: var(--bg-dark);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--gold);
+  color: var(--gold-legacy);
   border: 1.5px solid var(--border-gold);
   backdrop-filter: blur(10px);
 }
@@ -302,7 +429,7 @@ img {
 .btn-outline:hover {
   transform: translateY(-3px) scale(1.02);
   background: rgba(212, 175, 55, 0.08);
-  border-color: var(--gold);
+  border-color: var(--gold-legacy);
   box-shadow: 0 0 40px var(--shadow-gold);
 }
 
@@ -362,7 +489,7 @@ img {
   border-radius: 50px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-legacy);
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
 }
@@ -423,7 +550,7 @@ img {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  background: linear-gradient(135deg, var(--gold-legacy), var(--gold-light));
   font-size: 36px;
   box-shadow: 0 0 60px var(--shadow-gold);
   margin-bottom: 20px;
@@ -433,7 +560,7 @@ img {
   font-size: 72px;
   font-weight: 800;
   letter-spacing: -3px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+  background: linear-gradient(135deg, var(--gold-legacy), var(--gold-light), var(--gold-legacy));
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -444,7 +571,7 @@ img {
 
 .hero .slogan {
   font-size: 22px;
-  color: var(--gold);
+  color: var(--gold-legacy);
   letter-spacing: 4px;
   font-weight: 300;
   text-transform: uppercase;
@@ -540,7 +667,7 @@ img {
   border-radius: 50px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-legacy);
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
   cursor: default;
@@ -594,7 +721,7 @@ img {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  background: linear-gradient(135deg, var(--gold-legacy), var(--gold-light));
   font-size: 28px;
   box-shadow: 0 0 40px var(--shadow-gold);
 }
@@ -603,7 +730,7 @@ img {
   font-size: 28px;
   font-weight: 700;
   text-align: center;
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  background: linear-gradient(135deg, var(--gold-legacy), var(--gold-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -645,7 +772,7 @@ img {
 }
 
 .auth-card input:focus {
-  border-color: var(--gold);
+  border-color: var(--gold-legacy);
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.08);
   background: rgba(255, 255, 255, 0.06);
 }
@@ -662,7 +789,7 @@ img {
 }
 
 .auth-card .auth-link a {
-  color: var(--gold);
+  color: var(--gold-legacy);
   font-weight: 600;
 }
 
@@ -707,7 +834,7 @@ img {
 
 .testimonial-card .author {
   font-weight: 600;
-  color: var(--gold);
+  color: var(--gold-legacy);
 }
 
 .testimonial-card .role {
@@ -738,7 +865,7 @@ img {
 }
 
 .footer .brand {
-  color: var(--gold);
+  color: var(--gold-legacy);
   font-weight: 700;
 }
 
@@ -755,7 +882,7 @@ img {
 }
 
 .footer-links a:hover {
-  color: var(--gold);
+  color: var(--gold-legacy);
 }
 
 /* ========================================
@@ -863,4 +990,4 @@ img {
   .auth-card {
     padding: 24px 16px;
   }
-}
+}}

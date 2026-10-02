@@ -125,93 +125,90 @@ export default function NotificationBell({
   };
 
   return (
-    <div ref={rootRef} style={{ position: "relative" }}>
+    <div ref={rootRef} className="relative font-sans">
       <style>{`
-        @keyframes ntf-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes ntf-ring { 0%,100% { transform: rotate(0); } 20% { transform: rotate(14deg); } 40% { transform: rotate(-12deg); } 60% { transform: rotate(8deg); } 80% { transform: rotate(-4deg); } }
         .ntf-ring { animation: ntf-ring 0.9s ease; transform-origin: 50% 10%; }
-        .ntf-panel { position: absolute; right: 0; top: calc(100% + 10px); width: 380px; max-width: calc(100vw - 24px); z-index: 300;
-          background: #0F1E35; border: 1px solid rgba(180,200,230,0.12); border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-          overflow: hidden; font-family: 'Inter', -apple-system, sans-serif; }
-        .ntf-item { width: 100%; display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; border: none; background: none;
-          text-align: left; cursor: pointer; font-family: inherit; border-bottom: 1px solid rgba(180,200,230,0.05); }
-        .ntf-item:hover { background: rgba(255,255,255,0.04); }
-        .ntf-link-btn { border: none; background: none; color: #F5D76E; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-family: inherit; padding: 4px; }
-        .ntf-link-btn:disabled { opacity: 0.4; cursor: default; }
-        @media (max-width: 520px) { .ntf-panel { position: fixed; left: 12px; right: 12px; top: 64px; width: auto; } }
       `}</style>
 
       <button
         onClick={toggle}
-        className={buttonClassName}
+        className={`relative inline-flex size-9 cursor-pointer items-center justify-center ${buttonClassName}`}
         aria-label={count > 0 ? `Notifications : ${count} non lue${count > 1 ? "s" : ""}` : "Notifications"}
         aria-expanded={open}
         aria-haspopup="dialog"
-        style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", cursor: "pointer" }}
       >
-        <Bell size={16} className={pulse ? "ntf-ring" : undefined} />
+        <Bell className={`size-[18px] ${pulse ? "ntf-ring" : ""}`} strokeWidth={1.75} />
         {count > 0 && (
-          <span style={{
-            position: "absolute", top: "2px", right: "2px", minWidth: "16px", height: "16px", padding: "0 4px", borderRadius: "8px",
-            background: "#E4736B", color: "#fff", fontSize: "9px", fontWeight: 700, display: "inline-flex", alignItems: "center",
-            justifyContent: "center", border: "2px solid #0A1628", lineHeight: 1,
-          }}>
+          <span className="absolute top-1 right-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[9px] leading-none font-bold text-white tabular-nums ring-2 ring-canvas">
             {count > 99 ? "99+" : count}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="ntf-panel" role="dialog" aria-label="Dernières notifications">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid rgba(180,200,230,0.08)" }}>
-            <span style={{ fontSize: "14px", fontWeight: 700, color: "#E8EDF5" }}>
-              Notifications {count > 0 && <span style={{ color: "#F5D76E", fontWeight: 600 }}>· {count} non lue{count > 1 ? "s" : ""}</span>}
+        <div
+          role="dialog"
+          aria-label="Dernières notifications"
+          className="fixed inset-x-3 top-16 z-[300] overflow-hidden rounded-2xl border border-line bg-surface text-ink shadow-raised sm:absolute sm:inset-x-auto sm:top-[calc(100%+10px)] sm:right-0 sm:w-[380px] animate-rise"
+        >
+          <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
+            <span className="font-display text-[14px] font-semibold">
+              Notifications
+              {count > 0 && <span className="ml-1.5 font-sans text-[12px] font-medium text-brand">· {count} non lue{count > 1 ? "s" : ""}</span>}
             </span>
-            <button className="ntf-link-btn" onClick={markAll} disabled={count === 0}>
-              <CheckCheck size={14} /> Tout lire
+            <button
+              onClick={markAll}
+              disabled={count === 0}
+              className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-[12px] font-semibold text-brand transition-colors hover:bg-brand-soft disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <CheckCheck className="size-3.5" /> Tout lire
             </button>
           </div>
 
-          <div style={{ maxHeight: "420px", overflowY: "auto" }}>
+          <div className="max-h-[420px] overflow-y-auto">
             {items === null ? (
-              <div style={{ padding: "28px", display: "flex", justifyContent: "center" }}>
-                <Loader2 size={18} style={{ color: "#F5D76E", animation: "ntf-spin 1s linear infinite" }} />
+              <div className="flex justify-center p-7">
+                <Loader2 className="size-[18px] animate-spin text-brand" />
               </div>
             ) : items.length === 0 ? (
-              <p style={{ padding: "32px 20px", margin: 0, textAlign: "center", fontSize: "13px", color: "rgba(200,215,235,0.5)" }}>
+              <p className="px-5 py-8 text-center text-[13px] leading-relaxed text-ink-muted">
                 Vous êtes à jour. Les validations, demandes et ajouts à des groupes apparaîtront ici.
               </p>
             ) : (
               items.map((n) => {
                 const meta = KIND_META[n.type];
                 return (
-                  <button key={n.id} className="ntf-item" onClick={() => openItem(n)} style={{ background: n.read ? undefined : "rgba(212,175,55,0.05)" }}>
-                    <span style={{ width: 30, height: 30, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: meta.bg }}>
-                      <meta.icon size={14} style={{ color: meta.color }} />
+                  <button
+                    key={n.id}
+                    onClick={() => openItem(n)}
+                    className={`flex w-full items-start gap-3 border-b border-line/70 px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-surface-muted ${n.read ? "" : "bg-brand-soft/40"}`}
+                  >
+                    <span className={`inline-flex size-8 shrink-0 items-center justify-center rounded-lg ${meta.tone}`}>
+                      <meta.icon className="size-4" strokeWidth={1.75} />
                     </span>
-                    <span style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ display: "block", fontSize: "13px", lineHeight: 1.45, color: n.read ? "rgba(200,215,235,0.6)" : "#E8EDF5", fontWeight: n.read ? 400 : 500 }}>
-                        {n.message}
-                      </span>
-                      <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.4)" }}>{relativeTime(n.createdAt, now)}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className={`block text-[13px] leading-snug ${n.read ? "text-ink-muted" : "font-medium text-ink"}`}>{n.message}</span>
+                      <span className="mt-0.5 block text-[11px] text-ink-subtle">{relativeTime(n.createdAt, now)}</span>
                     </span>
-                    {!n.read && <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F5D76E", flexShrink: 0, marginTop: 6 }} />}
+                    {!n.read && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand" aria-label="Non lue" />}
                   </button>
                 );
               })
             )}
             {isPending && items !== null && (
-              <div style={{ padding: "6px", display: "flex", justifyContent: "center" }}>
-                <Loader2 size={14} style={{ color: "#F5D76E", animation: "ntf-spin 1s linear infinite" }} />
+              <div className="flex justify-center p-1.5">
+                <Loader2 className="size-3.5 animate-spin text-brand" />
               </div>
             )}
           </div>
 
-          <Link href={allHref} onClick={() => setOpen(false)} style={{
-            display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", padding: "12px", fontSize: "13px", fontWeight: 600,
-            color: "#F5D76E", textDecoration: "none", borderTop: "1px solid rgba(180,200,230,0.08)", background: "rgba(255,255,255,0.02)",
-          }}>
-            Voir toutes les notifications <ArrowRight size={14} />
+          <Link
+            href={allHref}
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center gap-1.5 border-t border-line bg-surface-muted p-3 text-[13px] font-semibold text-brand transition-colors hover:text-brand-strong"
+          >
+            Voir toutes les notifications <ArrowRight className="size-3.5" />
           </Link>
         </div>
       )}
