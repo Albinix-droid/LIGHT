@@ -166,7 +166,7 @@ export default function QuestionnairePage() {
       <div className="mb-6">
         <div className="mb-2.5 flex items-center justify-between text-[12.5px]">
           <span className="inline-flex items-center gap-1.5 font-semibold text-ink-muted">
-            <Sparkles className="size-3.5 text-gold" aria-hidden="true" />
+            <Sparkles className="size-3.5 text-brand" aria-hidden="true" />
             Question {currentStep + 1}/{totalQuestions}
           </span>
           <span className="text-ink-subtle tabular-nums">{Math.round(progress)}%</span>

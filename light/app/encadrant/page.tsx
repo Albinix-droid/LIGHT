@@ -70,7 +70,7 @@ export default async function EncadrantDashboardPage() {
           href="/encadrant/demandes"
           className="group flex items-center gap-4 rounded-[22px] border border-gold/30 bg-gold-soft/60 px-5 py-4 transition-colors hover:border-gold/60 animate-rise"
         >
-          <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(140deg,#f1d48a,#c9993a)] text-[#2a1d05]">
+          <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-brand text-white">
             <GraduationCap className="size-5" strokeWidth={1.9} />
           </span>
           <span className="min-w-0 flex-1">
@@ -79,7 +79,7 @@ export default async function EncadrantDashboardPage() {
             </span>
             <span className="block text-[13px] text-ink-muted">Des étudiants souhaitent que vous accompagniez leur projet.</span>
           </span>
-          <ArrowRight className="size-5 text-gold transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight className="size-5 text-brand transition-transform group-hover:translate-x-0.5" />
         </Link>
       )}
 
@@ -103,7 +103,7 @@ export default async function EncadrantDashboardPage() {
             />
             {pending.length === 0 ? (
               <div className="flex flex-col items-center rounded-2xl bg-success-soft/60 px-6 py-10 text-center">
-                <PartyPopper className="size-7 text-success" strokeWidth={1.5} />
+                <PartyPopper className="size-7 text-brand" strokeWidth={1.5} />
                 <p className="mt-2 text-[14px] font-semibold text-ink">Toutes les soumissions ont été traitées</p>
                 <p className="mt-1 text-[12.5px] text-ink-muted">Vous serez notifié dès qu&apos;un étudiant soumettra une étape.</p>
               </div>
@@ -123,7 +123,7 @@ export default async function EncadrantDashboardPage() {
                         </span>
                       </span>
                       <Badge tone="warning">{stageLabel(s.step.stage)}</Badge>
-                      <ArrowRight className="size-4 shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-brand" />
+                      <ArrowRight className="size-4 shrink-0 text-ink transition-transform group-hover:translate-x-0.5 group-hover:text-brand" />
                     </Link>
                   </li>
                 ))}

@@ -137,7 +137,7 @@ export default function ActivityCalendar({ events, serverNow }: { events: Activi
 
         {list.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-line px-6 py-10 text-center">
-            <CalendarDays className="size-6 text-ink-subtle" strokeWidth={1.5} />
+            <CalendarDays className="size-6 text-ink" strokeWidth={1.5} />
             <p className="mt-3 text-[13px] text-ink-muted">
               {selected ? "Aucune activité ce jour-là." : "Vos soumissions et les décisions de votre encadrant apparaîtront ici."}
             </p>

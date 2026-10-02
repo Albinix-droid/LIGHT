@@ -93,7 +93,7 @@ export default function AppShell({
               : "text-sidebar-ink hover:bg-white/[0.06] hover:text-white"
           }`}
         >
-          <item.icon className={`size-[19px] shrink-0 ${active ? "text-white" : "text-sidebar-ink/80 group-hover:text-white"}`} strokeWidth={1.75} aria-hidden="true" />
+          <item.icon className={`size-[19px] shrink-0 ${active ? "text-white" : "text-white/75 group-hover:text-white"}`} strokeWidth={1.75} aria-hidden="true" />
           {!compact && <span className="truncate">{item.label}</span>}
           {badge > 0 && (
             <span
@@ -266,7 +266,7 @@ export function TopSelect({
   return (
     <label className="relative hidden items-center sm:flex">
       <span className="sr-only">{label}</span>
-      <Icon className="pointer-events-none absolute left-3.5 size-4 text-ink-subtle" strokeWidth={1.75} />
+      <Icon className="pointer-events-none absolute left-3.5 size-4 text-ink" strokeWidth={1.75} />
       <select
         value={value}
         onChange={(e) => e.target.value && onChange(e.target.value)}

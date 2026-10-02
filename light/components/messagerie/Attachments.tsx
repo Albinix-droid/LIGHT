@@ -190,7 +190,7 @@ export function PendingTray({ files, onRemove }: { files: PendingFile[]; onRemov
             )}
             {f.status === "error" && f.previewUrl && (
               <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(10,22,40,0.55)" }}>
-                <AlertCircle size={18} style={{ color: "var(--danger)" }} />
+                <AlertCircle size={18} style={{ color: "var(--brand)" }} />
               </span>
             )}
             <button onClick={() => onRemove(f.localId)} aria-label={`Retirer ${f.name}`} style={{
@@ -260,7 +260,7 @@ export function MessageAttachments({
               <span className="msg-ellipsis" style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{doc.name}</span>
               <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>{visual.label} · {formatFileSize(doc.size)}</span>
             </span>
-            <Download size={16} style={{ color: "var(--ink-muted)", flexShrink: 0 }} />
+            <Download size={16} style={{ color: "var(--ink)", flexShrink: 0 }} />
           </a>
         );
       })}
@@ -392,7 +392,7 @@ export function SharedFilesDialog({
                     {formatFileSize(doc.size)} · {doc.senderName} · {dateFormat.format(new Date(doc.createdAt))}
                   </span>
                 </span>
-                <Download size={15} style={{ color: "var(--ink-muted)", flexShrink: 0 }} />
+                <Download size={15} style={{ color: "var(--ink)", flexShrink: 0 }} />
               </a>
             );
           })}

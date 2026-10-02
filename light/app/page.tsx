@@ -180,7 +180,7 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-[1200px] items-center gap-14 px-5 pt-12 sm:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:pt-20">
           <div className="animate-rise">
             <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-3.5 py-1.5 text-[12.5px] font-semibold text-gold-bright ring-1 ring-white/10">
-              <Sparkles className="size-3.5" strokeWidth={2} aria-hidden="true" /> La plateforme entrepreneuriale pour étudiants
+              <Sparkles className="size-3.5 text-white" strokeWidth={2} aria-hidden="true" /> La plateforme entrepreneuriale pour étudiants
             </span>
             <h1 className="mt-6 font-display text-[40px] leading-[1.05] font-extrabold tracking-tight sm:text-[56px]">
               Un étudiant, un projet,
@@ -227,14 +227,14 @@ export default function HomePage() {
                   <Avatar name="Marie Ngo" size="md" />
                   <div>
                     <p className="text-[13px] font-semibold">Marie Ngo</p>
-                    <p className="flex gap-0.5">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`size-3 ${n <= 4 ? "fill-gold-bright text-gold-bright" : "text-line-strong"}`} />)}</p>
+                    <p className="flex gap-0.5">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`size-3 ${n <= 4 ? "fill-brand text-brand" : "text-line-strong"}`} />)}</p>
                   </div>
                 </div>
               </div>
               <div className="rounded-[20px] bg-white p-4 text-ink shadow-xl">
                 <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-subtle uppercase">Mentor IA</p>
                 <div className="mt-3 flex items-center gap-3">
-                  <span className="inline-flex size-10 items-center justify-center rounded-xl bg-[linear-gradient(140deg,#f1d48a,#c9993a)] text-[#2a1d05]"><Sparkles className="size-5" /></span>
+                  <span className="inline-flex size-10 items-center justify-center rounded-xl bg-brand text-white"><Sparkles className="size-5" /></span>
                   <p className="text-[12.5px] leading-snug text-ink-muted">Analyse de marché prête</p>
                 </div>
               </div>
@@ -260,7 +260,7 @@ export default function HomePage() {
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
             {TRUSTED_BY.map((item) => (
               <span key={item.name} className="inline-flex items-center gap-2.5 text-[15px] font-semibold text-ink-muted">
-                <item.icon className="size-5 text-gold" strokeWidth={1.75} aria-hidden="true" /> {item.name}
+                <item.icon className="size-5 text-brand" strokeWidth={1.75} aria-hidden="true" /> {item.name}
               </span>
             ))}
           </div>
@@ -305,10 +305,10 @@ export default function HomePage() {
           <div className="grid gap-5 lg:grid-cols-3">
             {TESTIMONIALS.map((t) => (
               <figure key={t.author} className="flex flex-col rounded-[22px] border border-line bg-surface p-7 shadow-card">
-                <Quote className="size-7 text-gold-bright" strokeWidth={1.5} aria-hidden="true" />
+                <Quote className="size-7 text-brand" strokeWidth={1.5} aria-hidden="true" />
                 <blockquote className="mt-4 flex-1 text-[14.5px] leading-relaxed text-ink">« {t.quote} »</blockquote>
                 <div className="mt-5 flex gap-0.5" aria-label={`Note : ${t.stars} sur 5`}>
-                  {Array.from({ length: t.stars }, (_, i) => <Star key={i} className="size-4 fill-gold-bright text-gold-bright" aria-hidden="true" />)}
+                  {Array.from({ length: t.stars }, (_, i) => <Star key={i} className="size-4 fill-brand text-brand" aria-hidden="true" />)}
                 </div>
                 <figcaption className="mt-4 flex items-center gap-3 border-t border-line pt-4">
                   <Avatar name={t.author} size="md" />

@@ -265,7 +265,7 @@ export default function ChatApp({
           </div>
 
           <div style={{ position: "relative", marginBottom: "12px" }}>
-            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--ink-subtle)" }} />
+            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--ink)" }} />
             <input className="msg-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une conversation" style={{ paddingLeft: "34px", padding: "9px 12px 9px 34px", fontSize: "13px" }} aria-label="Rechercher une conversation" />
           </div>
 

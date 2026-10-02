@@ -71,7 +71,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
               href={`/dashboard/assistant?projet=${project.id}`}
               className="inline-flex h-10 items-center gap-2 rounded-xl bg-white/95 px-4 text-[13px] font-semibold text-[#14244f] shadow-sm transition-transform hover:-translate-y-px"
             >
-              <Sparkles className="size-4 text-gold" strokeWidth={2} /> Analyser avec le mentor IA
+              <Sparkles className="size-4 text-brand" strokeWidth={2} /> Analyser avec le mentor IA
             </Link>
           </div>
         </div>
@@ -149,7 +149,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
                         </div>
                       )}
                     </div>
-                    <ArrowRight className="mt-1 size-4 shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 group-hover:text-brand" />
+                    <ArrowRight className="mt-1 size-4 shrink-0 text-ink transition-transform group-hover:translate-x-0.5 group-hover:text-brand" />
                   </Link>
                 </li>
               );
@@ -173,7 +173,7 @@ export default async function ProjectOverviewPage({ params }: { params: Promise<
               <div className="mb-4 flex items-center gap-3 rounded-2xl border border-line bg-surface-muted p-3">
                 <div className="relative">
                   <Avatar name={fullName(project.supervisor)} size="lg" />
-                  <span className="absolute -right-1 -bottom-1 inline-flex size-5 items-center justify-center rounded-full bg-gold-bright text-[#2a1d05] ring-2 ring-surface">
+                  <span className="absolute -right-1 -bottom-1 inline-flex size-5 items-center justify-center rounded-full bg-brand text-white ring-2 ring-surface">
                     <GraduationCap className="size-3" strokeWidth={2.25} />
                   </span>
                 </div>

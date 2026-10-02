@@ -98,7 +98,7 @@ export default async function AdminHomePage() {
             </ul>
           )}
           <p className="mt-4 flex items-center gap-2 border-t border-line pt-4 text-[12.5px] text-ink-muted">
-            <KeyRound className="size-4 text-gold" strokeWidth={1.75} />
+            <KeyRound className="size-4 text-brand" strokeWidth={1.75} />
             {o.credentials.active} identifiant{o.credentials.active > 1 ? "s" : ""} actif{o.credentials.active > 1 ? "s" : ""} · {o.credentials.used} déjà utilisé{o.credentials.used > 1 ? "s" : ""}
           </p>
         </Card>

@@ -52,7 +52,7 @@ export default function SupervisorPicker({
   if (pendingRequest) {
     return (
       <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-warning-soft px-4 py-3 ring-1 ring-warning/15 ring-inset">
-        <Clock className="size-4 shrink-0 text-warning" strokeWidth={2} />
+        <Clock className="size-4 shrink-0 text-brand" strokeWidth={2} />
         <span className="min-w-0 flex-1 text-[13px] text-ink">
           Demande envoyée à <strong className="font-semibold">{pendingRequest.encadrantName}</strong> le {dateFormat.format(new Date(pendingRequest.createdAt))}, en attente de sa réponse.
         </span>

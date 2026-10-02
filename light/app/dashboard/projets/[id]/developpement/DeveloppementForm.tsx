@@ -335,7 +335,7 @@ export default function DeveloppementForm({ projectId, initialData, completed, s
       <div style={{ maxWidth: "1180px", margin: "0 auto" }}>
 
         {/* ===== EN-TÊTE ===== */}
-        <div className="fade-in-up delay-1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
+        <div className="fade-in-up delay-1 step-hero" style={{ "--hero-img": "url(/images/etapes/developpement.jpg)" } as React.CSSProperties}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Link
               href={`/dashboard/projets/${projectId}`}

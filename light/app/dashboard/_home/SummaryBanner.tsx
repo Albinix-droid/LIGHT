@@ -74,7 +74,7 @@ export default function SummaryBanner({ project }: { project: StudentHome["featu
         {/* ===== DERNIÈRE ÉVALUATION ===== */}
         <div className="flex flex-col justify-center border-white/15 md:border-l md:pl-6">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.12em] text-white/65 uppercase">
-            <Award className="size-3.5 text-gold-bright" strokeWidth={2} /> Dernière évaluation
+            <Award className="size-3.5 text-brand" strokeWidth={2} /> Dernière évaluation
           </p>
           {review?.rating ? (
             <>
@@ -84,7 +84,7 @@ export default function SummaryBanner({ project }: { project: StudentHome["featu
               </p>
               <div className="mt-2.5 flex gap-0.5" aria-label={`${review.rating} sur 5`}>
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <Star key={n} className={`size-4 ${n <= review.rating! ? "fill-gold-bright text-gold-bright" : "text-white/25"}`} strokeWidth={1.5} />
+                  <Star key={n} className={`size-4 ${n <= review.rating! ? "fill-brand text-brand" : "text-white/25"}`} strokeWidth={1.5} />
                 ))}
               </div>
               <p className="mt-2 text-[12px] text-white/70">

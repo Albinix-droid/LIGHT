@@ -348,7 +348,7 @@ export default function ConceptionForm({ projectId, initialData, completed, stat
       <div style={{ maxWidth: "1180px", margin: "0 auto" }}>
 
         {/* ===== EN-TÊTE ===== */}
-        <div className="fade-in-up delay-1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
+        <div className="fade-in-up delay-1 step-hero" style={{ "--hero-img": "url(/images/etapes/conception.jpg)" } as React.CSSProperties}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Link
               href={`/dashboard/projets/${projectId}`}
@@ -704,7 +704,7 @@ export default function ConceptionForm({ projectId, initialData, completed, stat
                   <Loader2 size={24} style={{ animation: "spin 1s linear infinite", color: "var(--brand)" }} />
                 ) : (
                   <>
-                    <Image size={24} style={{ color: "var(--ink-subtle)", marginBottom: "8px" }} />
+                    <Image size={24} style={{ color: "var(--ink)", marginBottom: "8px" }} />
                     <p style={{ fontSize: "13px", color: "var(--ink-muted)", margin: 0 }}>
                       Cliquez pour importer des images de vos maquettes
                     </p>

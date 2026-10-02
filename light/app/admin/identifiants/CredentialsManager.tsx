@@ -85,7 +85,7 @@ export default function CredentialsManager({ rows, openCreate }: { rows: Credent
       {/* ===== BARRE D'OUTILS ===== */}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div className="relative min-w-[240px] flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-subtle" />
+          <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink" />
           <input
             className={cx(inputClass, "h-10 py-0 pl-10 shadow-card")}
             value={query}

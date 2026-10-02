@@ -96,7 +96,7 @@ export default function ProjectsList({ projects }: { projects: ProjectSummary[] 
           {/* ===== RECHERCHE & FILTRES ===== */}
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <div className="relative min-w-[240px] flex-1">
-              <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-subtle" />
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink" />
               <input
                 className={cx(inputClass, "h-10 py-0 pl-10 shadow-card")}
                 value={query}
@@ -170,12 +170,12 @@ export default function ProjectsList({ projects }: { projects: ProjectSummary[] 
                       <StageTrack stage={p.stageKey} steps={p.steps} className="mt-3" />
                       <div className="mt-4 space-y-1.5 border-t border-line pt-3 text-[12px] text-ink-muted">
                         <p className="flex items-center gap-1.5 truncate">
-                          <GraduationCap className="size-3.5 shrink-0 text-ink-subtle" strokeWidth={1.75} />
+                          <GraduationCap className="size-3.5 shrink-0 text-ink" strokeWidth={1.75} />
                           {p.supervisor ?? <span className="text-gold">Aucun encadrant choisi</span>}
                         </p>
                         <p className="flex items-center justify-between gap-2">
                           <span className="inline-flex items-center gap-1.5">
-                            <Users className="size-3.5 text-ink-subtle" strokeWidth={1.75} /> {p.members} membre{p.members > 1 ? "s" : ""}
+                            <Users className="size-3.5 text-ink" strokeWidth={1.75} /> {p.members} membre{p.members > 1 ? "s" : ""}
                           </span>
                           <span className="text-ink-subtle">{formatShortDate(p.updatedAt)}</span>
                         </p>

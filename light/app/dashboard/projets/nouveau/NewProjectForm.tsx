@@ -251,7 +251,7 @@ export default function NewProjectForm({ encadrants }: { encadrants: { id: strin
               </ol>
             </Card>
             <div className="flex gap-3 rounded-[22px] border border-gold/30 bg-gold-soft/60 p-4">
-              <GraduationCap className="mt-0.5 size-5 shrink-0 text-gold" strokeWidth={1.75} />
+              <GraduationCap className="mt-0.5 size-5 shrink-0 text-brand" strokeWidth={1.75} />
               <p className="text-[12.5px] leading-relaxed text-ink-muted">
                 <strong className="font-semibold text-ink">Conseil :</strong> choisissez votre encadrant dès maintenant. Sans lui, vous pourrez préparer vos étapes mais pas les faire valider.
               </p>

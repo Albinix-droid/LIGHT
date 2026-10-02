@@ -1,5 +1,5 @@
 // components/ui/Stars.tsx
-// Note de 1 à 5 en étoiles dorées (lecture seule)
+// Note de 1 à 5 en étoiles bleues (lecture seule)
 
 import { Star } from "lucide-react";
 
@@ -10,7 +10,7 @@ export default function Stars({ rating, size = 14, className = "" }: { rating: n
         <Star
           key={n}
           style={{ width: size, height: size }}
-          className={n <= rating ? "fill-gold-bright text-gold-bright" : "text-line-strong"}
+          className={n <= rating ? "fill-brand text-brand" : "text-line-strong"}
           strokeWidth={1.5}
           aria-hidden="true"
         />

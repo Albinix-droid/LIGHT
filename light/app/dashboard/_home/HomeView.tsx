@@ -82,7 +82,7 @@ export default function HomeView({ firstName, home, serverNow }: { firstName: st
             href={`/dashboard/assistant?projet=${featured.id}`}
             className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-[13px] font-semibold text-ink shadow-card transition-colors hover:border-gold/60"
           >
-            <Sparkles className="size-4 text-gold" strokeWidth={1.75} /> Mentor IA
+            <Sparkles className="size-4 text-brand" strokeWidth={1.75} /> Mentor IA
           </Link>
           <Link
             href="/dashboard/projets/nouveau"

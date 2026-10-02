@@ -160,7 +160,7 @@ export default function RegisterPage() {
           </div>
           {staff && (
             <p className="mt-2.5 flex gap-2 rounded-xl bg-gold-soft px-3 py-2.5 text-[12.5px] leading-relaxed text-ink-muted ring-1 ring-gold/20 ring-inset">
-              <KeyRound className="mt-0.5 size-3.5 shrink-0 text-gold" strokeWidth={2} />
+              <KeyRound className="mt-0.5 size-3.5 shrink-0 text-brand" strokeWidth={2} />
               Après l&apos;inscription, vous confirmerez ce rôle avec le matricule et le code confidentiel remis par l&apos;école.
             </p>
           )}

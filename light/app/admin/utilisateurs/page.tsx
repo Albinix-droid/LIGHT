@@ -92,7 +92,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
                     {u.matricule ? (
                       <>
                         <span className="inline-flex items-center gap-1.5 font-mono text-[12px] text-ink">
-                          {u.verifiedAt && <BadgeCheck className="size-3.5 text-success" aria-label="Identité confirmée" />}
+                          {u.verifiedAt && <BadgeCheck className="size-3.5 text-brand" aria-label="Identité confirmée" />}
                           {u.matricule}
                         </span>
                         <span className="block text-[12px] text-ink-muted">{[u.grade, u.department].filter(Boolean).join(" · ") || "—"}</span>

@@ -47,7 +47,7 @@ export default function TeamCard({ contacts, projectId }: { contacts: HomeContac
             <div className="relative">
               <Avatar name={c.name} url={c.avatarUrl} size="lg" />
               {c.isSupervisor && (
-                <span className="absolute -right-1 -bottom-1 inline-flex size-5 items-center justify-center rounded-full bg-gold-bright text-[#2a1d05] ring-2 ring-surface" title="Encadrant">
+                <span className="absolute -right-1 -bottom-1 inline-flex size-5 items-center justify-center rounded-full bg-brand text-white ring-2 ring-surface" title="Encadrant">
                   <GraduationCap className="size-3" strokeWidth={2.25} />
                 </span>
               )}

@@ -260,7 +260,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
       <div style={{ maxWidth: "1180px", margin: "0 auto" }}>
 
         {/* ===== EN-TÊTE ===== */}
-        <div className="fade-in-up delay-1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
+        <div className="fade-in-up delay-1 step-hero" style={{ "--hero-img": "url(/images/etapes/idealisation.jpg)" } as React.CSSProperties}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Link
               href={`/dashboard/projets/${projectId}`}
@@ -371,7 +371,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                  <AlertCircle size={14} style={{ color: "var(--danger)" }} />
+                  <AlertCircle size={14} style={{ color: "var(--brand)" }} />
                   <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                     Problème identifié
                   </span>
@@ -388,7 +388,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                  <CheckCircle size={14} style={{ color: "var(--success)" }} />
+                  <CheckCircle size={14} style={{ color: "var(--brand)" }} />
                   <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                     Solution proposée
                   </span>
@@ -426,7 +426,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                  <Star size={14} style={{ color: "var(--warning)" }} />
+                  <Star size={14} style={{ color: "var(--brand)" }} />
                   <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                     Valeur ajoutée
                   </span>
@@ -446,7 +446,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             {/* Modèle de revenus */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                <TrendingUp size={14} style={{ color: "var(--gold)" }} />
+                <TrendingUp size={14} style={{ color: "var(--brand)" }} />
                 <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                   Modèle de revenus
                 </span>

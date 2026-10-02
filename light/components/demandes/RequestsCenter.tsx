@@ -36,8 +36,8 @@ const KIND_TONES: Record<RequestKind, Tone> = {
 
 const TONE_TILES: Partial<Record<Tone, string>> = {
   brand: "bg-brand text-white",
-  success: "bg-success text-white",
-  gold: "bg-[linear-gradient(140deg,#f1d48a,#c9993a)] text-[#2a1d05]",
+  success: "bg-brand-soft text-brand",
+  gold: "bg-surface text-brand shadow-card",
 };
 
 const STATE_TONES: Record<RequestState, Tone> = {
@@ -278,11 +278,11 @@ function DiscoverSection({ initial }: { initial: DiscoverProject[] }) {
   return (
     <section aria-labelledby="dem-discover" className="mt-12">
       <h2 id="dem-discover" className="flex items-center gap-2 font-display text-[19px] font-semibold tracking-tight text-ink">
-        <Compass className="size-5 text-gold" strokeWidth={1.75} /> Découvrir des projets
+        <Compass className="size-5 text-brand" strokeWidth={1.75} /> Découvrir des projets
       </h2>
       <p className="mt-1 mb-4 text-[13.5px] text-ink-muted">Proposez vos compétences à une équipe : le porteur du projet recevra votre demande.</p>
       <div className="relative mb-5 max-w-xl">
-        <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-subtle" />
+        <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink" />
         <input
           className={cx(inputClass, "h-11 py-0 pl-10 shadow-card")}
           value={query}

@@ -108,7 +108,7 @@ export default function ReviewForm({ submissionId, stageLabel, isLastStage }: { 
             aria-pressed={rating === s}
             className="rounded-lg p-1 transition-transform hover:scale-110"
           >
-            <Star className={cx("size-7 transition-colors", (hover || rating) >= s ? "fill-gold-bright text-gold-bright" : "text-line-strong")} strokeWidth={1.5} />
+            <Star className={cx("size-7 transition-colors", (hover || rating) >= s ? "fill-brand text-brand" : "text-line-strong")} strokeWidth={1.5} />
           </button>
         ))}
         {rating > 0 && <span className="ml-2 text-[13px] font-medium text-ink-muted tabular-nums">{rating}/5</span>}

@@ -80,7 +80,7 @@ export default function ActionsCard({
         </ul>
       ) : (
         <div className="flex flex-col items-center rounded-2xl bg-success-soft/60 px-5 py-8 text-center">
-          <CircleCheck className="size-7 text-success" strokeWidth={1.5} />
+          <CircleCheck className="size-7 text-brand" strokeWidth={1.5} />
           <p className="mt-2 text-[14px] font-semibold text-ink">Vous êtes à jour</p>
           <p className="mt-1 text-[12px] text-ink-muted">Aucune action en attente sur vos projets.</p>
         </div>

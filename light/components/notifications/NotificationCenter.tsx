@@ -29,7 +29,7 @@ const TONES: Record<ActionItem["tone"], { icon: typeof Info; tile: string; cta: 
 function GroupTitle({ children, icon: Icon }: { children: React.ReactNode; icon?: typeof Info }) {
   return (
     <h2 className="mt-8 mb-3 flex items-center gap-2 text-[11.5px] font-bold tracking-[0.14em] text-ink-subtle uppercase">
-      {Icon && <Icon className="size-3.5 text-gold" strokeWidth={2} />}
+      {Icon && <Icon className="size-3.5 text-brand" strokeWidth={2} />}
       {children}
     </h2>
   );
@@ -191,7 +191,7 @@ export default function NotificationCenter({
       <GroupTitle icon={Sparkles}>À traiter</GroupTitle>
       {actionItems.length === 0 ? (
         <div className="flex items-center gap-3 rounded-2xl bg-success-soft px-5 py-4 ring-1 ring-success/15 ring-inset">
-          <CheckCircle2 className="size-5 shrink-0 text-success" strokeWidth={1.75} />
+          <CheckCircle2 className="size-5 shrink-0 text-brand" strokeWidth={1.75} />
           <span className="text-[14px] text-ink">Rien ne vous attend pour le moment. Beau travail !</span>
         </div>
       ) : (
@@ -242,7 +242,7 @@ export default function NotificationCenter({
         </div>
       ) : items.length === 0 ? (
         <div className="mt-5 flex flex-col items-center rounded-[22px] border border-dashed border-line-strong bg-surface/60 px-6 py-12 text-center">
-          <Bell className="size-6 text-ink-subtle" strokeWidth={1.5} />
+          <Bell className="size-6 text-ink" strokeWidth={1.5} />
           <p className="mt-3 text-[14px] text-ink-muted">
             {filter === "all" ? "Aucune notification pour le moment."
               : filter === "unread" ? "Aucune notification non lue."

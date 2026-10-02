@@ -148,10 +148,11 @@ export function Badge({ tone = "neutral", children, icon: Icon, className = "" }
   );
 }
 
+// Les icônes n'ont que deux couleurs : bleu (toutes les tonalités) ou encre (neutre)
 export function IconTile({ icon: Icon, tone = "brand", size = "md" }: { icon: LucideIcon; tone?: Tone; size?: "sm" | "md" | "lg" }) {
   const dims = size === "sm" ? "size-8 rounded-lg [&_svg]:size-4" : size === "lg" ? "size-12 rounded-2xl [&_svg]:size-[22px]" : "size-10 rounded-xl [&_svg]:size-5";
   return (
-    <span className={cx("inline-flex shrink-0 items-center justify-center", dims, TONE_CLASSES[tone].replace(/ring-\S+/g, ""))}>
+    <span className={cx("inline-flex shrink-0 items-center justify-center", dims, tone === "neutral" ? "bg-surface-muted text-ink" : "bg-brand-soft text-brand")}>
       <Icon strokeWidth={1.75} aria-hidden="true" />
     </span>
   );

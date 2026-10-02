@@ -92,7 +92,7 @@ function UserPicker({
   return (
     <div>
       <div style={{ position: "relative" }}>
-        <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--ink-subtle)" }} />
+        <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--ink)" }} />
         <input
           className="msg-input"
           value={query}

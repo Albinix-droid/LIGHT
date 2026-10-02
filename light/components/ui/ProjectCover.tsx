@@ -1,18 +1,19 @@
 // components/ui/ProjectCover.tsx
-// Couverture générée d'un projet : un duo de couleurs et une icône propres à son secteur,
-// avec une trame fine et un léger relief. Toujours nette, sans photo générique.
+// Couverture d'un projet : photo douce propre à son secteur (public/images/couvertures),
+// sous un voile bleu nuit commun pour garder l'unité de la charte, et l'icône du secteur.
 
+import Image from "next/image";
 import { Briefcase, Cpu, GraduationCap, HeartPulse, Landmark, ShoppingBag, Sparkles, Sprout, type LucideIcon } from "lucide-react";
 
-const SECTORS: Record<string, { from: string; to: string; icon: LucideIcon }> = {
-  tech: { from: "#14244f", to: "#2f5bd3", icon: Cpu },
-  agriculture: { from: "#123327", to: "#2c8a5a", icon: Sprout },
-  commerce: { from: "#3b220f", to: "#b8742a", icon: ShoppingBag },
-  services: { from: "#241d47", to: "#6553c9", icon: Briefcase },
-  health: { from: "#3f1626", to: "#b8435f", icon: HeartPulse },
-  education: { from: "#0f3340", to: "#2685a1", icon: GraduationCap },
-  finance: { from: "#2e240b", to: "#a87c22", icon: Landmark },
-  autre: { from: "#1b2233", to: "#4a556b", icon: Sparkles },
+const SECTORS: Record<string, { image: string; icon: LucideIcon }> = {
+  tech: { image: "/images/couvertures/tech.jpg", icon: Cpu },
+  agriculture: { image: "/images/couvertures/agriculture.jpg", icon: Sprout },
+  commerce: { image: "/images/couvertures/commerce.jpg", icon: ShoppingBag },
+  services: { image: "/images/couvertures/services.jpg", icon: Briefcase },
+  health: { image: "/images/couvertures/health.jpg", icon: HeartPulse },
+  education: { image: "/images/couvertures/education.jpg", icon: GraduationCap },
+  finance: { image: "/images/couvertures/finance.jpg", icon: Landmark },
+  autre: { image: "/images/couvertures/autre.jpg", icon: Sparkles },
 };
 
 export function sectorStyle(sector: string | null | undefined) {
@@ -21,53 +22,35 @@ export function sectorStyle(sector: string | null | undefined) {
 
 export default function ProjectCover({
   sector,
-  title,
   className = "",
   variant = "cover",
 }: {
   sector: string | null | undefined;
-  title: string;
+  title?: string;
   className?: string;
   // tile : petite vignette carrée (listes), icône du secteur centrée
   variant?: "cover" | "tile";
 }) {
-  const { from, to, icon: Icon } = sectorStyle(sector);
-  const initial = title.trim()[0]?.toUpperCase() ?? "•";
+  const { image, icon: Icon } = sectorStyle(sector);
 
   if (variant === "tile") {
     return (
-      <span
-        className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden ${className}`}
-        style={{ backgroundImage: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
-        aria-hidden="true"
-      >
-        <span className="absolute -top-1/2 -right-1/3 size-full rounded-full bg-white/20 blur-md" />
+      <span className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden bg-sidebar ${className}`} aria-hidden="true">
+        <Image src={image} alt="" fill sizes="64px" className="object-cover" />
+        <span className="absolute inset-0 bg-[linear-gradient(135deg,rgba(11,19,36,0.55),rgba(31,79,216,0.55))]" />
         <Icon className="relative size-[45%] text-white" strokeWidth={1.75} />
       </span>
     );
   }
 
   return (
-    <div
-      className={`relative isolate overflow-hidden ${className}`}
-      style={{ backgroundImage: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
-      aria-hidden="true"
-    >
-      {/* Trame fine */}
-      <svg className="absolute inset-0 size-full opacity-[0.12]" preserveAspectRatio="none">
-        <defs>
-          <pattern id="cover-grid" width="22" height="22" patternUnits="userSpaceOnUse">
-            <path d="M22 0H0V22" fill="none" stroke="white" strokeWidth="0.6" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#cover-grid)" />
-      </svg>
-      {/* Halo lumineux */}
-      <div className="absolute -top-1/3 -right-1/4 size-[85%] rounded-full bg-white/15 blur-3xl" />
-      {/* Grande initiale en filigrane */}
-      <span className="absolute -bottom-6 left-4 font-display text-[110px] leading-none font-extrabold text-white/10 select-none">{initial}</span>
+    <div className={`relative isolate overflow-hidden bg-sidebar ${className}`} aria-hidden="true">
+      <Image src={image} alt="" fill sizes="(max-width: 768px) 100vw, 640px" className="-z-10 object-cover" />
+      {/* Voile : léger en haut, plus dense en bas pour les étiquettes posées dessus */}
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(11,19,36,0.05)_0%,rgba(11,19,36,0.25)_55%,rgba(11,19,36,0.7)_100%)]" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(31,79,216,0.18),transparent_60%)]" />
       {/* Icône du secteur */}
-      <span className="absolute top-4 right-4 inline-flex size-10 items-center justify-center rounded-xl bg-white/12 ring-1 ring-white/20 backdrop-blur-sm">
+      <span className="absolute top-4 right-4 inline-flex size-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25 backdrop-blur-md">
         <Icon className="size-5 text-white" strokeWidth={1.75} />
       </span>
     </div>
