@@ -302,361 +302,14 @@ export default function TestsForm({ projectId, initialData, completed, status, s
   // RENDU
   // ============================================================
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0A1628",
-        position: "relative",
-        overflow: "hidden",
-        fontFamily: "'Inter', -apple-system, sans-serif",
-        padding: "0 0 24px 0",
-      }}
-    >
-      {/* ===== FOND AVEC PARALLAX ===== */}
-      <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat",
-            opacity: 0.06,
-            transform: `translateY(${scrollY * 0.02}px) scale(1.1)`,
-            transition: "transform 0.05s ease-out",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "radial-gradient(ellipse at 30% 20%, rgba(10,22,40,0.7) 0%, rgba(10,22,40,0.9) 100%)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            width: "600px",
-            height: "600px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212,175,55,0.04), transparent 70%)",
-            top: "-200px",
-            right: "-100px",
-            animation: "floatBg 8s ease-in-out infinite",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212,175,55,0.025), transparent 70%)",
-            bottom: "-100px",
-            left: "-80px",
-            animation: "floatBg 10s ease-in-out infinite reverse",
-          }}
-        />
-      </div>
+    <div className="step-form">
 
-      <style>{`
-        @keyframes floatBg {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, -20px) scale(1.1); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
 
-        .fade-in-up {
-          opacity: 0;
-          transform: translateY(30px) scale(0.96);
-          animation: fadeInUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        .delay-1 { animation-delay: 0.05s; }
-        .delay-2 { animation-delay: 0.15s; }
-        .delay-3 { animation-delay: 0.25s; }
-        .delay-4 { animation-delay: 0.35s; }
-        .delay-5 { animation-delay: 0.45s; }
-
-        .card-glass {
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(12px);
-          border-radius: 20px;
-          padding: 28px;
-          border: 1px solid rgba(180, 200, 230, 0.08);
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .card-glass:hover {
-          border-color: rgba(212, 175, 55, 0.12);
-          background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 8px 40px rgba(0, 20, 50, 0.3);
-        }
-
-        .btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 28px;
-          background: linear-gradient(135deg, #D4AF37, #F5D76E);
-          color: #0A1628;
-          border: none;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
-          cursor: pointer;
-        }
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 8px 40px rgba(212, 175, 55, 0.3);
-        }
-        .btn-primary:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .btn-secondary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 10px 20px;
-          border: 1px solid rgba(180, 200, 230, 0.15);
-          border-radius: 50px;
-          color: rgba(200, 215, 235, 0.6);
-          text-decoration: none;
-          font-size: 13px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.03);
-          cursor: pointer;
-        }
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.06);
-          border-color: rgba(180, 200, 230, 0.25);
-          color: #E8EDF5;
-          transform: translateY(-2px);
-        }
-
-        .btn-success {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 28px;
-          background: linear-gradient(135deg, #10B981, #34D399);
-          color: #FFFFFF;
-          border: none;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
-          cursor: pointer;
-        }
-        .btn-success:hover:not(:disabled) {
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 8px 40px rgba(16, 185, 129, 0.3);
-        }
-        .btn-success:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 12px;
-          background: rgba(212, 175, 55, 0.12);
-          border: 1px solid rgba(212, 175, 55, 0.15);
-          border-radius: 50px;
-          font-size: 11px;
-          font-weight: 600;
-          color: #F5D76E;
-        }
-
-        .input {
-          width: 100%;
-          padding: 12px 16px;
-          border-radius: 12px;
-          border: 1px solid rgba(180, 200, 230, 0.1);
-          background: rgba(255, 255, 255, 0.04);
-          color: #E8EDF5;
-          font-size: 14px;
-          outline: none;
-          transition: all 0.3s ease;
-          box-sizing: border-box;
-          font-family: 'Inter', -apple-system, sans-serif;
-        }
-        .input:focus {
-          border-color: rgba(212, 175, 55, 0.3);
-          background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.06);
-        }
-        .input::placeholder {
-          color: rgba(200, 215, 235, 0.3);
-        }
-        textarea.input {
-          resize: vertical;
-          min-height: 80px;
-        }
-
-        .tag-item {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 10px 4px 12px;
-          border-radius: 50px;
-          font-size: 12px;
-          font-weight: 500;
-          background: rgba(212, 175, 55, 0.08);
-          color: #F5D76E;
-          border: 1px solid rgba(212, 175, 55, 0.1);
-          transition: all 0.3s ease;
-        }
-        .tag-item:hover {
-          background: rgba(212, 175, 55, 0.15);
-        }
-        .tag-item .remove {
-          cursor: pointer;
-          opacity: 0.5;
-          transition: opacity 0.3s ease;
-        }
-        .tag-item .remove:hover {
-          opacity: 1;
-        }
-
-        .test-case-card {
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: 12px;
-          padding: 14px 16px;
-          border: 1px solid rgba(180, 200, 230, 0.06);
-          transition: all 0.3s ease;
-        }
-        .test-case-card:hover {
-          background: rgba(255, 255, 255, 0.06);
-          border-color: rgba(180, 200, 230, 0.12);
-        }
-
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          display: inline-block;
-          margin-right: 6px;
-        }
-        .status-dot-todo { background: #6B8BA4; }
-        .status-dot-in-progress { background: #6366F1; }
-        .status-dot-passed { background: #10B981; }
-        .status-dot-failed { background: #E4736B; }
-
-        .priority-tag {
-          font-size: 10px;
-          padding: 2px 10px;
-          border-radius: 50px;
-          font-weight: 600;
-        }
-        .priority-critical { background: rgba(228, 115, 107, 0.15); color: #E4736B; }
-        .priority-high { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
-        .priority-medium { background: rgba(99, 102, 241, 0.15); color: #818CF8; }
-        .priority-low { background: rgba(107, 139, 164, 0.15); color: #6B8BA4; }
-
-        .tab-btn {
-          padding: 8px 16px;
-          border-radius: 10px;
-          font-size: 13px;
-          font-weight: 500;
-          border: 1px solid transparent;
-          background: transparent;
-          color: rgba(200, 215, 235, 0.4);
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-        .tab-btn:hover {
-          color: rgba(200, 215, 235, 0.7);
-        }
-        .tab-btn-active {
-          background: rgba(212, 175, 55, 0.08);
-          color: #F5D76E;
-          border-color: rgba(212, 175, 55, 0.1);
-        }
-
-        .progress-ring-bg {
-          width: 100%;
-          height: 4px;
-          border-radius: 2px;
-          background: rgba(255, 255, 255, 0.06);
-          overflow: hidden;
-        }
-        .progress-ring-fill {
-          height: 100%;
-          border-radius: 2px;
-          background: linear-gradient(90deg, #D4AF37, #F5D76E);
-          transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .stage-pill {
-          padding: 6px 14px;
-          border-radius: 50px;
-          font-size: 11px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.04);
-          color: rgba(200, 215, 235, 0.4);
-          border: 1px solid rgba(180, 200, 230, 0.06);
-        }
-        .stage-pill-active {
-          background: rgba(212, 175, 55, 0.12);
-          color: #F5D76E;
-          border-color: rgba(212, 175, 55, 0.15);
-        }
-
-        .scrollbar-custom::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-          background: rgba(212, 175, 55, 0.2);
-          border-radius: 2px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-          background: rgba(212, 175, 55, 0.4);
-        }
-
-        .floating-particle {
-          position: fixed;
-          pointer-events: none;
-          border-radius: 50%;
-          background: rgba(212, 175, 55, 0.03);
-          animation: floatParticle 15s ease-in-out infinite;
-        }
-
-        @keyframes floatParticle {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-          25% { transform: translate(30px, -40px) scale(1.2); opacity: 0.6; }
-          50% { transform: translate(-20px, -70px) scale(0.8); opacity: 0.4; }
-          75% { transform: translate(40px, -30px) scale(1.1); opacity: 0.7; }
-        }
-      `}</style>
-
-      {/* ===== PARTICULES FLOTTANTES ===== */}
-      <div className="floating-particle" style={{ width: "300px", height: "300px", top: "10%", right: "5%", animationDelay: "0s" }} />
-      <div className="floating-particle" style={{ width: "200px", height: "200px", bottom: "20%", left: "8%", animationDelay: "-5s" }} />
-      <div className="floating-particle" style={{ width: "150px", height: "150px", top: "40%", right: "15%", animationDelay: "-10s" }} />
 
       {/* ============================================================
           CONTENU PRINCIPAL
           ============================================================ */}
-      <div style={{ position: "relative", zIndex: 1, maxWidth: "1000px", margin: "0 auto", padding: "20px" }}>
+      <div style={{ maxWidth: "1180px", margin: "0 auto" }}>
 
         {/* ===== EN-TÊTE ===== */}
         <div className="fade-in-up delay-1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
@@ -669,7 +322,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               <ArrowLeft size={16} />
               Retour
             </Link>
-            <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#E8EDF5", letterSpacing: "-0.5px" }}>
+            <h1 style={{ fontSize: "24px", fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.5px" }}>
               Tests
             </h1>
             <span className="badge">
@@ -692,10 +345,10 @@ export default function TestsForm({ projectId, initialData, completed, status, s
         {/* ===== BARRE DE PROGRESSION ===== */}
         <div className="fade-in-up delay-1" style={{ marginBottom: "24px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-            <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)" }}>
+            <span style={{ fontSize: "12px", color: "var(--ink-subtle)" }}>
               Complétude des tests
             </span>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: "#F5D76E" }}>
+            <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--brand)" }}>
               {completionRate()}%
             </span>
           </div>
@@ -707,7 +360,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               className="progress-ring-fill"
             />
           </div>
-          <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", marginTop: "4px" }}>
+          <p style={{ fontSize: "11px", color: "var(--ink-subtle)", marginTop: "4px" }}>
             {isComplete
               ? "Tous les tests sont passés et les bugs sont résolus."
               : "Complétez les critères ci-dessous pour valider cette étape."}
@@ -717,7 +370,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
         </div>
 
         {/* ===== ONGLETS ===== */}
-        <div className="fade-in-up delay-2" style={{ display: "flex", gap: "4px", marginBottom: "20px", flexWrap: "wrap", borderBottom: "1px solid rgba(180,200,230,0.06)", paddingBottom: "8px" }}>
+        <div className="fade-in-up delay-2" style={{ display: "flex", gap: "4px", marginBottom: "20px", flexWrap: "wrap", borderBottom: "1px solid var(--line)", paddingBottom: "8px" }}>
           {[
             { id: "functional", label: "Tests fonctionnels", icon: CheckCircle },
             { id: "user", label: "Tests utilisateurs", icon: Users },
@@ -747,10 +400,10 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               style={{ padding: "24px" }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Target size={18} style={{ color: "#F5D76E" }} />
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Target size={18} style={{ color: "var(--brand)" }} />
                   Cas de test
-                  <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.3)", fontWeight: 400 }}>
+                  <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 400 }}>
                     ({data.testCases.filter(t => t.status === "passed").length}/{data.testCases.length} réussis)
                   </span>
                 </h3>
@@ -765,7 +418,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               </div>
 
               {/* Ajout de test */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px", padding: "12px", background: "rgba(255,255,255,0.03)", borderRadius: "12px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px", padding: "12px", background: "var(--surface-muted)", borderRadius: "12px" }}>
                 <input
                   value={newTestCase.title}
                   onChange={(e) => setNewTestCase(prev => ({ ...prev, title: e.target.value }))}
@@ -797,7 +450,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               {/* Liste des tests */}
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "350px", overflowY: "auto" }} className="scrollbar-custom">
                 {data.testCases.length === 0 ? (
-                  <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(200,215,235,0.25)", padding: "16px 0" }}>
+                  <p style={{ textAlign: "center", fontSize: "13px", color: "var(--ink-subtle)", padding: "16px 0" }}>
                     Aucun test. Ajoutez des cas de test pour vérifier votre application.
                   </p>
                 ) : (
@@ -805,24 +458,24 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                     <div key={test.id} className="test-case-card">
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                         <span className={`status-dot status-dot-${test.status}`} />
-                        <span style={{ flex: 1, fontSize: "14px", fontWeight: 500, color: "#E8EDF5" }}>
+                        <span style={{ flex: 1, fontSize: "14px", fontWeight: 500, color: "var(--ink)" }}>
                           {test.title}
                         </span>
                         {test.description && (
-                          <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)" }}>
+                          <span style={{ fontSize: "11px", color: "var(--ink-subtle)" }}>
                             {test.description}
                           </span>
                         )}
-                        <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.4)" }}>
+                        <span style={{ fontSize: "11px", color: "var(--ink-subtle)" }}>
                           Attendue: {test.expectedResult}
                         </span>
                         {test.status === "passed" && (
-                          <span style={{ fontSize: "11px", color: "#10B981" }}>
+                          <span style={{ fontSize: "11px", color: "var(--success)" }}>
                             ✓ {test.actualResult}
                           </span>
                         )}
                         {test.status === "failed" && (
-                          <span style={{ fontSize: "11px", color: "#E4736B" }}>
+                          <span style={{ fontSize: "11px", color: "var(--danger)" }}>
                             ✗ {test.actualResult}
                           </span>
                         )}
@@ -843,14 +496,14 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                             style={{
                               background: "transparent",
                               border: "none",
-                              color: "rgba(200,215,235,0.15)",
+                              color: "var(--ink-subtle)",
                               cursor: "pointer",
                               padding: "4px",
                               borderRadius: "6px",
                               transition: "all 0.3s ease",
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = "#E4736B"; e.currentTarget.style.background = "rgba(228,115,107,0.1)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(200,215,235,0.15)"; e.currentTarget.style.background = "transparent"; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--danger)"; e.currentTarget.style.background = "var(--danger-soft)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-subtle)"; e.currentTarget.style.background = "transparent"; }}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -871,16 +524,16 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               className="card-glass"
               style={{ padding: "24px" }}
             >
-              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <Users size={18} style={{ color: "#F5D76E" }} />
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Users size={18} style={{ color: "var(--brand)" }} />
                 Retours utilisateurs
-                <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.3)", fontWeight: 400 }}>
+                <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 400 }}>
                   ({data.userTests.length} retours)
                 </span>
               </h3>
 
               {/* Ajout de retour */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px", padding: "12px", background: "rgba(255,255,255,0.03)", borderRadius: "12px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px", padding: "12px", background: "var(--surface-muted)", borderRadius: "12px" }}>
                 <input
                   value={newUserTest.userName}
                   onChange={(e) => setNewUserTest(prev => ({ ...prev, userName: e.target.value }))}
@@ -916,25 +569,25 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               {/* Liste des retours */}
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "300px", overflowY: "auto" }} className="scrollbar-custom">
                 {data.userTests.length === 0 ? (
-                  <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(200,215,235,0.25)", padding: "16px 0" }}>
+                  <p style={{ textAlign: "center", fontSize: "13px", color: "var(--ink-subtle)", padding: "16px 0" }}>
                     Aucun retour utilisateur. Faites tester votre projet par des utilisateurs.
                   </p>
                 ) : (
                   data.userTests.map(test => (
                     <div key={test.id} className="test-case-card">
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                        <span style={{ fontSize: "14px", fontWeight: 500, color: "#E8EDF5" }}>
+                        <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--ink)" }}>
                           {test.userName}
                         </span>
-                        <span style={{ display: "flex", gap: "2px", color: "#F5D76E" }}>
+                        <span style={{ display: "flex", gap: "2px", color: "var(--brand)" }}>
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={14} fill={i < test.rating ? "#F5D76E" : "none"} style={{ color: "#F5D76E" }} />
+                            <Star key={i} size={14} fill={i < test.rating ? "var(--brand)" : "none"} style={{ color: "var(--brand)" }} />
                           ))}
                         </span>
-                        <span style={{ fontSize: "13px", color: "rgba(200,215,235,0.6)" }}>
+                        <span style={{ fontSize: "13px", color: "var(--ink-muted)" }}>
                           "{test.feedback}"
                         </span>
-                        <span style={{ fontSize: "10px", color: "rgba(200,215,235,0.2)", marginLeft: "auto" }}>
+                        <span style={{ fontSize: "10px", color: "var(--ink-subtle)", marginLeft: "auto" }}>
                           {new Date(test.createdAt).toLocaleDateString()}
                         </span>
                         <button
@@ -942,14 +595,14 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                           style={{
                             background: "transparent",
                             border: "none",
-                            color: "rgba(200,215,235,0.15)",
+                            color: "var(--ink-subtle)",
                             cursor: "pointer",
                             padding: "4px",
                             borderRadius: "6px",
                             transition: "all 0.3s ease",
                           }}
-                          onMouseEnter={(e) => { e.currentTarget.style.color = "#E4736B"; e.currentTarget.style.background = "rgba(228,115,107,0.1)"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(200,215,235,0.15)"; e.currentTarget.style.background = "transparent"; }}
+                          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--danger)"; e.currentTarget.style.background = "var(--danger-soft)"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-subtle)"; e.currentTarget.style.background = "transparent"; }}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -970,10 +623,10 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               style={{ padding: "24px" }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Bug size={18} style={{ color: "#F5D76E" }} />
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Bug size={18} style={{ color: "var(--brand)" }} />
                   Bugs
-                  <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.3)", fontWeight: 400 }}>
+                  <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 400 }}>
                     ({data.bugs.filter(b => b.status === "resolved" || b.status === "closed").length}/{data.bugs.length} résolus)
                   </span>
                 </h3>
@@ -988,7 +641,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               </div>
 
               {/* Ajout de bug */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px", padding: "12px", background: "rgba(255,255,255,0.03)", borderRadius: "12px" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px", padding: "12px", background: "var(--surface-muted)", borderRadius: "12px" }}>
                 <input
                   value={newBug.title}
                   onChange={(e) => setNewBug(prev => ({ ...prev, title: e.target.value }))}
@@ -1030,7 +683,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               {/* Liste des bugs */}
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "350px", overflowY: "auto" }} className="scrollbar-custom">
                 {data.bugs.length === 0 ? (
-                  <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(200,215,235,0.25)", padding: "16px 0" }}>
+                  <p style={{ textAlign: "center", fontSize: "13px", color: "var(--ink-subtle)", padding: "16px 0" }}>
                     Aucun bug signalé.
                   </p>
                 ) : (
@@ -1038,13 +691,13 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                     <div key={bug.id} className="test-case-card">
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                         <span className={`status-dot ${bug.status === "resolved" || bug.status === "closed" ? "status-dot-passed" : bug.status === "in-progress" ? "status-dot-in-progress" : "status-dot-todo"}`} />
-                        <span style={{ flex: 1, fontSize: "14px", fontWeight: 500, color: "#E8EDF5" }}>
+                        <span style={{ flex: 1, fontSize: "14px", fontWeight: 500, color: "var(--ink)" }}>
                           {bug.title}
                         </span>
                         <span className={`priority-tag priority-${bug.priority}`}>
                           {bug.priority}
                         </span>
-                        <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)" }}>
+                        <span style={{ fontSize: "11px", color: "var(--ink-subtle)" }}>
                           {bug.assignee}
                         </span>
                         <div style={{ display: "flex", gap: "4px", alignItems: "center", flexShrink: 0 }}>
@@ -1064,14 +717,14 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                             style={{
                               background: "transparent",
                               border: "none",
-                              color: "rgba(200,215,235,0.15)",
+                              color: "var(--ink-subtle)",
                               cursor: "pointer",
                               padding: "4px",
                               borderRadius: "6px",
                               transition: "all 0.3s ease",
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = "#E4736B"; e.currentTarget.style.background = "rgba(228,115,107,0.1)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(200,215,235,0.15)"; e.currentTarget.style.background = "transparent"; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--danger)"; e.currentTarget.style.background = "var(--danger-soft)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-subtle)"; e.currentTarget.style.background = "transparent"; }}
                           >
                             <Trash2 size={14} />
                           </button>
@@ -1092,8 +745,8 @@ export default function TestsForm({ projectId, initialData, completed, status, s
               className="card-glass"
               style={{ padding: "24px" }}
             >
-              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <BarChart3 size={18} style={{ color: "#F5D76E" }} />
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <BarChart3 size={18} style={{ color: "var(--brand)" }} />
                 Indicateurs de qualité
               </h3>
 
@@ -1105,7 +758,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                   { key: "securityScore", label: "Sécurité", threshold: 80 },
                 ] as const).map(metric => (
                   <div key={metric.key} className="test-case-card" style={{ textAlign: "center", padding: "20px" }}>
-                    <label htmlFor={`metric-${metric.key}`} style={{ fontSize: "11px", color: "rgba(200,215,235,0.4)", display: "block" }}>
+                    <label htmlFor={`metric-${metric.key}`} style={{ fontSize: "11px", color: "var(--ink-subtle)", display: "block" }}>
                       {metric.label} (%)
                     </label>
                     <input
@@ -1121,7 +774,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                       className="input"
                       style={{
                         fontSize: "24px", fontWeight: 700, textAlign: "center", padding: "6px", margin: "6px auto 0", maxWidth: "120px",
-                        color: data[metric.key] >= metric.threshold ? "#10B981" : "#F59E0B",
+                        color: data[metric.key] >= metric.threshold ? "var(--success)" : "var(--warning)",
                       }}
                     />
                     <div className="progress-ring-bg" style={{ marginTop: "10px" }}>
@@ -1138,11 +791,11 @@ export default function TestsForm({ projectId, initialData, completed, status, s
         <motion.div className="card-glass fade-in-up delay-4">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <MessageCircle size={18} style={{ color: "#F5D76E" }} />
-              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>
+              <MessageCircle size={18} style={{ color: "var(--brand)" }} />
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", margin: 0 }}>
                 Notes de test
               </h3>
-              <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", fontWeight: 400 }}>
+              <span style={{ fontSize: "11px", color: "var(--ink-subtle)", fontWeight: 400 }}>
                 ({data.brainstorming.length} notes)
               </span>
             </div>
@@ -1166,14 +819,14 @@ export default function TestsForm({ projectId, initialData, completed, status, s
 
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "160px", overflowY: "auto" }} className="scrollbar-custom">
             {data.brainstorming.length === 0 ? (
-              <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(200,215,235,0.25)", padding: "16px 0" }}>
+              <p style={{ textAlign: "center", fontSize: "13px", color: "var(--ink-subtle)", padding: "16px 0" }}>
                 Notez vos réflexions sur les tests à effectuer.
               </p>
             ) : (
               data.brainstorming.map((note, i) => (
                 <div key={i} className="test-case-card">
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
-                    <p style={{ fontSize: "13px", color: "#E8EDF5", margin: 0, lineHeight: 1.5 }}>
+                    <p style={{ fontSize: "13px", color: "var(--ink)", margin: 0, lineHeight: 1.5 }}>
                       {note}
                     </p>
                     <button
@@ -1184,14 +837,14 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                       style={{
                         background: "transparent",
                         border: "none",
-                        color: "rgba(200,215,235,0.15)",
+                        color: "var(--ink-subtle)",
                         cursor: "pointer",
                         padding: "4px",
                         borderRadius: "6px",
                         transition: "all 0.3s ease",
                       }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = "#E4736B"; e.currentTarget.style.background = "rgba(228,115,107,0.1)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(200,215,235,0.15)"; e.currentTarget.style.background = "transparent"; }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "var(--danger)"; e.currentTarget.style.background = "var(--danger-soft)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-subtle)"; e.currentTarget.style.background = "transparent"; }}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -1206,11 +859,11 @@ export default function TestsForm({ projectId, initialData, completed, status, s
         <motion.div className="card-glass fade-in-up delay-5">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Sparkles size={18} style={{ color: "#F5D76E" }} />
-              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>
+              <Sparkles size={18} style={{ color: "var(--brand)" }} />
+              <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", margin: 0 }}>
                 Conseils IA
               </h3>
-              <span style={{ fontSize: "10px", color: "rgba(200,215,235,0.2)", fontWeight: 400 }}>
+              <span style={{ fontSize: "10px", color: "var(--ink-subtle)", fontWeight: 400 }}>
                 En temps réel
               </span>
             </div>
@@ -1236,7 +889,7 @@ export default function TestsForm({ projectId, initialData, completed, status, s
                     key={tip.id}
                     className={`tip-item tip-item-${tip.category}`}
                   >
-                    <p style={{ fontSize: "13px", color: "rgba(200,215,235,0.7)", margin: 0, lineHeight: 1.6 }}>
+                    <p style={{ fontSize: "13px", color: "var(--ink-muted)", margin: 0, lineHeight: 1.6 }}>
                       {tip.content}
                     </p>
                   </div>
@@ -1282,13 +935,13 @@ export default function TestsForm({ projectId, initialData, completed, status, s
 
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
             {error && (
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "rgba(228,115,107,0.08)", border: "1px solid rgba(228,115,107,0.15)", color: "#E4736B", fontSize: "13px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "var(--danger-soft)", border: "1px solid color-mix(in srgb, var(--danger) 22%, transparent)", color: "var(--danger)", fontSize: "13px" }}>
                 <AlertCircle size={16} />
                 {error}
               </div>
             )}
             {success && (
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)", color: "#10B981", fontSize: "13px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "var(--success-soft)", border: "1px solid color-mix(in srgb, var(--success) 22%, transparent)", color: "var(--success)", fontSize: "13px" }}>
                 <CheckCircle size={16} />
                 {success}
               </div>
@@ -1310,12 +963,6 @@ export default function TestsForm({ projectId, initialData, completed, status, s
         </div>
       </div>
 
-      {/* ===== FOOTER ===== */}
-      <div className="fade-in-up delay-5" style={{ marginTop: "32px", paddingTop: "16px", borderTop: "1px solid rgba(180,200,230,0.06)", textAlign: "center" }}>
-        <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.2)", letterSpacing: "0.5px", margin: 0 }}>
-          © 2026 <span style={{ color: "#D4AF37" }}>IAI Entrepreneur</span> · Plateforme de gestion de projets étudiants
-        </p>
-      </div>
     </div>
   );
 }

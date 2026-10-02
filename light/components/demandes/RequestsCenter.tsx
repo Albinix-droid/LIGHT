@@ -18,7 +18,7 @@ import {
 } from "@/lib/demandes/types";
 import Avatar from "@/components/ui/Avatar";
 import ProjectCover from "@/components/ui/ProjectCover";
-import { Badge, EmptyState, IconTile, PageHeader, Segmented, buttonClass, cx, inputClass, selectClass, textareaClass, type Tone } from "@/components/ui/kit";
+import { Badge, EmptyState, PageHeader, Segmented, buttonClass, cx, inputClass, selectClass, textareaClass, type Tone } from "@/components/ui/kit";
 
 type Tab = "received" | "sent" | "history";
 
@@ -32,6 +32,12 @@ const KIND_TONES: Record<RequestKind, Tone> = {
   PROJECT_INVITATION: "brand",
   JOIN_REQUEST: "success",
   SUPERVISION_REQUEST: "gold",
+};
+
+const TONE_TILES: Partial<Record<Tone, string>> = {
+  brand: "bg-brand text-white",
+  success: "bg-success text-white",
+  gold: "bg-[linear-gradient(140deg,#f1d48a,#c9993a)] text-[#2a1d05]",
 };
 
 const STATE_TONES: Record<RequestState, Tone> = {
@@ -159,8 +165,8 @@ function RequestCard({ request: r, isEncadrant }: { request: RequestItem; isEnca
       <div className="flex gap-4">
         <div className="relative h-fit shrink-0">
           <Avatar name={r.other.name} size="lg" />
-          <span className="absolute -right-1.5 -bottom-1.5 rounded-lg ring-2 ring-surface">
-            <IconTile icon={Icon} tone={KIND_TONES[r.type]} size="sm" />
+          <span className={cx("absolute -right-1.5 -bottom-1.5 inline-flex size-6 items-center justify-center rounded-lg ring-2 ring-surface", TONE_TILES[KIND_TONES[r.type]])}>
+            <Icon className="size-3.5" strokeWidth={2} />
           </span>
         </div>
         <div className="min-w-0 flex-1">
@@ -196,7 +202,7 @@ function RequestCard({ request: r, isEncadrant }: { request: RequestItem; isEnca
               {mode === "accept" && r.type === "JOIN_REQUEST" && (
                 <label className="flex flex-wrap items-center gap-3 text-[13px] font-medium text-ink">
                   Rôle attribué
-                  <select className={cx(selectClass, "w-auto min-w-[200px] flex-1")} value={role} onChange={(e) => setRole(e.target.value as InvitableRole)}>
+                  <select className={cx(selectClass, "!w-auto min-w-[200px] flex-1")} value={role} onChange={(e) => setRole(e.target.value as InvitableRole)}>
                     {INVITABLE_ROLES.map((ro) => <option key={ro} value={ro}>{TEAM_ROLE_LABELS[ro]}</option>)}
                   </select>
                 </label>

@@ -58,7 +58,7 @@ export default function UserActions({
       <div className="inline-flex flex-wrap items-center justify-end gap-1.5">
         {pending && <Loader2 className="size-4 animate-spin text-brand" />}
         <select
-          className={cx(selectClass, "h-9 w-auto py-0 pl-3 text-[12.5px]")}
+          className={cx(selectClass, "h-9 !w-auto py-0 pl-3 text-[12.5px]")}
           value={user.role}
           onChange={(e) => changeRole(e.target.value as Role)}
           disabled={pending}

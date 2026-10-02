@@ -250,348 +250,14 @@ export default function IdealisationForm({ projectId, initialData, completed, st
   // RENDU
   // ============================================================
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0A1628",
-        position: "relative",
-        overflow: "hidden",
-        fontFamily: "'Inter', -apple-system, sans-serif",
-        padding: "0 0 24px 0",
-      }}
-    >
-      {/* ===== FOND AVEC PARALLAX ===== */}
-      <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat",
-            opacity: 0.06,
-            transform: `translateY(${scrollY * 0.02}px) scale(1.1)`,
-            transition: "transform 0.05s ease-out",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "radial-gradient(ellipse at 30% 20%, rgba(10,22,40,0.7) 0%, rgba(10,22,40,0.9) 100%)",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            width: "600px",
-            height: "600px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212,175,55,0.04), transparent 70%)",
-            top: "-200px",
-            right: "-100px",
-            animation: "floatBg 8s ease-in-out infinite",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212,175,55,0.025), transparent 70%)",
-            bottom: "-100px",
-            left: "-80px",
-            animation: "floatBg 10s ease-in-out infinite reverse",
-          }}
-        />
-      </div>
+    <div className="step-form">
 
-      <style>{`
-        @keyframes floatBg {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, -20px) scale(1.1); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
 
-        .fade-in-up {
-          opacity: 0;
-          transform: translateY(30px) scale(0.96);
-          animation: fadeInUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        .delay-1 { animation-delay: 0.05s; }
-        .delay-2 { animation-delay: 0.15s; }
-        .delay-3 { animation-delay: 0.25s; }
-        .delay-4 { animation-delay: 0.35s; }
-        .delay-5 { animation-delay: 0.45s; }
-
-        .card-glass {
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(12px);
-          border-radius: 20px;
-          padding: 28px;
-          border: 1px solid rgba(180, 200, 230, 0.08);
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .card-glass:hover {
-          border-color: rgba(212, 175, 55, 0.12);
-          background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 8px 40px rgba(0, 20, 50, 0.3);
-        }
-        .card-glass-focus {
-          border-color: rgba(212, 175, 55, 0.25) !important;
-          background: rgba(255, 255, 255, 0.08) !important;
-          box-shadow: 0 8px 40px rgba(212, 175, 55, 0.05) !important;
-        }
-
-        .btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 28px;
-          background: linear-gradient(135deg, #D4AF37, #F5D76E);
-          color: #0A1628;
-          border: none;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
-          cursor: pointer;
-        }
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 8px 40px rgba(212, 175, 55, 0.3);
-        }
-        .btn-primary:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .btn-secondary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 10px 20px;
-          border: 1px solid rgba(180, 200, 230, 0.15);
-          border-radius: 50px;
-          color: rgba(200, 215, 235, 0.6);
-          text-decoration: none;
-          font-size: 13px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.03);
-          cursor: pointer;
-        }
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.06);
-          border-color: rgba(180, 200, 230, 0.25);
-          color: #E8EDF5;
-          transform: translateY(-2px);
-        }
-
-        .btn-success {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 28px;
-          background: linear-gradient(135deg, #10B981, #34D399);
-          color: #FFFFFF;
-          border: none;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
-          cursor: pointer;
-        }
-        .btn-success:hover:not(:disabled) {
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 8px 40px rgba(16, 185, 129, 0.3);
-        }
-        .btn-success:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 12px;
-          background: rgba(212, 175, 55, 0.12);
-          border: 1px solid rgba(212, 175, 55, 0.15);
-          border-radius: 50px;
-          font-size: 11px;
-          font-weight: 600;
-          color: #F5D76E;
-        }
-
-        .input {
-          width: 100%;
-          padding: 12px 16px;
-          border-radius: 12px;
-          border: 1px solid rgba(180, 200, 230, 0.1);
-          background: rgba(255, 255, 255, 0.04);
-          color: #E8EDF5;
-          font-size: 14px;
-          outline: none;
-          transition: all 0.3s ease;
-          box-sizing: border-box;
-          font-family: 'Inter', -apple-system, sans-serif;
-        }
-        .input:focus {
-          border-color: rgba(212, 175, 55, 0.3);
-          background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.06);
-        }
-        .input::placeholder {
-          color: rgba(200, 215, 235, 0.3);
-        }
-        textarea.input {
-          resize: vertical;
-          min-height: 100px;
-        }
-
-        .input-title {
-          font-size: 28px;
-          font-weight: 700;
-          background: transparent;
-          border: none;
-          border-bottom: 2px solid rgba(180, 200, 230, 0.1);
-          padding: 8px 0;
-          color: #E8EDF5;
-          outline: none;
-          transition: all 0.3s ease;
-          width: 100%;
-        }
-        .input-title:focus {
-          border-bottom-color: rgba(212, 175, 55, 0.3);
-        }
-        .input-title::placeholder {
-          color: rgba(200, 215, 235, 0.2);
-          font-weight: 400;
-        }
-
-        .note-item {
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: 12px;
-          padding: 12px 16px;
-          border: 1px solid rgba(180, 200, 230, 0.06);
-          transition: all 0.3s ease;
-          cursor: default;
-          position: relative;
-        }
-        .note-item:hover {
-          background: rgba(255, 255, 255, 0.06);
-          border-color: rgba(180, 200, 230, 0.12);
-        }
-        .note-item:hover .note-delete {
-          opacity: 1;
-        }
-
-        .note-delete {
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-
-        .tip-item {
-          padding: 12px 16px;
-          border-radius: 12px;
-          border-left: 3px solid #D4AF37;
-          background: rgba(212, 175, 55, 0.04);
-          transition: all 0.3s ease;
-        }
-        .tip-item-feedback {
-          border-left-color: #10B981;
-          background: rgba(16, 185, 129, 0.04);
-        }
-        .tip-item-suggestion {
-          border-left-color: #6366F1;
-          background: rgba(99, 102, 241, 0.04);
-        }
-        .tip-item-question {
-          border-left-color: #F59E0B;
-          background: rgba(245, 158, 11, 0.04);
-        }
-
-        .progress-ring-bg {
-          width: 100%;
-          height: 4px;
-          border-radius: 2px;
-          background: rgba(255, 255, 255, 0.06);
-          overflow: hidden;
-        }
-        .progress-ring-fill {
-          height: 100%;
-          border-radius: 2px;
-          background: linear-gradient(90deg, #D4AF37, #F5D76E);
-          transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .stage-pill {
-          padding: 6px 14px;
-          border-radius: 50px;
-          font-size: 11px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.04);
-          color: rgba(200, 215, 235, 0.4);
-          border: 1px solid rgba(180, 200, 230, 0.06);
-        }
-        .stage-pill-active {
-          background: rgba(212, 175, 55, 0.12);
-          color: #F5D76E;
-          border-color: rgba(212, 175, 55, 0.15);
-        }
-
-        .scrollbar-custom::-webkit-scrollbar {
-          width: 4px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-          background: rgba(212, 175, 55, 0.2);
-          border-radius: 2px;
-        }
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-          background: rgba(212, 175, 55, 0.4);
-        }
-
-        .floating-particle {
-          position: fixed;
-          pointer-events: none;
-          border-radius: 50%;
-          background: rgba(212, 175, 55, 0.03);
-          animation: floatParticle 15s ease-in-out infinite;
-        }
-
-        @keyframes floatParticle {
-          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-          25% { transform: translate(30px, -40px) scale(1.2); opacity: 0.6; }
-          50% { transform: translate(-20px, -70px) scale(0.8); opacity: 0.4; }
-          75% { transform: translate(40px, -30px) scale(1.1); opacity: 0.7; }
-        }
-      `}</style>
-
-      {/* ===== PARTICULES FLOTTANTES ===== */}
-      <div className="floating-particle" style={{ width: "300px", height: "300px", top: "10%", right: "5%", animationDelay: "0s" }} />
-      <div className="floating-particle" style={{ width: "200px", height: "200px", bottom: "20%", left: "8%", animationDelay: "-5s" }} />
-      <div className="floating-particle" style={{ width: "150px", height: "150px", top: "40%", right: "15%", animationDelay: "-10s" }} />
 
       {/* ============================================================
           CONTENU PRINCIPAL
           ============================================================ */}
-      <div style={{ position: "relative", zIndex: 1, maxWidth: "1000px", margin: "0 auto", padding: "20px" }}>
+      <div style={{ maxWidth: "1180px", margin: "0 auto" }}>
 
         {/* ===== EN-TÊTE ===== */}
         <div className="fade-in-up delay-1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
@@ -604,7 +270,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
               <ArrowLeft size={16} />
               Retour
             </Link>
-            <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#E8EDF5", letterSpacing: "-0.5px" }}>
+            <h1 style={{ fontSize: "24px", fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.5px" }}>
               Idéalisation
             </h1>
             <span className="badge">
@@ -627,10 +293,10 @@ export default function IdealisationForm({ projectId, initialData, completed, st
         {/* ===== BARRE DE PROGRESSION ===== */}
         <div className="fade-in-up delay-1" style={{ marginBottom: "24px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-            <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)" }}>
+            <span style={{ fontSize: "12px", color: "var(--ink-subtle)" }}>
               Complétude de l'idéation
             </span>
-            <span style={{ fontSize: "14px", fontWeight: 600, color: "#F5D76E" }}>
+            <span style={{ fontSize: "14px", fontWeight: 600, color: "var(--brand)" }}>
               {completionRate()}%
             </span>
           </div>
@@ -642,7 +308,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
               className="progress-ring-fill"
             />
           </div>
-          <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", marginTop: "4px" }}>
+          <p style={{ fontSize: "11px", color: "var(--ink-subtle)", marginTop: "4px" }}>
             {isComplete
               ? "Votre idée est suffisamment développée pour passer à l'étape suivante."
               : "Complétez les critères ci-dessous pour valider cette étape."}
@@ -662,8 +328,8 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             {/* Titre */}
             <div style={{ marginBottom: "28px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                <Lightbulb size={18} style={{ color: "#F5D76E" }} />
-                <span style={{ fontSize: "13px", color: "rgba(200,215,235,0.4)", fontWeight: 500 }}>
+                <Lightbulb size={18} style={{ color: "var(--brand)" }} />
+                <span style={{ fontSize: "13px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                   Nom du projet
                 </span>
               </div>
@@ -681,11 +347,11 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             {/* Description */}
             <div style={{ marginBottom: "24px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-                <Brain size={16} style={{ color: "#F5D76E" }} />
-                <span style={{ fontSize: "13px", color: "rgba(200,215,235,0.4)", fontWeight: 500 }}>
+                <Brain size={16} style={{ color: "var(--brand)" }} />
+                <span style={{ fontSize: "13px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                   Description du projet
                 </span>
-                <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.2)", marginLeft: "auto" }}>
+                <span style={{ fontSize: "11px", color: "var(--ink-subtle)", marginLeft: "auto" }}>
                   {data.description.length} / 2000
                 </span>
               </div>
@@ -705,8 +371,8 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                  <AlertCircle size={14} style={{ color: "#E4736B" }} />
-                  <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)", fontWeight: 500 }}>
+                  <AlertCircle size={14} style={{ color: "var(--danger)" }} />
+                  <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                     Problème identifié
                   </span>
                 </div>
@@ -722,8 +388,8 @@ export default function IdealisationForm({ projectId, initialData, completed, st
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                  <CheckCircle size={14} style={{ color: "#10B981" }} />
-                  <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)", fontWeight: 500 }}>
+                  <CheckCircle size={14} style={{ color: "var(--success)" }} />
+                  <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                     Solution proposée
                   </span>
                 </div>
@@ -743,8 +409,8 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                  <Users size={14} style={{ color: "#6366F1" }} />
-                  <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)", fontWeight: 500 }}>
+                  <Users size={14} style={{ color: "var(--brand)" }} />
+                  <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                     Clients cibles
                   </span>
                 </div>
@@ -760,8 +426,8 @@ export default function IdealisationForm({ projectId, initialData, completed, st
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                  <Star size={14} style={{ color: "#F59E0B" }} />
-                  <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)", fontWeight: 500 }}>
+                  <Star size={14} style={{ color: "var(--warning)" }} />
+                  <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                     Valeur ajoutée
                   </span>
                 </div>
@@ -780,8 +446,8 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             {/* Modèle de revenus */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                <TrendingUp size={14} style={{ color: "#D4AF37" }} />
-                <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)", fontWeight: 500 }}>
+                <TrendingUp size={14} style={{ color: "var(--gold)" }} />
+                <span style={{ fontSize: "12px", color: "var(--ink-subtle)", fontWeight: 500 }}>
                   Modèle de revenus
                 </span>
               </div>
@@ -801,11 +467,11 @@ export default function IdealisationForm({ projectId, initialData, completed, st
           <motion.div className="card-glass fade-in-up delay-3">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <MessageCircle size={18} style={{ color: "#F5D76E" }} />
-                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>
+                <MessageCircle size={18} style={{ color: "var(--brand)" }} />
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", margin: 0 }}>
                   Brainstorming
                 </h3>
-                <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", fontWeight: 400 }}>
+                <span style={{ fontSize: "11px", color: "var(--ink-subtle)", fontWeight: 400 }}>
                   ({data.brainstorming.length} notes)
                 </span>
               </div>
@@ -827,7 +493,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
                   exit={{ opacity: 0, height: 0 }}
                   style={{ overflow: "hidden" }}
                 >
-                  <div style={{ display: "flex", gap: "8px", marginBottom: "12px", padding: "8px", background: "rgba(255,255,255,0.03)", borderRadius: "12px" }}>
+                  <div style={{ display: "flex", gap: "8px", marginBottom: "12px", padding: "8px", background: "var(--surface-muted)", borderRadius: "12px" }}>
                     <textarea
                       value={newNote}
                       onChange={(e) => setNewNote(e.target.value)}
@@ -857,7 +523,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
 
             <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "200px", overflowY: "auto" }} className="scrollbar-custom">
               {data.brainstorming.length === 0 ? (
-                <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(200,215,235,0.25)", padding: "16px 0" }}>
+                <p style={{ textAlign: "center", fontSize: "13px", color: "var(--ink-subtle)", padding: "16px 0" }}>
                   Pas encore de notes. Laissez libre cours à votre créativité.
                 </p>
               ) : (
@@ -871,10 +537,10 @@ export default function IdealisationForm({ projectId, initialData, completed, st
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: "13px", color: "#E8EDF5", margin: 0, lineHeight: 1.5 }}>
+                        <p style={{ fontSize: "13px", color: "var(--ink)", margin: 0, lineHeight: 1.5 }}>
                           {note.content}
                         </p>
-                        <p style={{ fontSize: "10px", color: "rgba(200,215,235,0.3)", marginTop: "4px" }}>
+                        <p style={{ fontSize: "10px", color: "var(--ink-subtle)", marginTop: "4px" }}>
                           {new Date(note.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -884,14 +550,14 @@ export default function IdealisationForm({ projectId, initialData, completed, st
                         style={{
                           background: "transparent",
                           border: "none",
-                          color: "rgba(200,215,235,0.2)",
+                          color: "var(--ink-subtle)",
                           cursor: "pointer",
                           padding: "4px",
                           borderRadius: "6px",
                           transition: "all 0.3s ease",
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = "#E4736B"; e.currentTarget.style.background = "rgba(228,115,107,0.1)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(200,215,235,0.2)"; e.currentTarget.style.background = "transparent"; }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = "var(--danger)"; e.currentTarget.style.background = "var(--danger-soft)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = "var(--ink-subtle)"; e.currentTarget.style.background = "transparent"; }}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -906,11 +572,11 @@ export default function IdealisationForm({ projectId, initialData, completed, st
           <motion.div className="card-glass fade-in-up delay-4">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <Sparkles size={18} style={{ color: "#F5D76E" }} />
-                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>
+                <Sparkles size={18} style={{ color: "var(--brand)" }} />
+                <h3 style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", margin: 0 }}>
                   Conseils IA
                 </h3>
-                <span style={{ fontSize: "10px", color: "rgba(200,215,235,0.2)", fontWeight: 400 }}>
+                <span style={{ fontSize: "10px", color: "var(--ink-subtle)", fontWeight: 400 }}>
                   En temps réel
                 </span>
               </div>
@@ -936,7 +602,7 @@ export default function IdealisationForm({ projectId, initialData, completed, st
                       key={tip.id}
                       className={`tip-item tip-item-${tip.category}`}
                     >
-                      <p style={{ fontSize: "13px", color: "rgba(200,215,235,0.7)", margin: 0, lineHeight: 1.6 }}>
+                      <p style={{ fontSize: "13px", color: "var(--ink-muted)", margin: 0, lineHeight: 1.6 }}>
                         {tip.content}
                       </p>
                     </div>
@@ -983,13 +649,13 @@ export default function IdealisationForm({ projectId, initialData, completed, st
             </div>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
               {error && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "rgba(228,115,107,0.08)", border: "1px solid rgba(228,115,107,0.15)", color: "#E4736B", fontSize: "13px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "var(--danger-soft)", border: "1px solid color-mix(in srgb, var(--danger) 22%, transparent)", color: "var(--danger)", fontSize: "13px" }}>
                   <AlertCircle size={16} />
                   {error}
                 </div>
               )}
               {success && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)", color: "#10B981", fontSize: "13px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 14px", borderRadius: "10px", background: "var(--success-soft)", border: "1px solid color-mix(in srgb, var(--success) 22%, transparent)", color: "var(--success)", fontSize: "13px" }}>
                   <CheckCircle size={16} />
                   {success}
                 </div>
@@ -1011,12 +677,6 @@ export default function IdealisationForm({ projectId, initialData, completed, st
           </div>
         </div>
 
-        {/* ===== FOOTER ===== */}
-        <div className="fade-in-up delay-5" style={{ marginTop: "32px", paddingTop: "16px", borderTop: "1px solid rgba(180,200,230,0.06)", textAlign: "center" }}>
-          <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.2)", letterSpacing: "0.5px", margin: 0 }}>
-            © 2026 <span style={{ color: "#D4AF37" }}>IAI Entrepreneur</span> · Plateforme de gestion de projets étudiants
-          </p>
-        </div>
       </div>
     </div>
   );

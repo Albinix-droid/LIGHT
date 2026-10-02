@@ -372,7 +372,7 @@ export default function AssistantApp({
             )}
           </div>
           <p style={{ fontSize: "11px", color: "var(--ink-subtle)", margin: "8px 0 0", textAlign: "center" }}>
-            <MessageSquare size={10} style={{ verticalAlign: "-1px" }} /> Le mentor IA peut se tromper : vérifiez les chiffres importants et discutez de vos décisions avec votre encadrant.
+            <MessageSquare size={10} style={{ display: "inline-block", verticalAlign: "-1px" }} /> Le mentor IA peut se tromper : vérifiez les chiffres importants et discutez de vos décisions avec votre encadrant.
           </p>
         </footer>
       </section>

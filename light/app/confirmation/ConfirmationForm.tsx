@@ -58,7 +58,7 @@ export default function ConfirmationForm({ role, email, fullName }: { role: Staf
   };
 
   const sectionTitle = (icon: React.ReactNode, text: string) => (
-    <p style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.6px", textTransform: "uppercase", color: "#F5D76E", margin: "0 0 14px" }}>
+    <p style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.6px", textTransform: "uppercase", color: "var(--brand)", margin: "0 0 14px" }}>
       {icon}
       {text}
     </p>
@@ -69,13 +69,13 @@ export default function ConfirmationForm({ role, email, fullName }: { role: Staf
       <style>{`
         .conf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         @media (max-width: 520px) { .conf-grid { grid-template-columns: 1fr; } }
-        .conf-block { padding: 18px; border-radius: 16px; background: rgba(255,255,255,0.025); border: 1px solid rgba(180,200,230,0.08); margin-bottom: 18px; }
-        .conf-hint { font-size: 12px; color: rgba(200,215,235,0.4); margin: 6px 0 0; line-height: 1.5; }
+        .conf-block { padding: 18px; border-radius: 16px; background: var(--surface-muted); border: 1px solid var(--line); margin-bottom: 18px; }
+        .conf-hint { font-size: 12px; color: var(--ink-subtle); margin: 6px 0 0; line-height: 1.5; }
       `}</style>
 
       {/* Compte concerné */}
-      <div className="auth-message" style={{ background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.15)", color: "rgba(232,237,245,0.8)", display: "flex", gap: "10px", alignItems: "flex-start" }}>
-        {isEncadrant ? <GraduationCap size={18} style={{ color: "#F5D76E", flexShrink: 0, marginTop: "1px" }} /> : <ShieldCheck size={18} style={{ color: "#F5D76E", flexShrink: 0, marginTop: "1px" }} />}
+      <div className="auth-message" style={{ background: "var(--brand-soft)", border: "1px solid var(--brand-soft)", color: "var(--ink)", display: "flex", gap: "10px", alignItems: "flex-start" }}>
+        {isEncadrant ? <GraduationCap size={18} style={{ color: "var(--brand)", flexShrink: 0, marginTop: "1px" }} /> : <ShieldCheck size={18} style={{ color: "var(--brand)", flexShrink: 0, marginTop: "1px" }} />}
         <span>
           Demande de rôle <strong>{isEncadrant ? "encadrant" : "administrateur"}</strong> pour <strong>{fullName || email}</strong> ({email}).
           En attendant la confirmation, ce compte n&apos;a accès à aucun espace.
@@ -123,7 +123,7 @@ export default function ConfirmationForm({ role, email, fullName }: { role: Staf
                 type="button"
                 onClick={() => setShowCode(!showCode)}
                 aria-label={showCode ? "Masquer le code" : "Afficher le code"}
-                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(200,215,235,0.45)", display: "flex" }}
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--ink-subtle)", display: "flex" }}
               >
                 {showCode ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -178,7 +178,7 @@ export default function ConfirmationForm({ role, email, fullName }: { role: Staf
         <div style={{ marginTop: "14px" }}>
           <label htmlFor="specialty" className="auth-label">
             {isEncadrant ? "Spécialité" : "Domaine de compétence"}
-            {!isEncadrant && <span style={{ fontWeight: 400, color: "rgba(200,215,235,0.35)" }}> (facultatif)</span>}
+            {!isEncadrant && <span style={{ fontWeight: 400, color: "var(--ink-subtle)" }}> (facultatif)</span>}
           </label>
           <input
             id="specialty"
@@ -193,13 +193,13 @@ export default function ConfirmationForm({ role, email, fullName }: { role: Staf
         </div>
       </div>
 
-      <label style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontSize: "13px", color: "rgba(200,215,235,0.65)", lineHeight: 1.5, marginBottom: "22px", cursor: "pointer" }}>
+      <label style={{ display: "flex", gap: "10px", alignItems: "flex-start", fontSize: "13px", color: "var(--ink-muted)", lineHeight: 1.5, marginBottom: "22px", cursor: "pointer" }}>
         <input
           type="checkbox"
           checked={certify}
           onChange={(e) => setCertify(e.target.checked)}
           disabled={pending}
-          style={{ width: "16px", height: "16px", marginTop: "2px", accentColor: "#D4AF37", flexShrink: 0 }}
+          style={{ width: "16px", height: "16px", marginTop: "2px", accentColor: "var(--gold)", flexShrink: 0 }}
         />
         Je certifie que ces informations sont exactes et que ces identifiants m&apos;ont été remis personnellement par l&apos;école.
       </label>
@@ -209,7 +209,7 @@ export default function ConfirmationForm({ role, email, fullName }: { role: Staf
         {pending ? "Vérification…" : "Confirmer mon compte"}
       </button>
 
-      <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(200,215,235,0.4)", margin: "18px 0 0", lineHeight: 1.6 }}>
+      <p style={{ textAlign: "center", fontSize: "13px", color: "var(--ink-subtle)", margin: "18px 0 0", lineHeight: 1.6 }}>
         Vous n&apos;avez pas reçu d&apos;identifiants ? Contactez l&apos;administration de l&apos;école.
         <br />
         <button

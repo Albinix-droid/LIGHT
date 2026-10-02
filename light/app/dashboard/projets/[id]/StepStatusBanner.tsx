@@ -2,7 +2,9 @@
 // SUIVI ENCADRANT CÔTÉ ÉTUDIANT : statut de l'étape, retour de l'encadrant, message de soumission
 
 import Link from "next/link";
-import { Clock, CheckCircle, AlertTriangle, UserPlus, Star, MessageSquare, Compass } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, Compass, MessageSquare, UserPlus } from "lucide-react";
+import StarsBase from "@/components/ui/Stars";
+import { cx, textareaClass } from "@/components/ui/kit";
 
 export type StepStatusKey = "IN_PROGRESS" | "SUBMITTED" | "CHANGES_REQUESTED" | "COMPLETED";
 
@@ -21,20 +23,14 @@ const dateFormat = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "lo
 export const formatDate = (iso: string) => dateFormat.format(new Date(iso));
 
 export function Stars({ rating, size = 13 }: { rating: number; size?: number }) {
-  return (
-    <span style={{ display: "inline-flex", gap: "2px" }} aria-label={`Note : ${rating} sur 5`}>
-      {[1, 2, 3, 4, 5].map((s) => (
-        <Star key={s} size={size} style={{ color: "#F5D76E", fill: s <= rating ? "#F5D76E" : "transparent" }} />
-      ))}
-    </span>
-  );
+  return <StarsBase rating={rating} size={size} />;
 }
 
 const TONES = {
-  info: { bg: "rgba(99,102,241,0.08)", border: "rgba(99,102,241,0.22)", color: "#A5B4FC" },
-  pending: { bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)", color: "#F5B544" },
-  warning: { bg: "rgba(228,115,107,0.08)", border: "rgba(228,115,107,0.28)", color: "#F0928B" },
-  success: { bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.25)", color: "#34D399" },
+  info: { box: "bg-brand-soft ring-brand/15", title: "text-brand-ink", tile: "bg-brand text-white", quote: "border-brand/40" },
+  pending: { box: "bg-warning-soft ring-warning/20", title: "text-warning", tile: "bg-warning text-white", quote: "border-warning/50" },
+  warning: { box: "bg-danger-soft ring-danger/20", title: "text-danger", tile: "bg-danger text-white", quote: "border-danger/50" },
+  success: { box: "bg-success-soft ring-success/20", title: "text-success", tile: "bg-success text-white", quote: "border-success/50" },
 };
 
 export default function StepStatusBanner({
@@ -56,52 +52,39 @@ export default function StepStatusBanner({
   let Icon = Clock;
   let title: string;
   let body: React.ReactNode = null;
+  const chooseLink = (
+    <Link href={`/dashboard/projets/${projectId}`} className="font-semibold text-brand hover:text-brand-strong">
+      Choisir mon encadrant →
+    </Link>
+  );
 
   if (locked && status !== "COMPLETED" && status !== "SUBMITTED") {
     tone = "info";
     Icon = Compass;
     title = "Étape à venir : vous pouvez la préparer dès maintenant";
     body = (
-      <p style={{ margin: "4px 0 0" }}>
+      <p>
         Remplissez et sauvegardez librement. Vous pourrez la soumettre
         {supervisorName ? ` à ${supervisorName}` : " à votre encadrant"} dès que l&apos;étape {previousStageLabel ?? "précédente"} aura été validée.
-        {!supervisorName && (
-          <>
-            {" "}
-            <Link href={`/dashboard/projets/${projectId}`} style={{ color: "#F5D76E", fontWeight: 600 }}>
-              Choisir mon encadrant →
-            </Link>
-          </>
-        )}
+        {!supervisorName && <> {chooseLink}</>}
       </p>
     );
   } else if (!supervisorName && status !== "COMPLETED") {
     tone = "info";
     Icon = UserPlus;
     title = "Aucun encadrant n'est encore associé à ce projet";
-    body = (
-      <p style={{ margin: "4px 0 0" }}>
-        Les étapes sont validées par votre encadrant.{" "}
-        <Link href={`/dashboard/projets/${projectId}`} style={{ color: "#F5D76E", fontWeight: 600 }}>
-          Choisir mon encadrant →
-        </Link>
-      </p>
-    );
+    body = <p>Les étapes sont validées par votre encadrant. {chooseLink}</p>;
   } else if (status === "SUBMITTED") {
     tone = "pending";
     title = `Soumise${review ? ` le ${formatDate(review.submittedAt)}` : ""} · en attente de la décision de ${supervisorName}`;
-    body = (
-      <p style={{ margin: "4px 0 0", opacity: 0.85 }}>
-        Vous pouvez continuer à travailler : votre encadrant examine la version soumise.
-      </p>
-    );
+    body = <p>Vous pouvez continuer à travailler : votre encadrant examine la version soumise.</p>;
   } else if (status === "CHANGES_REQUESTED") {
     tone = "warning";
     Icon = AlertTriangle;
     title = `${review?.reviewerName ?? supervisorName} demande des modifications`;
   } else if (status === "COMPLETED") {
     tone = "success";
-    Icon = CheckCircle;
+    Icon = CheckCircle2;
     title = review?.decision === "APPROVED" && review.reviewerName
       ? `Étape validée par ${review.reviewerName}${review.reviewedAt ? ` le ${formatDate(review.reviewedAt)}` : ""}`
       : "Étape validée";
@@ -114,45 +97,23 @@ export default function StepStatusBanner({
   const showFeedback = review?.feedback && (status === "CHANGES_REQUESTED" || status === "COMPLETED");
 
   return (
-    <div
-      role="status"
-      style={{
-        marginTop: "14px",
-        padding: "14px 18px",
-        borderRadius: "14px",
-        background: t.bg,
-        border: `1px solid ${t.border}`,
-        color: t.color,
-        fontSize: "13px",
-        lineHeight: 1.55,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 600, flexWrap: "wrap" }}>
-        <Icon size={16} />
-        <span>{title}</span>
-        {showFeedback && review?.rating ? <Stars rating={review.rating} /> : null}
+    <div role="status" className={cx("mt-4 flex gap-3.5 rounded-2xl px-4 py-4 text-[13px] leading-relaxed ring-1 ring-inset", t.box)}>
+      <span className={cx("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", t.tile)}>
+        <Icon className="size-[18px]" strokeWidth={2} />
+      </span>
+      <div className="min-w-0 flex-1 text-ink-muted">
+        <div className={cx("flex flex-wrap items-center gap-2 font-semibold", t.title)}>
+          <span>{title}</span>
+          {showFeedback && review?.rating ? <Stars rating={review.rating} /> : null}
+        </div>
+        {body && <div className="mt-0.5">{body}</div>}
+        {showFeedback && (
+          <blockquote className={cx("mt-2.5 rounded-r-xl border-l-[3px] bg-surface/70 px-4 py-2.5 whitespace-pre-wrap text-ink", t.quote)}>
+            {review!.feedback}
+          </blockquote>
+        )}
+        {status === "CHANGES_REQUESTED" && <p className="mt-2">Apportez les corrections demandées puis soumettez à nouveau l&apos;étape.</p>}
       </div>
-      {body}
-      {showFeedback && (
-        <blockquote
-          style={{
-            margin: "10px 0 0",
-            padding: "10px 14px",
-            borderLeft: `3px solid ${t.border}`,
-            background: "rgba(255,255,255,0.03)",
-            borderRadius: "0 10px 10px 0",
-            color: "rgba(232,237,245,0.85)",
-            whiteSpace: "pre-wrap",
-          }}
-        >
-          {review!.feedback}
-        </blockquote>
-      )}
-      {status === "CHANGES_REQUESTED" && (
-        <p style={{ margin: "8px 0 0", opacity: 0.85 }}>
-          Apportez les corrections demandées puis soumettez à nouveau l&apos;étape.
-        </p>
-      )}
     </div>
   );
 }
@@ -168,13 +129,10 @@ export function SubmissionNote({
   supervisorName: string | null;
 }) {
   return (
-    <div style={{ marginBottom: "14px" }}>
-      <label
-        htmlFor="submission-note"
-        style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "rgba(200,215,235,0.5)", marginBottom: "6px", fontWeight: 500 }}
-      >
-        <MessageSquare size={13} />
-        Message pour {supervisorName ?? "votre encadrant"} (facultatif)
+    <div className="mb-4">
+      <label htmlFor="submission-note" className="mb-1.5 flex items-center gap-1.5 text-[13px] font-semibold text-ink">
+        <MessageSquare className="size-3.5 text-brand" strokeWidth={2} />
+        Message pour {supervisorName ?? "votre encadrant"} <span className="font-normal text-ink-subtle">(facultatif)</span>
       </label>
       <textarea
         id="submission-note"
@@ -182,8 +140,7 @@ export function SubmissionNote({
         onChange={(e) => onChange(e.target.value)}
         maxLength={2000}
         placeholder="Points sur lesquels vous souhaitez un avis, difficultés rencontrées, changements depuis la dernière version…"
-        className="input"
-        style={{ minHeight: "70px", fontSize: "13px" }}
+        className={cx(textareaClass, "min-h-[90px] text-[13.5px]")}
       />
     </div>
   );

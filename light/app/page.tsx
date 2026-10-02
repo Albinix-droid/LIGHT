@@ -1,35 +1,19 @@
 // app/page.tsx
-// PAGE D'ACCUEIL - AVEC IMAGE DE FOND CONTEXTUELLE
+// PAGE D'ACCUEIL DU SITE (publique)
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { createClient } from "@/lib/supabase/client";
 import {
-  Menu, X, Home, Info, LogIn, UserPlus,
-  Lightbulb, Palette, Settings, Rocket,
-  Languages, TrendingUp, FileText,
-  Sparkles, Target, Quote, Star, Users,
-  Zap, Award, Building2, Cloud, ArrowRight,
-  Globe2, GraduationCap, Briefcase, Heart,
-  Cpu, Shield, ChevronRight, CheckCircle,
-  BarChart3, MessageCircle, Mail, LayoutDashboard
+  ArrowRight, Award, Building2, Cloud, FileText, Languages, Lightbulb, Menu, Palette, Quote, Rocket, Settings, Sparkles,
+  Star, Target, TrendingUp, Users, X, Zap,
 } from "lucide-react";
-
-// ============================================================
-// HOOK SCROLL
-// ============================================================
-function useScroll() {
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-  return scrollY;
-}
+import { createClient } from "@/lib/supabase/client";
+import Logo, { LogoMark } from "@/components/ui/Logo";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import Avatar from "@/components/ui/Avatar";
+import ProgressRing from "@/components/ui/ProgressRing";
 
 // ============================================================
 // DONNÉES
@@ -50,12 +34,12 @@ const STEPS = [
 ];
 
 const FEATURES = [
-  { icon: Languages, title: "9 langues", desc: "Guide personnalisé dans votre langue maternelle", image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" },
-  { icon: TrendingUp, title: "Prévisions IA", desc: "Estimations budgétaires contextualisées au Cameroun", image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" },
-  { icon: FileText, title: "Modèles prêts", desc: "Templates adaptés à votre secteur d'activité", image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=2070&auto=format&fit=crop" },
-  { icon: Users, title: "Collaboration", desc: "Invitez des membres et gérez les rôles en temps réel", image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" },
-  { icon: Target, title: "Validation", desc: "Soumettez vos jalons et recevez des feedbacks", image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2070&auto=format&fit=crop" },
-  { icon: Award, title: "Concrétisation", desc: "Transformez votre projet en entreprise prospère", image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2070&auto=format&fit=crop" },
+  { icon: Languages, title: "9 langues", desc: "Guide personnalisé dans votre langue maternelle" },
+  { icon: TrendingUp, title: "Prévisions IA", desc: "Estimations budgétaires contextualisées au Cameroun" },
+  { icon: FileText, title: "Modèles prêts", desc: "Templates adaptés à votre secteur d'activité" },
+  { icon: Users, title: "Collaboration", desc: "Invitez des membres et gérez les rôles en temps réel" },
+  { icon: Target, title: "Validation", desc: "Soumettez vos jalons et recevez des feedbacks" },
+  { icon: Award, title: "Concrétisation", desc: "Transformez votre projet en entreprise prospère" },
 ];
 
 const TESTIMONIALS = [
@@ -85,11 +69,22 @@ const TRUSTED_BY = [
   { name: "Ministère de l'Enseignement Supérieur", icon: Award },
 ];
 
+function SectionHeading({ icon: Icon, eyebrow, title, subtitle }: { icon: typeof Zap; eyebrow: string; title: string; subtitle?: string }) {
+  return (
+    <div className="mx-auto mb-12 max-w-2xl text-center">
+      <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3.5 py-1.5 text-[12px] font-semibold text-brand-ink ring-1 ring-brand/15 ring-inset">
+        <Icon className="size-3.5" strokeWidth={2} aria-hidden="true" /> {eyebrow}
+      </span>
+      <h2 className="mt-4 font-display text-[30px] leading-tight font-bold tracking-tight text-ink sm:text-[38px]">{title}</h2>
+      {subtitle && <p className="mt-3 text-[16px] leading-relaxed text-ink-muted">{subtitle}</p>}
+    </div>
+  );
+}
+
 // ============================================================
 // COMPOSANT PRINCIPAL
 // ============================================================
 export default function HomePage() {
-  const scrollY = useScroll();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Visiteur déjà connecté : on lui propose d'aller directement à son espace
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -99,707 +94,261 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isMenuOpen]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsMenuOpen(false);
-    };
+    const handleKeyDown = (e: KeyboardEvent) => e.key === "Escape" && setIsMenuOpen(false);
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const navLinks = (
+    <>
+      <Link href="#parcours" className="text-[14px] font-medium text-white/75 transition-colors hover:text-white" onClick={() => setIsMenuOpen(false)}>Le parcours</Link>
+      <Link href="#fonctionnalites" className="text-[14px] font-medium text-white/75 transition-colors hover:text-white" onClick={() => setIsMenuOpen(false)}>Fonctionnalités</Link>
+      <Link href="#temoignages" className="text-[14px] font-medium text-white/75 transition-colors hover:text-white" onClick={() => setIsMenuOpen(false)}>Témoignages</Link>
+    </>
+  );
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0A1628",
-        position: "relative",
-        overflow: "hidden",
-        fontFamily: "'Inter', -apple-system, sans-serif",
-        padding: "0 0 24px 0",
-      }}
-    >
-      {/* ===== IMAGE DE FOND CONTEXTUELLE AVEC PARALLAX ===== */}
-      <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden" }}>
-        {/* Image de fond principale */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat",
-            opacity: 0.15,
-            transform: `translateY(${scrollY * 0.04}px) scale(1.1)`,
-            transition: "transform 0.05s ease-out",
-          }}
-        />
-        {/* Dégradé pour la lisibilité */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "radial-gradient(ellipse at 30% 20%, rgba(10,22,40,0.6) 0%, rgba(10,22,40,0.85) 100%)",
-          }}
-        />
-        {/* Orbes lumineuses */}
-        <div
-          style={{
-            position: "absolute",
-            width: "600px",
-            height: "600px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212,175,55,0.06), transparent 70%)",
-            top: "-200px",
-            right: "-100px",
-            animation: "floatBg 8s ease-in-out infinite",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            width: "400px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(212,175,55,0.04), transparent 70%)",
-            bottom: "-100px",
-            left: "-80px",
-            animation: "floatBg 10s ease-in-out infinite reverse",
-          }}
-        />
-        {/* Vague bleue en bas */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "200px",
-            background: "linear-gradient(180deg, transparent, rgba(10,22,40,0.4))",
-          }}
-        />
-      </div>
-
-      <style>{`
-        @keyframes floatBg {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          50% { transform: translate(20px, -20px) scale(1.1); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(30px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes pulseGlow {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 1; }
-        }
-
-        .fade-in-up {
-          opacity: 0;
-          transform: translateY(30px) scale(0.96);
-          animation: fadeInUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-        .delay-1 { animation-delay: 0.05s; }
-        .delay-2 { animation-delay: 0.15s; }
-        .delay-3 { animation-delay: 0.25s; }
-        .delay-4 { animation-delay: 0.35s; }
-        .delay-5 { animation-delay: 0.45s; }
-        .delay-6 { animation-delay: 0.55s; }
-
-        .stat-card {
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(12px);
-          border-radius: 16px;
-          padding: 18px 20px;
-          border: 1px solid rgba(180, 200, 230, 0.08);
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-          cursor: default;
-        }
-        .stat-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(212, 175, 55, 0.2);
-          background: rgba(255, 255, 255, 0.07);
-          box-shadow: 0 8px 40px rgba(0, 20, 50, 0.3);
-        }
-
-        .hero-card {
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(12px);
-          border-radius: 20px;
-          border: 1px solid rgba(180, 200, 230, 0.08);
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-          overflow: hidden;
-        }
-        .hero-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(212, 175, 55, 0.2);
-          background: rgba(255, 255, 255, 0.07);
-          box-shadow: 0 8px 40px rgba(0, 20, 50, 0.3);
-        }
-
-        .feature-image {
-          height: 160px;
-          background-size: cover;
-          background-position: center;
-          position: relative;
-        }
-        .feature-image::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(180deg, transparent 40%, rgba(10,22,40,0.8) 100%);
-        }
-
-        .step-dot {
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .step-dot:hover {
-          transform: scale(1.08);
-        }
-
-        .btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 14px 36px;
-          background: linear-gradient(135deg, #D4AF37, #F5D76E);
-          color: #0A1628;
-          border: none;
-          border-radius: 50px;
-          font-size: 15px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
-          cursor: pointer;
-        }
-        .btn-primary:hover {
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 8px 40px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-secondary {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 14px 32px;
-          border: 1px solid rgba(180, 200, 230, 0.15);
-          border-radius: 50px;
-          color: rgba(200, 215, 235, 0.7);
-          text-decoration: none;
-          font-size: 15px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-          background: rgba(255, 255, 255, 0.03);
-          cursor: pointer;
-        }
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.06);
-          border-color: rgba(180, 200, 230, 0.25);
-          color: #E8EDF5;
-          transform: translateY(-3px);
-        }
-
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 14px;
-          background: rgba(212, 175, 55, 0.12);
-          border: 1px solid rgba(212, 175, 55, 0.15);
-          border-radius: 50px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #F5D76E;
-        }
-
-        .trust-logo {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          color: rgba(200, 215, 235, 0.4);
-          font-weight: 500;
-          transition: all 0.3s ease;
-        }
-        .trust-logo:hover {
-          color: #F5D76E;
-          transform: scale(1.05);
-        }
-
-        .testimonial-card {
-          background: rgba(255, 255, 255, 0.04);
-          backdrop-filter: blur(12px);
-          border-radius: 16px;
-          padding: 28px 24px;
-          border: 1px solid rgba(180, 200, 230, 0.08);
-          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .testimonial-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(212, 175, 55, 0.15);
-          background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 8px 40px rgba(0, 20, 50, 0.3);
-        }
-
-        .tag {
-          padding: 2px 12px;
-          border-radius: 50px;
-          font-size: 9px;
-          font-weight: 600;
-          background: rgba(255,255,255,0.05);
-          color: rgba(200,215,235,0.5);
-          border: 1px solid rgba(180,200,230,0.05);
-        }
-
-        .navbar {
-          position: sticky;
-          top: 0;
-          z-index: 50;
-          backdrop-filter: blur(24px);
-          padding: 0 24px;
-          height: 64px;
-          display: flex;
-          align-items: center;
-          border-radius: 16px;
-          max-width: 1100px;
-          margin: 0 auto 24px;
-          transition: background 0.3s ease, box-shadow 0.3s ease;
-        }
-        .navbar-idle {
-          background: rgba(10, 22, 40, 0.6);
-          border: 1px solid rgba(180, 200, 230, 0.06);
-        }
-        .navbar-scrolled {
-          background: rgba(10, 22, 40, 0.9);
-          border: 1px solid rgba(180, 200, 230, 0.08);
-          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .nav-link {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 8px 14px;
-          border-radius: 50px;
-          font-size: 14px;
-          font-weight: 500;
-          color: rgba(200, 215, 235, 0.6);
-          text-decoration: none;
-          transition: all 0.2s ease;
-          border: 1px solid transparent;
-        }
-        .nav-link:hover {
-          color: #E8EDF5;
-          background: rgba(255, 255, 255, 0.04);
-          border-color: rgba(180, 200, 230, 0.08);
-        }
-        .nav-link-active {
-          color: #E8EDF5;
-          background: rgba(255, 255, 255, 0.04);
-          border-color: rgba(180, 200, 230, 0.08);
-        }
-
-        .nav-links-desktop { display: none; align-items: center; gap: 4px; }
-        .nav-toggle-btn {
-          display: flex;
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 8px;
-          color: #E8EDF5;
-        }
-
-        @media (min-width: 768px) {
-          .nav-links-desktop { display: flex; }
-          .nav-toggle-btn { display: none; }
-        }
-
-        .scrollbar-custom::-webkit-scrollbar { width: 4px; }
-        .scrollbar-custom::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-custom::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 2px; }
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.5); }
-      `}</style>
-
+    <div className="min-h-screen bg-canvas font-sans text-ink">
       {/* ============================================================
-          NAVBAR
+          EN-TÊTE ET HERO (bleu nuit)
           ============================================================ */}
-      <header className={`navbar ${scrollY > 10 ? "navbar-scrolled" : "navbar-idle"}`}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-            <div
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "10px",
-                background: "linear-gradient(135deg, #D4AF37, #F5D76E)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "#0A1628",
-              }}
-            >
-              IAI
-            </div>
-            <span style={{ fontSize: "18px", fontWeight: 700, color: "#E8EDF5" }}>Entrepreneur</span>
-            <span
-              style={{
-                fontSize: "9px",
-                fontWeight: 600,
-                color: "#D4AF37",
-                background: "rgba(212,175,55,0.12)",
-                padding: "2px 10px",
-                borderRadius: "50px",
-                textTransform: "uppercase",
-                border: "1px solid rgba(212,175,55,0.1)",
-              }}
-            >
-              Beta
-            </span>
-          </Link>
+      <header className="relative isolate overflow-hidden bg-sidebar pb-24 text-white sm:pb-32">
+        <div aria-hidden="true" className="absolute -top-48 left-1/2 -z-10 size-[760px] -translate-x-1/2 rounded-full bg-[#1f4fd8]/30 blur-3xl" />
+        <div aria-hidden="true" className="absolute -right-40 bottom-0 -z-10 size-[460px] rounded-full bg-[#c9993a]/12 blur-3xl" />
+        <svg aria-hidden="true" className="absolute inset-0 -z-10 size-full opacity-[0.05]">
+          <defs>
+            <pattern id="hero-grid" width="34" height="34" patternUnits="userSpaceOnUse">
+              <path d="M34 0H0V34" fill="none" stroke="white" strokeWidth="0.7" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#hero-grid)" />
+        </svg>
 
-          <nav className="nav-links-desktop" aria-label="Navigation principale">
-            <Link href="/" className="nav-link nav-link-active">
-              <Home size={15} aria-hidden="true" /> Accueil
-            </Link>
-            <Link href="#fonctionnalites" className="nav-link">
-              <Info size={15} aria-hidden="true" /> Fonctionnalités
-            </Link>
-            <span style={{ width: "1px", height: "24px", background: "rgba(180,200,230,0.1)", margin: "0 4px" }} />
-            {isLoggedIn && (
-              <Link href="/dashboard" className="nav-link">
-                <LayoutDashboard size={15} aria-hidden="true" /> Mon espace
+        {/* Navigation */}
+        <nav className="mx-auto flex h-20 max-w-[1200px] items-center gap-8 px-5 sm:px-8" aria-label="Navigation principale">
+          <Link href="/" aria-label="Accueil LIGHT"><Logo /></Link>
+          <div className="hidden items-center gap-7 md:flex">{navLinks}</div>
+          <div className="ml-auto hidden items-center gap-2 md:flex">
+            <ThemeToggle className="text-white/70 hover:bg-white/10 hover:text-white" />
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="inline-flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-[13.5px] font-semibold text-[#14244f] transition-transform hover:-translate-y-px">
+                Mon espace <ArrowRight className="size-4" />
               </Link>
+            ) : (
+              <>
+                <Link href="/login" className="inline-flex h-10 items-center rounded-xl px-4 text-[13.5px] font-semibold text-white/85 transition-colors hover:bg-white/10 hover:text-white">Connexion</Link>
+                <Link href="/register" className="inline-flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-[13.5px] font-semibold text-[#14244f] transition-transform hover:-translate-y-px">
+                  S&apos;inscrire <ArrowRight className="size-4" />
+                </Link>
+              </>
             )}
-            <Link href="/login" className="nav-link">
-              <LogIn size={15} aria-hidden="true" /> Connexion
-            </Link>
-            <Link href="/register" className="btn-primary" style={{ padding: "8px 20px", fontSize: "13px" }}>
-              <UserPlus size={15} aria-hidden="true" /> S'inscrire
-            </Link>
-          </nav>
-
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="nav-toggle-btn"
-            aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-            aria-expanded={isMenuOpen}
-          >
-            {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
+          </div>
+          <button type="button" className="ml-auto inline-flex size-10 items-center justify-center rounded-xl text-white/80 hover:bg-white/10 md:hidden" onClick={() => setIsMenuOpen(true)} aria-label="Ouvrir le menu">
+            <Menu className="size-5" />
           </button>
-        </div>
-      </header>
+        </nav>
 
-      {/* Menu mobile */}
-      {isMenuOpen && (
-        <div
-          style={{
-            position: "fixed",
-            top: "64px",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(10,22,40,0.98)",
-            backdropFilter: "blur(20px)",
-            zIndex: 49,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "32px",
-            gap: "12px",
-          }}
-        >
-          <Link href="/" className="nav-link nav-link-active" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
-            <Home size={20} /> Accueil
-          </Link>
-          <Link href="#fonctionnalites" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
-            <Info size={20} /> Fonctionnalités
-          </Link>
-          <div style={{ width: "60px", height: "1px", background: "rgba(180,200,230,0.1)", margin: "8px 0" }} />
-          {isLoggedIn && (
-            <Link href="/dashboard" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
-              <LayoutDashboard size={20} /> Mon espace
-            </Link>
-          )}
-          <Link href="/login" className="nav-link" style={{ fontSize: "20px", padding: "16px 32px" }} onClick={() => setIsMenuOpen(false)}>
-            <LogIn size={20} /> Connexion
-          </Link>
-          <Link href="/register" className="btn-primary" style={{ fontSize: "18px", padding: "16px 48px", marginTop: "8px" }} onClick={() => setIsMenuOpen(false)}>
-            <UserPlus size={20} /> S'inscrire
-          </Link>
-        </div>
-      )}
-
-      {/* ============================================================
-          CONTENU PRINCIPAL
-          ============================================================ */}
-      <div style={{ position: "relative", zIndex: 1, maxWidth: "1100px", margin: "0 auto", padding: "0 20px" }}>
-
-        {/* ============================================================
-            HERO
-            ============================================================ */}
-        <section className="fade-in-up delay-1" style={{ padding: "40px 0 60px" }}>
-          <div className="hero-card" style={{ padding: "48px 40px", textAlign: "center" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-              <span className="badge">
-                <Sparkles size={14} />
-                La Plateforme entrepreneuriale pour étudiants
-              </span>
+        {/* Menu mobile */}
+        {isMenuOpen && (
+          <div className="fixed inset-0 z-50 flex flex-col bg-sidebar px-6 py-5 md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+            <div className="flex items-center justify-between">
+              <Logo />
+              <button type="button" className="inline-flex size-10 items-center justify-center rounded-xl text-white/80 hover:bg-white/10" onClick={() => setIsMenuOpen(false)} aria-label="Fermer le menu">
+                <X className="size-5" />
+              </button>
             </div>
-            <h1 style={{
-              fontSize: "44px",
-              fontWeight: 700,
-              color: "#E8EDF5",
-              letterSpacing: "-1px",
-              lineHeight: 1.1,
-              marginBottom: "16px",
-            }}>
-              UN ÉTUDIANT UN PROJET, <br />
-              <span style={{ color: "#F5D76E" }}>UNE ENTREPRISE</span>
+            <div className="mt-12 flex flex-col gap-6 text-[18px]">{navLinks}</div>
+            <div className="mt-auto flex flex-col gap-3">
+              {isLoggedIn ? (
+                <Link href="/dashboard" className="inline-flex h-12 items-center justify-center rounded-xl bg-white font-semibold text-[#14244f]">Mon espace</Link>
+              ) : (
+                <>
+                  <Link href="/register" className="inline-flex h-12 items-center justify-center rounded-xl bg-white font-semibold text-[#14244f]">S&apos;inscrire</Link>
+                  <Link href="/login" className="inline-flex h-12 items-center justify-center rounded-xl font-semibold text-white ring-1 ring-white/25">Connexion</Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Hero */}
+        <div className="mx-auto grid max-w-[1200px] items-center gap-14 px-5 pt-12 sm:px-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:pt-20">
+          <div className="animate-rise">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/[0.07] px-3.5 py-1.5 text-[12.5px] font-semibold text-gold-bright ring-1 ring-white/10">
+              <Sparkles className="size-3.5" strokeWidth={2} aria-hidden="true" /> La plateforme entrepreneuriale pour étudiants
+            </span>
+            <h1 className="mt-6 font-display text-[40px] leading-[1.05] font-extrabold tracking-tight sm:text-[56px]">
+              Un étudiant, un projet,
+              <br />
+              <span className="bg-[linear-gradient(120deg,#f1d48a,#c9993a)] bg-clip-text text-transparent">une entreprise.</span>
             </h1>
-            <p style={{
-              fontSize: "18px",
-              color: "rgba(200,215,235,0.6)",
-              maxWidth: "500px",
-              margin: "0 auto 32px",
-              lineHeight: 1.7,
-            }}>
-              L'application intelligente qui guide les entrepreneurs de l'idée à la réussite.
+            <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-white/70">
+              L&apos;application intelligente qui guide les entrepreneurs de l&apos;idée à la réussite.
             </p>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap", gap: "12px" }}>
-              <Link href="/register" className="btn-primary">
-                Commençons !
-                <ArrowRight size={18} aria-hidden="true" />
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link href="/register" className="inline-flex h-12 items-center gap-2 rounded-xl bg-white px-6 text-[14.5px] font-semibold text-[#14244f] shadow-lg transition-transform hover:-translate-y-px">
+                Commençons ! <ArrowRight className="size-[18px]" aria-hidden="true" />
               </Link>
-              <Link href="#fonctionnalites" className="btn-secondary">
+              <Link href="#fonctionnalites" className="inline-flex h-12 items-center rounded-xl px-6 text-[14.5px] font-semibold text-white ring-1 ring-white/25 transition-colors hover:bg-white/10">
                 En savoir plus
               </Link>
             </div>
           </div>
+
+          {/* Aperçu de l'interface */}
+          <div className="relative hidden animate-rise [animation-delay:120ms] lg:block" aria-hidden="true">
+            <div className="absolute -inset-6 rounded-[36px] bg-white/[0.03] ring-1 ring-white/10" />
+            <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(118deg,#162f86_0%,#1f4fd8_48%,#3a78f2_100%)] p-6 shadow-2xl">
+              <div className="absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(236,208,138,0.8),transparent)]" />
+              <p className="text-[11px] font-semibold tracking-[0.14em] text-white/65 uppercase">Synthèse du projet</p>
+              <div className="mt-4 flex items-center gap-4">
+                <ProgressRing value={60} size={70} stroke={6} trackClassName="stroke-white/15" barClassName="stroke-white">
+                  <span className="font-display text-[15px] font-bold">60%</span>
+                </ProgressRing>
+                <div>
+                  <p className="text-[11px] font-semibold tracking-[0.12em] text-white/65 uppercase">Étape 4 sur 5</p>
+                  <p className="font-display text-[19px] font-semibold">Tests</p>
+                  <p className="text-[12px] text-white/70">Validée par l&apos;encadrant</p>
+                </div>
+              </div>
+              <div className="mt-5 flex gap-1.5">
+                {[1, 1, 1, 0.45, 0.15].map((o, i) => <span key={i} className="h-1.5 flex-1 rounded-full bg-white" style={{ opacity: o }} />)}
+              </div>
+            </div>
+            <div className="relative mt-4 grid grid-cols-2 gap-4">
+              <div className="rounded-[20px] bg-white p-4 text-ink shadow-xl">
+                <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-subtle uppercase">Encadrant</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <Avatar name="Marie Ngo" size="md" />
+                  <div>
+                    <p className="text-[13px] font-semibold">Marie Ngo</p>
+                    <p className="flex gap-0.5">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`size-3 ${n <= 4 ? "fill-gold-bright text-gold-bright" : "text-line-strong"}`} />)}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-[20px] bg-white p-4 text-ink shadow-xl">
+                <p className="text-[11px] font-semibold tracking-[0.12em] text-ink-subtle uppercase">Mentor IA</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <span className="inline-flex size-10 items-center justify-center rounded-xl bg-[linear-gradient(140deg,#f1d48a,#c9993a)] text-[#2a1d05]"><Sparkles className="size-5" /></span>
+                  <p className="text-[12.5px] leading-snug text-ink-muted">Analyse de marché prête</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-[1200px] px-5 sm:px-8">
+        {/* ===== CHIFFRES ===== */}
+        <section className="relative -mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Chiffres clés">
+          {STATS.map((stat) => (
+            <div key={stat.label} className="rounded-[22px] border border-line bg-surface p-6 shadow-raised">
+              <p className="font-display text-[34px] leading-none font-bold tracking-tight text-brand tabular-nums">{stat.value}</p>
+              <p className="mt-2.5 text-[13.5px] leading-snug text-ink-muted">{stat.label}</p>
+            </div>
+          ))}
         </section>
 
-        {/* ============================================================
-            STATS
-            ============================================================ */}
-        <section className="fade-in-up delay-2" style={{ marginBottom: "48px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "12px" }}>
-            {STATS.map((stat, index) => (
-              <div key={index} className="stat-card" style={{ textAlign: "center" }}>
-                <p style={{ fontSize: "28px", fontWeight: 700, color: "#F5D76E", margin: 0 }}>{stat.value}</p>
-                <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)", margin: "4px 0 0 0" }}>{stat.label}</p>
+        {/* ===== CONFIANCE ===== */}
+        <section className="py-14 text-center" aria-label="Ils nous font confiance">
+          <p className="text-[11.5px] font-semibold tracking-[0.18em] text-ink-subtle uppercase">Ils nous font confiance</p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-5">
+            {TRUSTED_BY.map((item) => (
+              <span key={item.name} className="inline-flex items-center gap-2.5 text-[15px] font-semibold text-ink-muted">
+                <item.icon className="size-5 text-gold" strokeWidth={1.75} aria-hidden="true" /> {item.name}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* ===== PARCOURS ===== */}
+        <section id="parcours" className="scroll-mt-8 py-16">
+          <SectionHeading icon={Target} eyebrow="Feuille de route" title="Transforme ton idée en plan d'affaires" />
+          <ol className="relative grid gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:before:absolute lg:before:top-[44px] lg:before:right-[10%] lg:before:left-[10%] lg:before:h-px lg:before:bg-line">
+            {STEPS.map((step, i) => (
+              <li key={step.label} className="relative rounded-[22px] border border-line bg-surface p-5 text-center shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-raised">
+                <span className={`relative mx-auto inline-flex size-14 items-center justify-center rounded-2xl ring-8 ring-canvas ${i === 0 ? "bg-brand text-white shadow-brand" : "bg-brand-soft text-brand-ink"}`}>
+                  <step.icon className="size-6" strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <p className="mt-4 text-[11px] font-semibold tracking-[0.14em] text-gold uppercase">Étape {i + 1}</p>
+                <p className="mt-1 font-display text-[16px] font-semibold text-ink">{step.label}</p>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-ink-muted">{step.desc}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* ===== FONCTIONNALITÉS ===== */}
+        <section id="fonctionnalites" className="scroll-mt-8 py-16">
+          <SectionHeading icon={Zap} eyebrow="Propulsé par l'IA" title="Construis ton plan plus rapidement" subtitle="L'IA au service de ton projet entrepreneurial" />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((feature) => (
+              <div key={feature.title} className="group rounded-[22px] border border-line bg-surface p-6 shadow-card transition-all duration-200 hover:-translate-y-1 hover:border-line-strong hover:shadow-raised">
+                <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand-ink transition-colors group-hover:bg-brand group-hover:text-white">
+                  <feature.icon className="size-[22px]" strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <h3 className="mt-5 font-display text-[17px] font-semibold text-ink">{feature.title}</h3>
+                <p className="mt-1.5 text-[14px] leading-relaxed text-ink-muted">{feature.desc}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ============================================================
-            TRUST
-            ============================================================ */}
-        <section className="fade-in-up delay-2" style={{ marginBottom: "48px" }}>
-          <div style={{ textAlign: "center", padding: "24px", background: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px solid rgba(180,200,230,0.04)" }}>
-            <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "16px" }}>
-              Ils nous font confiance
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: "28px" }}>
-              {TRUSTED_BY.map((item) => (
-                <div key={item.name} className="trust-logo">
-                  <item.icon size={18} aria-hidden="true" /> {item.name}
+        {/* ===== TÉMOIGNAGES ===== */}
+        <section id="temoignages" className="scroll-mt-8 py-16">
+          <SectionHeading icon={Users} eyebrow="Témoignages" title="Ce que nos utilisateurs disent" />
+          <div className="grid gap-5 lg:grid-cols-3">
+            {TESTIMONIALS.map((t) => (
+              <figure key={t.author} className="flex flex-col rounded-[22px] border border-line bg-surface p-7 shadow-card">
+                <Quote className="size-7 text-gold-bright" strokeWidth={1.5} aria-hidden="true" />
+                <blockquote className="mt-4 flex-1 text-[14.5px] leading-relaxed text-ink">« {t.quote} »</blockquote>
+                <div className="mt-5 flex gap-0.5" aria-label={`Note : ${t.stars} sur 5`}>
+                  {Array.from({ length: t.stars }, (_, i) => <Star key={i} className="size-4 fill-gold-bright text-gold-bright" aria-hidden="true" />)}
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================
-            STEPS (Parcours)
-            ============================================================ */}
-        <section className="fade-in-up delay-3" style={{ marginBottom: "48px" }}>
-          <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <span className="badge" style={{ marginBottom: "12px" }}>
-              <Target size={14} aria-hidden="true" /> Feuille de route
-            </span>
-            <h2 style={{ fontSize: "30px", fontWeight: 700, color: "#E8EDF5", letterSpacing: "-0.5px" }}>
-              Transforme ton idée en plan d'affaires
-            </h2>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "12px" }}>
-            {STEPS.map((step, index) => (
-              <motion.div
-                key={step.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-                className="step-dot"
-                style={{
-                  flex: 1,
-                  minWidth: "140px",
-                  maxWidth: "200px",
-                  background: "rgba(255,255,255,0.04)",
-                  backdropFilter: "blur(12px)",
-                  borderRadius: "16px",
-                  padding: "20px 16px",
-                  border: "1px solid rgba(180,200,230,0.06)",
-                  textAlign: "center",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.borderColor = "rgba(212,175,55,0.15)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(180,200,230,0.06)"; }}
-              >
-                <step.icon size={28} style={{ color: "#F5D76E", marginBottom: "8px" }} aria-hidden="true" />
-                <p style={{ fontSize: "14px", fontWeight: 600, color: "#E8EDF5", margin: "0 0 4px 0" }}>{step.label}</p>
-                <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.4)", margin: 0, lineHeight: 1.4 }}>{step.desc}</p>
-              </motion.div>
+                <figcaption className="mt-4 flex items-center gap-3 border-t border-line pt-4">
+                  <Avatar name={t.author} size="md" />
+                  <span>
+                    <span className="block text-[14px] font-semibold text-ink">{t.author}</span>
+                    <span className="block text-[12.5px] text-ink-muted">{t.role}</span>
+                  </span>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </section>
 
-        {/* ============================================================
-            FEATURES
-            ============================================================ */}
-        <section id="fonctionnalites" className="fade-in-up delay-4" style={{ marginBottom: "48px" }}>
-          <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <span className="badge" style={{ marginBottom: "12px" }}>
-              <Zap size={14} aria-hidden="true" /> Propulsé par l'IA
+        {/* ===== APPEL À L'ACTION ===== */}
+        <section className="py-16">
+          <div className="relative isolate overflow-hidden rounded-[30px] bg-[linear-gradient(118deg,#162f86_0%,#1f4fd8_48%,#3a78f2_100%)] px-6 py-14 text-center text-white shadow-[0_24px_60px_-24px_rgba(31,79,216,0.7)] sm:px-12">
+            <div aria-hidden="true" className="absolute -top-24 -right-16 -z-10 size-72 rounded-full bg-[#7fb0ff]/25 blur-3xl" />
+            <div aria-hidden="true" className="absolute inset-x-16 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(236,208,138,0.8),transparent)]" />
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-[12px] font-semibold text-gold-bright ring-1 ring-white/15">
+              <Award className="size-3.5" strokeWidth={2} aria-hidden="true" /> Rejoins la communauté
             </span>
-            <h2 style={{ fontSize: "30px", fontWeight: 700, color: "#E8EDF5", letterSpacing: "-0.5px" }}>
-              Construis ton plan plus rapidement
-            </h2>
-            <p style={{ fontSize: "16px", color: "rgba(200,215,235,0.4)", marginTop: "4px" }}>
-              L'IA au service de ton projet entrepreneurial
-            </p>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
-            {FEATURES.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.06 }}
-                className="hero-card"
-              >
-                <div
-                  className="feature-image"
-                  style={{ backgroundImage: `url(${feature.image})` }}
-                />
-                <div style={{ padding: "16px 18px 18px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-                    <div style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: "rgba(212,175,55,0.12)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                      <feature.icon size={16} style={{ color: "#F5D76E" }} />
-                    </div>
-                    <h3 style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>{feature.title}</h3>
-                  </div>
-                  <p style={{ fontSize: "13px", color: "rgba(200,215,235,0.5)", margin: 0, lineHeight: 1.5 }}>
-                    {feature.desc}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* ============================================================
-            TESTIMONIALS
-            ============================================================ */}
-        <section className="fade-in-up delay-5" style={{ marginBottom: "48px" }}>
-          <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <span className="badge" style={{ marginBottom: "12px" }}>
-              <Users size={14} aria-hidden="true" /> Témoignages
-            </span>
-            <h2 style={{ fontSize: "30px", fontWeight: 700, color: "#E8EDF5", letterSpacing: "-0.5px" }}>
-              Ce que nos utilisateurs disent
-            </h2>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px" }}>
-            {TESTIMONIALS.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.author}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-                className="testimonial-card"
-              >
-                <Quote size={24} style={{ color: "#D4AF37", opacity: 0.3, marginBottom: "12px" }} aria-hidden="true" />
-                <p style={{ fontSize: "14px", color: "rgba(200,215,235,0.7)", lineHeight: 1.6, marginBottom: "12px" }}>
-                  "{testimonial.quote}"
-                </p>
-                <div style={{ display: "flex", gap: "4px", marginBottom: "8px" }} aria-label={`Note : ${testimonial.stars} sur 5`}>
-                  {[...Array(testimonial.stars)].map((_, i) => (
-                    <Star key={i} size={14} style={{ color: "#F5D76E", fill: "#F5D76E" }} aria-hidden="true" />
-                  ))}
-                </div>
-                <p style={{ fontSize: "14px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>
-                  {testimonial.author}
-                </p>
-                <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.4)", margin: 0 }}>
-                  {testimonial.role}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* ============================================================
-            CTA
-            ============================================================ */}
-        <section className="fade-in-up delay-6" style={{ marginBottom: "32px" }}>
-          <div style={{
-            background: "linear-gradient(135deg, rgba(212,175,55,0.08), rgba(10,22,40,0.8))",
-            backdropFilter: "blur(12px)",
-            borderRadius: "20px",
-            padding: "48px 40px",
-            textAlign: "center",
-            border: "1px solid rgba(212,175,55,0.1)",
-          }}>
-            <span className="badge" style={{ marginBottom: "12px" }}>
-              <Award size={14} aria-hidden="true" /> Rejoins la communauté
-            </span>
-            <h2 style={{ fontSize: "30px", fontWeight: 700, color: "#E8EDF5", marginBottom: "12px" }}>
-              Prêt à commencer ?
-            </h2>
-            <p style={{ fontSize: "16px", color: "rgba(200,215,235,0.5)", marginBottom: "28px" }}>
-              Rejoins la communauté IAI Entrepreneur et fais briller ton idée
-            </p>
-            <Link href="/register" className="btn-primary">
-              S'inscrire gratuitement
-              <ArrowRight size={18} aria-hidden="true" />
+            <h2 className="mt-5 font-display text-[30px] font-bold tracking-tight sm:text-[38px]">Prêt à commencer ?</h2>
+            <p className="mx-auto mt-3 max-w-xl text-[16px] text-white/75">Rejoins la communauté IAI Entrepreneur et fais briller ton idée</p>
+            <Link href="/register" className="mt-8 inline-flex h-12 items-center gap-2 rounded-xl bg-white px-6 text-[14.5px] font-semibold text-[#14244f] shadow-lg transition-transform hover:-translate-y-px">
+              S&apos;inscrire gratuitement <ArrowRight className="size-[18px]" aria-hidden="true" />
             </Link>
           </div>
         </section>
+      </main>
 
-        {/* ============================================================
-            FOOTER
-            ============================================================ */}
-        <footer className="fade-in-up delay-6" style={{
-          paddingTop: "24px",
-          borderTop: "1px solid rgba(180,200,230,0.06)",
-          textAlign: "center",
-        }}>
-          <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.2)", letterSpacing: "0.5px", margin: 0 }}>
-            © 2026 <span style={{ color: "#D4AF37" }}>IAI Entrepreneur</span> · Plateforme de gestion de projets étudiants
-          </p>
-        </footer>
-      </div>
+      {/* ===== PIED DE PAGE ===== */}
+      <footer className="border-t border-line">
+        <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-5 py-8 sm:px-8">
+          <span className="inline-flex items-center gap-3">
+            <LogoMark className="size-8" />
+            <span className="font-display text-[14px] font-bold tracking-[0.16em] text-ink">LIGHT</span>
+          </span>
+          <p className="text-[13px] text-ink-subtle">© 2026 IAI Entrepreneur · Plateforme de gestion de projets étudiants</p>
+        </div>
+      </footer>
     </div>
   );
 }

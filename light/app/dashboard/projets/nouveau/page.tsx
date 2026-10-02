@@ -4,6 +4,8 @@
 import { listEncadrants, fullName } from "@/lib/projects";
 import NewProjectForm from "./NewProjectForm";
 
+export const metadata = { title: "Nouveau projet" };
+
 export default async function NewProjectPage() {
   const encadrants = await listEncadrants();
   return <NewProjectForm encadrants={encadrants.map((e) => ({ id: e.id, name: fullName(e) }))} />;

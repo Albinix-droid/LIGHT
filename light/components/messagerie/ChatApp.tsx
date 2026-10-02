@@ -269,7 +269,7 @@ export default function ChatApp({
             <input className="msg-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une conversation" style={{ paddingLeft: "34px", padding: "9px 12px 9px 34px", fontSize: "13px" }} aria-label="Rechercher une conversation" />
           </div>
 
-          <div style={{ display: "flex", gap: "2px", padding: "3px", borderRadius: "12px", background: "color-mix(in srgb, var(--line) 70%, transparent)" }} role="tablist">
+          <div className="msg-scroll" style={{ display: "flex", gap: "2px", padding: "3px", borderRadius: "12px", background: "color-mix(in srgb, var(--line) 70%, transparent)", overflowX: "auto" }} role="tablist">
             {TABS.map((t) => {
               const count = unreadTotal(t.id);
               return (
@@ -560,7 +560,7 @@ const STYLES = `
   .msg-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
 
   .msg-tab {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 9px; font-size: 12.5px; font-weight: 600; flex-shrink: 0; white-space: nowrap;
     border: none; background: transparent; color: var(--ink-muted); cursor: pointer; font-family: inherit; transition: background-color 0.15s ease, color 0.15s ease;
   }
   .msg-tab:hover { color: var(--ink); }

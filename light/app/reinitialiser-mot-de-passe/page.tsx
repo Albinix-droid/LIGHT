@@ -87,7 +87,7 @@ export default function ResetPasswordPage() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-              style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "rgba(200,215,235,0.5)", cursor: "pointer", padding: "8px" }}
+              style={{ position: "absolute", right: "8px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--ink-muted)", cursor: "pointer", padding: "8px" }}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
