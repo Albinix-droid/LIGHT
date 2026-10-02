@@ -147,11 +147,11 @@ export function fileVisual(name: string, mimeType: string) {
   const ext = name.split(".").pop()?.toLowerCase() ?? "";
   if (mimeType === "application/pdf") return { Icon: FileText, color: "#F87171", label: "PDF" };
   if (["doc", "docx", "odt"].includes(ext)) return { Icon: FileText, color: "#60A5FA", label: ext.toUpperCase() };
-  if (["xls", "xlsx", "ods", "csv"].includes(ext)) return { Icon: FileSpreadsheet, color: "#34D399", label: ext.toUpperCase() };
+  if (["xls", "xlsx", "ods", "csv"].includes(ext)) return { Icon: FileSpreadsheet, color: "var(--success)", label: ext.toUpperCase() };
   if (["ppt", "pptx", "odp"].includes(ext)) return { Icon: Presentation, color: "#FB923C", label: ext.toUpperCase() };
   if (ext === "zip") return { Icon: FileArchive, color: "#C4B5FD", label: "ZIP" };
-  if (IMAGE_MIME_TYPES.includes(mimeType)) return { Icon: ImageIcon, color: "#F5D76E", label: ext.toUpperCase() };
-  return { Icon: FileIcon, color: "rgba(200,215,235,0.7)", label: ext.toUpperCase() || "FICHIER" };
+  if (IMAGE_MIME_TYPES.includes(mimeType)) return { Icon: ImageIcon, color: "var(--brand)", label: ext.toUpperCase() };
+  return { Icon: FileIcon, color: "var(--ink-muted)", label: ext.toUpperCase() || "FICHIER" };
 }
 
 // ============================================================
@@ -166,7 +166,7 @@ export function PendingTray({ files, onRemove }: { files: PendingFile[]; onRemov
         return (
           <div key={f.localId} title={f.error ?? f.name} style={{
             position: "relative", flexShrink: 0, width: f.previewUrl ? 76 : 190, height: 76, borderRadius: 12, overflow: "hidden",
-            background: "rgba(255,255,255,0.05)", border: `1px solid ${f.status === "error" ? "rgba(228,115,107,0.5)" : "rgba(180,200,230,0.12)"}`,
+            background: "var(--surface-muted)", border: `1px solid ${f.status === "error" ? "var(--danger)" : "var(--line)"}`,
             display: "flex", alignItems: "center", gap: 10, padding: f.previewUrl ? 0 : "0 12px",
           }}>
             {f.previewUrl ? (
@@ -176,8 +176,8 @@ export function PendingTray({ files, onRemove }: { files: PendingFile[]; onRemov
               <>
                 <visual.Icon size={24} style={{ color: visual.color, flexShrink: 0 }} />
                 <span style={{ minWidth: 0 }}>
-                  <span className="msg-ellipsis" style={{ fontSize: 12, fontWeight: 600, color: "#E8EDF5" }}>{f.name}</span>
-                  <span style={{ fontSize: 11, color: f.status === "error" ? "#F0928B" : "rgba(200,215,235,0.45)" }}>
+                  <span className="msg-ellipsis" style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{f.name}</span>
+                  <span style={{ fontSize: 11, color: f.status === "error" ? "var(--danger)" : "var(--ink-subtle)" }}>
                     {f.status === "error" ? f.error : formatFileSize(f.size)}
                   </span>
                 </span>
@@ -185,17 +185,17 @@ export function PendingTray({ files, onRemove }: { files: PendingFile[]; onRemov
             )}
             {f.status === "uploading" && (
               <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(10,22,40,0.45)" }}>
-                <Loader2 size={18} style={{ color: "#F5D76E", animation: "spin 1s linear infinite" }} />
+                <Loader2 size={18} style={{ color: "var(--brand)", animation: "spin 1s linear infinite" }} />
               </span>
             )}
             {f.status === "error" && f.previewUrl && (
               <span style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(10,22,40,0.55)" }}>
-                <AlertCircle size={18} style={{ color: "#F0928B" }} />
+                <AlertCircle size={18} style={{ color: "var(--danger)" }} />
               </span>
             )}
             <button onClick={() => onRemove(f.localId)} aria-label={`Retirer ${f.name}`} style={{
               position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", border: "none", cursor: "pointer",
-              background: "rgba(10,22,40,0.8)", color: "#E8EDF5", display: "inline-flex", alignItems: "center", justifyContent: "center",
+              background: "rgba(10,22,40,0.8)", color: "var(--ink)", display: "inline-flex", alignItems: "center", justifyContent: "center",
             }}>
               <X size={12} />
             </button>
@@ -234,7 +234,7 @@ export function MessageAttachments({
             const ratio = img.width && img.height ? img.width / img.height : 4 / 3;
             return (
               <button key={img.id} onClick={() => onOpenImage(images, i)} aria-label={`Agrandir ${img.name}`} className="msg-image-btn" style={{
-                padding: 0, border: "none", cursor: "zoom-in", borderRadius: 14, overflow: "hidden", background: "rgba(255,255,255,0.05)",
+                padding: 0, border: "none", cursor: "zoom-in", borderRadius: 14, overflow: "hidden", background: "var(--surface-muted)",
                 ...(single
                   ? { width: `min(300px, 60vw, ${Math.max(120, Math.round(260 * ratio))}px)`, aspectRatio: String(Math.min(Math.max(ratio, 0.6), 2)) }
                   : { aspectRatio: "1", gridColumn: images.length === 3 && i === 0 ? "span 2" : undefined }),
@@ -250,17 +250,17 @@ export function MessageAttachments({
         const visual = fileVisual(doc.name, doc.mimeType);
         return (
           <a key={doc.id} href={doc.url} className="msg-file-card" download={doc.name} title={`Télécharger ${doc.name}`} style={{
-            background: mine ? "rgba(212,175,55,0.14)" : "rgba(255,255,255,0.05)",
-            borderColor: mine ? "rgba(212,175,55,0.3)" : "rgba(180,200,230,0.1)",
+            background: mine ? "var(--brand-soft)" : "var(--surface)",
+            borderColor: mine ? "var(--brand)" : "var(--line)",
           }}>
             <span style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: "rgba(10,22,40,0.35)" }}>
               <visual.Icon size={19} style={{ color: visual.color }} />
             </span>
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span className="msg-ellipsis" style={{ fontSize: 13, fontWeight: 600, color: "#E8EDF5" }}>{doc.name}</span>
-              <span style={{ fontSize: 11, color: "rgba(200,215,235,0.5)" }}>{visual.label} · {formatFileSize(doc.size)}</span>
+              <span className="msg-ellipsis" style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{doc.name}</span>
+              <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>{visual.label} · {formatFileSize(doc.size)}</span>
             </span>
-            <Download size={16} style={{ color: "rgba(200,215,235,0.6)", flexShrink: 0 }} />
+            <Download size={16} style={{ color: "var(--ink-muted)", flexShrink: 0 }} />
           </a>
         );
       })}
@@ -296,9 +296,9 @@ export function ImageLightbox({ images, index, onClose }: { images: ChatAttachme
     <div role="dialog" aria-modal="true" aria-label={image.name} onMouseDown={(e) => e.target === e.currentTarget && onClose()} style={{
       position: "fixed", inset: 0, zIndex: 3000, background: "rgba(3,8,18,0.92)", display: "flex", alignItems: "center", justifyContent: "center", padding: "64px 16px 24px",
     }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", color: "#E8EDF5" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", color: "var(--ink)" }}>
         <span className="msg-ellipsis" style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
-          {image.name} <span style={{ color: "rgba(200,215,235,0.5)", fontWeight: 400 }}>· {formatFileSize(image.size)}{many ? ` · ${current + 1}/${images.length}` : ""}</span>
+          {image.name} <span style={{ color: "var(--ink-muted)", fontWeight: 400 }}>· {formatFileSize(image.size)}{many ? ` · ${current + 1}/${images.length}` : ""}</span>
         </span>
         <a href={`${image.url}?telecharger=1`} className="msg-btn msg-btn-small" style={{ textDecoration: "none" }}><Download size={14} /> Télécharger</a>
         <button className="msg-icon-btn" onClick={onClose} aria-label="Fermer"><X size={18} /></button>
@@ -360,17 +360,17 @@ export function SharedFilesDialog({
       </div>
 
       {error ? (
-        <p role="alert" style={{ color: "#F0928B", fontSize: 13 }}>{error}</p>
+        <p role="alert" style={{ color: "var(--danger)", fontSize: 13 }}>{error}</p>
       ) : files === null ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 30 }}><Loader2 size={20} style={{ color: "#F5D76E", animation: "spin 1s linear infinite" }} /></div>
+        <div style={{ display: "flex", justifyContent: "center", padding: 30 }}><Loader2 size={20} style={{ color: "var(--brand)", animation: "spin 1s linear infinite" }} /></div>
       ) : tab === "images" ? (
         images.length === 0 ? (
-          <p style={{ textAlign: "center", color: "rgba(200,215,235,0.45)", fontSize: 13, padding: "24px 0" }}>Aucune image partagée dans cette conversation.</p>
+          <p style={{ textAlign: "center", color: "var(--ink-subtle)", fontSize: 13, padding: "24px 0" }}>Aucune image partagée dans cette conversation.</p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
             {images.map((img, i) => (
               <button key={img.id} onClick={() => onOpenImage(images, i)} className="msg-image-btn" title={`${img.name} · ${img.senderName}`} aria-label={`Agrandir ${img.name}`}
-                style={{ padding: 0, border: "none", cursor: "zoom-in", aspectRatio: "1", borderRadius: 10, overflow: "hidden", background: "rgba(255,255,255,0.05)" }}>
+                style={{ padding: 0, border: "none", cursor: "zoom-in", aspectRatio: "1", borderRadius: 10, overflow: "hidden", background: "var(--surface-muted)" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={img.url} alt={img.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
               </button>
@@ -378,7 +378,7 @@ export function SharedFilesDialog({
           </div>
         )
       ) : docs.length === 0 ? (
-        <p style={{ textAlign: "center", color: "rgba(200,215,235,0.45)", fontSize: 13, padding: "24px 0" }}>Aucun document partagé dans cette conversation.</p>
+        <p style={{ textAlign: "center", color: "var(--ink-subtle)", fontSize: 13, padding: "24px 0" }}>Aucun document partagé dans cette conversation.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {docs.map((doc) => {
@@ -387,12 +387,12 @@ export function SharedFilesDialog({
               <a key={doc.id} href={doc.url} download={doc.name} className="msg-file-card" style={{ maxWidth: "none" }}>
                 <visual.Icon size={20} style={{ color: visual.color, flexShrink: 0 }} />
                 <span style={{ flex: 1, minWidth: 0 }}>
-                  <span className="msg-ellipsis" style={{ fontSize: 13, fontWeight: 600, color: "#E8EDF5" }}>{doc.name}</span>
-                  <span style={{ fontSize: 11, color: "rgba(200,215,235,0.5)" }}>
+                  <span className="msg-ellipsis" style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{doc.name}</span>
+                  <span style={{ fontSize: 11, color: "var(--ink-muted)" }}>
                     {formatFileSize(doc.size)} · {doc.senderName} · {dateFormat.format(new Date(doc.createdAt))}
                   </span>
                 </span>
-                <Download size={15} style={{ color: "rgba(200,215,235,0.6)", flexShrink: 0 }} />
+                <Download size={15} style={{ color: "var(--ink-muted)", flexShrink: 0 }} />
               </a>
             );
           })}

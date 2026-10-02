@@ -4,6 +4,7 @@
 import { requireRole } from "@/lib/auth";
 import { listCredentials } from "@/lib/admin/queries";
 import { credentialState } from "@/lib/staff";
+import { PageHeader } from "@/components/ui/kit";
 import CredentialsManager, { type CredentialRow } from "./CredentialsManager";
 
 export const metadata = { title: "Identifiants école" };
@@ -29,14 +30,12 @@ export default async function AdminCredentialsPage({ searchParams }: { searchPar
   }));
 
   return (
-    <div className="enc-page">
-      <div style={{ marginBottom: "20px" }}>
-        <h1 className="enc-h1">Identifiants école</h1>
-        <p className="enc-sub" style={{ maxWidth: "720px", lineHeight: 1.6 }}>
-          Chaque encadrant ou administrateur reçoit un matricule et un code confidentiel à usage unique. Après son inscription,
-          il les saisit dans le formulaire de confirmation : le rôle ne lui est attribué qu&apos;à ce moment-là.
-        </p>
-      </div>
+    <div className="mx-auto max-w-[1440px]">
+      <PageHeader
+        eyebrow="Administration"
+        title="Identifiants école"
+        description="Chaque encadrant ou administrateur reçoit un matricule et un code confidentiel à usage unique. Après son inscription, il les saisit dans le formulaire de confirmation : le rôle ne lui est attribué qu'à ce moment-là."
+      />
       <CredentialsManager rows={rows} openCreate={params.nouveau === "1"} />
     </div>
   );

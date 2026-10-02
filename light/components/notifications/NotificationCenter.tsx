@@ -18,12 +18,22 @@ import {
   type ActionItem, type NotificationFilter, type NotificationKind, type NotificationView,
 } from "@/lib/notifications/types";
 import { KIND_META } from "./kindMeta";
+import { PageHeader, Segmented, buttonClass, cx } from "@/components/ui/kit";
 
-const TONES: Record<ActionItem["tone"], { icon: typeof Info; color: string; bg: string; border: string }> = {
-  urgent: { icon: AlertTriangle, color: "#F0928B", bg: "rgba(228,115,107,0.08)", border: "rgba(228,115,107,0.28)" },
-  warning: { icon: Clock, color: "#F5B544", bg: "rgba(245,158,11,0.07)", border: "rgba(245,158,11,0.25)" },
-  info: { icon: Info, color: "#A5B4FC", bg: "rgba(99,102,241,0.07)", border: "rgba(99,102,241,0.22)" },
+const TONES: Record<ActionItem["tone"], { icon: typeof Info; tile: string; cta: string }> = {
+  urgent: { icon: AlertTriangle, tile: "bg-danger-soft text-danger", cta: "text-danger" },
+  warning: { icon: Clock, tile: "bg-warning-soft text-warning", cta: "text-warning" },
+  info: { icon: Info, tile: "bg-brand-soft text-brand-ink", cta: "text-brand" },
 };
+
+function GroupTitle({ children, icon: Icon }: { children: React.ReactNode; icon?: typeof Info }) {
+  return (
+    <h2 className="mt-8 mb-3 flex items-center gap-2 text-[11.5px] font-bold tracking-[0.14em] text-ink-subtle uppercase">
+      {Icon && <Icon className="size-3.5 text-gold" strokeWidth={2} />}
+      {children}
+    </h2>
+  );
+}
 
 export default function NotificationCenter({
   initialItems,
@@ -152,78 +162,57 @@ export default function NotificationCenter({
   const hasRead = items.some((i) => i.read);
 
   return (
-    <div className="ntc-root">
-      <style>{`
-        @keyframes ntc-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .ntc-root { max-width: 920px; margin: 0 auto; padding: 24px 20px 48px; font-family: 'Inter', -apple-system, sans-serif; color: #E8EDF5; }
-        .ntc-h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.5px; }
-        .ntc-sub { color: rgba(200,215,235,0.55); font-size: 14px; margin: 0; line-height: 1.6; }
-        .ntc-h2 { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(200,215,235,0.55); margin: 28px 0 10px; }
-        .ntc-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 50px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; border: 1px solid rgba(180,200,230,0.18); background: none; color: rgba(200,215,235,0.85); text-decoration: none; white-space: nowrap; }
-        .ntc-btn:hover:not(:disabled) { border-color: rgba(180,200,230,0.35); color: #E8EDF5; }
-        .ntc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .ntc-btn-danger { border-color: rgba(228,115,107,0.35); color: #F0928B; }
-        .ntc-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-top: 22px; scrollbar-width: none; }
-        .ntc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 50px; border: 1px solid rgba(180,200,230,0.12); background: rgba(255,255,255,0.03); color: rgba(200,215,235,0.7); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
-        .ntc-chip-active { background: linear-gradient(135deg, #D4AF37, #F5D76E); color: #0A1628; border-color: transparent; }
-        .ntc-chip-count { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; background: rgba(228,115,107,0.9); color: #fff; }
-        .ntc-action { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 16px; text-decoration: none; transition: transform 0.2s ease; }
-        .ntc-action:hover { transform: translateY(-1px); }
-        .ntc-list { border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(180,200,230,0.08); overflow: hidden; }
-        .ntc-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid rgba(180,200,230,0.05); position: relative; }
-        .ntc-item:last-child { border-bottom: none; }
-        .ntc-item:hover { background: rgba(255,255,255,0.03); }
-        .ntc-item-main { flex: 1; min-width: 0; border: none; background: none; padding: 0; text-align: left; font-family: inherit; cursor: pointer; color: inherit; }
-        .ntc-tools { display: flex; gap: 2px; opacity: 0.35; transition: opacity 0.2s ease; }
-        .ntc-item:hover .ntc-tools, .ntc-tools:focus-within { opacity: 1; }
-        .ntc-tool { width: 30px; height: 30px; border-radius: 8px; border: none; background: none; color: rgba(200,215,235,0.7); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-        .ntc-tool:hover { background: rgba(255,255,255,0.06); color: #E8EDF5; }
-        .ntc-empty { text-align: center; padding: 44px 20px; border-radius: 16px; border: 1px dashed rgba(180,200,230,0.15); color: rgba(200,215,235,0.5); font-size: 14px; }
-        @media (max-width: 640px) { .ntc-h1 { font-size: 23px; } .ntc-root { padding: 16px 16px 40px; } .ntc-tools { opacity: 1; } }
-      `}</style>
-
-      {/* ===== EN-TÊTE ===== */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "16px", flexWrap: "wrap" }}>
-        <div>
-          <h1 className="ntc-h1">Notifications</h1>
-          <p className="ntc-sub">
-            {unread > 0 ? `${unread} notification${unread > 1 ? "s" : ""} non lue${unread > 1 ? "s" : ""}.` : "Vous êtes à jour."}
-            {" "}Ouvrir une notification, ou la page qu&apos;elle concerne, la marque comme lue.
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          <button className="ntc-btn" onClick={markAll} disabled={unread === 0}><CheckCheck size={14} /> Tout marquer comme lu</button>
-          {confirmPurge ? (
-            <>
-              <button className="ntc-btn ntc-btn-danger" onClick={purgeRead}><Trash2 size={14} /> Confirmer</button>
-              <button className="ntc-btn" onClick={() => setConfirmPurge(false)}>Annuler</button>
-            </>
-          ) : (
-            <button className="ntc-btn" onClick={() => setConfirmPurge(true)} disabled={!hasRead}><Trash2 size={14} /> Supprimer les lues</button>
-          )}
-        </div>
-      </div>
+    <div className="mx-auto max-w-[980px]">
+      <PageHeader
+        eyebrow="Centre d'activité"
+        title="Notifications"
+        description={
+          <>
+            {unread > 0 ? `${unread} notification${unread > 1 ? "s" : ""} non lue${unread > 1 ? "s" : ""}.` : "Vous êtes à jour."}{" "}
+            Ouvrir une notification, ou la page qu&apos;elle concerne, la marque comme lue.
+          </>
+        }
+        actions={
+          <>
+            <button className={buttonClass("secondary")} onClick={markAll} disabled={unread === 0}><CheckCheck /> Tout marquer comme lu</button>
+            {confirmPurge ? (
+              <>
+                <button className={buttonClass("danger")} onClick={purgeRead}><Trash2 /> Confirmer</button>
+                <button className={buttonClass("ghost")} onClick={() => setConfirmPurge(false)}>Annuler</button>
+              </>
+            ) : (
+              <button className={buttonClass("ghost")} onClick={() => setConfirmPurge(true)} disabled={!hasRead}><Trash2 /> Supprimer les lues</button>
+            )}
+          </>
+        }
+      />
 
       {/* ===== À TRAITER ===== */}
-      <h2 className="ntc-h2"><Sparkles size={14} style={{ color: "#F5D76E" }} /> À traiter</h2>
+      <GroupTitle icon={Sparkles}>À traiter</GroupTitle>
       {actionItems.length === 0 ? (
-        <div className="ntc-action" style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.18)" }}>
-          <CheckCircle2 size={18} style={{ color: "#34D399", flexShrink: 0 }} />
-          <span style={{ fontSize: "14px", color: "rgba(232,237,245,0.85)" }}>Rien ne vous attend pour le moment. Beau travail !</span>
+        <div className="flex items-center gap-3 rounded-2xl bg-success-soft px-5 py-4 ring-1 ring-success/15 ring-inset">
+          <CheckCircle2 className="size-5 shrink-0 text-success" strokeWidth={1.75} />
+          <span className="text-[14px] text-ink">Rien ne vous attend pour le moment. Beau travail !</span>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div className="grid gap-3 md:grid-cols-2">
           {actionItems.map((a) => {
             const tone = TONES[a.tone];
             return (
-              <Link key={a.key} href={a.href} className="ntc-action" style={{ background: tone.bg, border: `1px solid ${tone.border}` }}>
-                <tone.icon size={18} style={{ color: tone.color, flexShrink: 0 }} />
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#E8EDF5" }}>{a.title}</span>
-                  <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.6)", lineHeight: 1.5 }}>{a.detail}</span>
+              <Link
+                key={a.key}
+                href={a.href}
+                className="group flex items-start gap-3.5 rounded-[20px] border border-line bg-surface p-4 shadow-card transition-all duration-150 hover:-translate-y-px hover:border-line-strong hover:shadow-raised"
+              >
+                <span className={cx("inline-flex size-11 shrink-0 items-center justify-center rounded-xl", tone.tile)}>
+                  <tone.icon className="size-5" strokeWidth={1.75} />
                 </span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "4px", fontSize: "12px", fontWeight: 700, color: tone.color, whiteSpace: "nowrap" }}>
-                  {a.cta} <ArrowRight size={13} />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14px] font-semibold text-ink">{a.title}</span>
+                  <span className="mt-0.5 block text-[12.5px] leading-relaxed text-ink-muted">{a.detail}</span>
+                  <span className={cx("mt-2 inline-flex items-center gap-1 text-[12.5px] font-semibold", tone.cta)}>
+                    {a.cta} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </span>
                 </span>
               </Link>
             );
@@ -232,29 +221,29 @@ export default function NotificationCenter({
       )}
 
       {/* ===== FILTRES ===== */}
-      <div className="ntc-chips" role="tablist" aria-label="Filtrer les notifications">
-        {NOTIFICATION_FILTERS.map((f) => {
-          const count = f.key === "all" ? 0 : f.key === "unread" ? unread : kindCounts[f.key] ?? 0;
-          return (
-            <button key={f.key} role="tab" aria-selected={filter === f.key} className={`ntc-chip ${filter === f.key ? "ntc-chip-active" : ""}`} onClick={() => changeFilter(f.key)}>
-              {f.label}
-              {count > 0 && <span className="ntc-chip-count">{count}</span>}
-            </button>
-          );
-        })}
-      </div>
+      <Segmented
+        className="mt-8 w-fit"
+        label="Filtrer les notifications"
+        value={filter}
+        onChange={changeFilter}
+        items={NOTIFICATION_FILTERS.map((f) => ({
+          value: f.key,
+          label: f.label,
+          count: f.key === "all" ? 0 : f.key === "unread" ? unread : kindCounts[f.key] ?? 0,
+        }))}
+      />
 
-      {error && <p role="alert" style={{ color: "#F0928B", fontSize: "13px", margin: "12px 0 0" }}>{error}</p>}
+      {error && <p role="alert" className="mt-3 text-[13px] text-danger">{error}</p>}
 
       {/* ===== HISTORIQUE ===== */}
       {items.length === 0 && loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "40px" }}>
-          <Loader2 size={20} style={{ color: "#F5D76E", animation: "ntc-spin 1s linear infinite" }} />
+        <div className="flex justify-center p-10">
+          <Loader2 className="size-5 animate-spin text-brand" />
         </div>
       ) : items.length === 0 ? (
-        <div className="ntc-empty" style={{ marginTop: "16px" }}>
-          <Bell size={22} style={{ color: "rgba(200,215,235,0.3)", marginBottom: "8px" }} />
-          <p style={{ margin: 0 }}>
+        <div className="mt-5 flex flex-col items-center rounded-[22px] border border-dashed border-line-strong bg-surface/60 px-6 py-12 text-center">
+          <Bell className="size-6 text-ink-subtle" strokeWidth={1.5} />
+          <p className="mt-3 text-[14px] text-ink-muted">
             {filter === "all" ? "Aucune notification pour le moment."
               : filter === "unread" ? "Aucune notification non lue."
               : `Aucune notification « ${NOTIFICATION_KIND_LABELS[filter]} ».`}
@@ -263,32 +252,41 @@ export default function NotificationCenter({
       ) : (
         groups.map(([label, list]) => (
           <section key={label} aria-label={label}>
-            <h2 className="ntc-h2">{label}</h2>
-            <div className="ntc-list">
+            <GroupTitle>{label}</GroupTitle>
+            <div className="overflow-hidden rounded-[22px] border border-line bg-surface shadow-card">
               {list.map((n) => {
                 const meta = KIND_META[n.type];
                 return (
-                  <div key={n.id} className="ntc-item" style={{ background: n.read ? undefined : "rgba(212,175,55,0.045)" }}>
-                    {!n.read && <span aria-hidden style={{ position: "absolute", left: 0, top: 12, bottom: 12, width: 3, borderRadius: 3, background: "#F5D76E" }} />}
-                    <span style={{ width: 34, height: 34, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: meta.bg }}>
-                      <meta.icon size={15} style={{ color: meta.color }} />
+                  <div
+                    key={n.id}
+                    className={cx(
+                      "group relative flex items-start gap-3.5 border-b border-line px-5 py-4 transition-colors last:border-b-0 hover:bg-surface-muted",
+                      !n.read && "bg-brand-soft/35",
+                    )}
+                  >
+                    {!n.read && <span aria-hidden="true" className="absolute top-4 bottom-4 left-0 w-[3px] rounded-r-full bg-brand" />}
+                    <span className={cx("inline-flex size-10 shrink-0 items-center justify-center rounded-xl", meta.tone)}>
+                      <meta.icon className="size-[18px]" strokeWidth={1.75} />
                     </span>
-                    <button className="ntc-item-main" onClick={() => open(n)} title={n.link ? "Ouvrir" : undefined}>
-                      <span style={{ display: "block", fontSize: "14px", lineHeight: 1.5, color: n.read ? "rgba(200,215,235,0.6)" : "#E8EDF5", fontWeight: n.read ? 400 : 500 }}>
-                        {n.message}
-                      </span>
-                      <span style={{ display: "flex", flexWrap: "wrap", gap: "8px", alignItems: "center", marginTop: "3px", fontSize: "11px", color: "rgba(200,215,235,0.42)" }}>
+                    <button className="min-w-0 flex-1 text-left" onClick={() => open(n)} title={n.link ? "Ouvrir" : undefined}>
+                      <span className={cx("block text-[14px] leading-relaxed", n.read ? "text-ink-muted" : "font-medium text-ink")}>{n.message}</span>
+                      <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11.5px] text-ink-subtle">
                         <span>{relativeTime(n.createdAt, now)}</span>
                         <span>· {NOTIFICATION_KIND_LABELS[n.type]}</span>
-                        {n.project && <span style={{ color: "rgba(245,215,110,0.7)" }}>· {n.project.title}</span>}
+                        {n.project && <span className="font-medium text-gold">· {n.project.title}</span>}
                       </span>
                     </button>
-                    <span className="ntc-tools">
-                      <button className="ntc-tool" onClick={() => toggleRead(n)} aria-label={n.read ? "Marquer comme non lue" : "Marquer comme lue"} title={n.read ? "Marquer comme non lue" : "Marquer comme lue"}>
-                        {n.read ? <Circle size={14} /> : <CheckCircle2 size={14} />}
+                    <span className="flex gap-0.5 opacity-100 transition-opacity sm:opacity-30 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
+                      <button
+                        className={buttonClass("ghost", "icon-sm")}
+                        onClick={() => toggleRead(n)}
+                        aria-label={n.read ? "Marquer comme non lue" : "Marquer comme lue"}
+                        title={n.read ? "Marquer comme non lue" : "Marquer comme lue"}
+                      >
+                        {n.read ? <Circle /> : <CheckCircle2 />}
                       </button>
-                      <button className="ntc-tool" onClick={() => remove(n)} aria-label="Supprimer" title="Supprimer">
-                        <X size={14} />
+                      <button className={buttonClass("ghost", "icon-sm")} onClick={() => remove(n)} aria-label="Supprimer" title="Supprimer">
+                        <X />
                       </button>
                     </span>
                   </div>
@@ -300,9 +298,9 @@ export default function NotificationCenter({
       )}
 
       {cursor && items.length > 0 && (
-        <div style={{ display: "flex", justifyContent: "center", marginTop: "18px" }}>
-          <button className="ntc-btn" onClick={() => load(filter, cursor)} disabled={loading}>
-            {loading ? <Loader2 size={14} style={{ animation: "ntc-spin 1s linear infinite" }} /> : null} Afficher plus
+        <div className="mt-6 flex justify-center">
+          <button className={buttonClass("secondary")} onClick={() => load(filter, cursor)} disabled={loading}>
+            {loading && <Loader2 className="animate-spin" />} Afficher plus
           </button>
         </div>
       )}

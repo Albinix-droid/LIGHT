@@ -22,11 +22,7 @@ export default function NotificationPreview({ items, serverNow }: { items: Notif
   }, []);
 
   if (optimistic.length === 0) {
-    return (
-      <p style={{ margin: 0, padding: "18px 0", fontSize: "13px", color: "rgba(200,215,235,0.5)", textAlign: "center" }}>
-        Aucune notification pour le moment.
-      </p>
-    );
+    return <p className="py-6 text-center text-[13px] text-ink-muted">Aucune notification pour le moment.</p>;
   }
 
   const open = (n: NotificationView) => {
@@ -41,29 +37,23 @@ export default function NotificationPreview({ items, serverNow }: { items: Notif
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+    <div className="flex flex-col gap-1">
       {optimistic.map((n) => {
         const meta = KIND_META[n.type];
         return (
           <button
             key={n.id}
             onClick={() => open(n)}
-            style={{
-              width: "100%", display: "flex", gap: "10px", alignItems: "flex-start", padding: "10px 12px", borderRadius: "12px",
-              border: "none", textAlign: "left", cursor: "pointer", fontFamily: "inherit",
-              background: n.read ? "rgba(255,255,255,0.02)" : "rgba(212,175,55,0.06)",
-            }}
+            className={`flex w-full items-start gap-3 rounded-xl p-2.5 text-left transition-colors hover:bg-surface-muted ${n.read ? "" : "bg-brand-soft/40"}`}
           >
-            <span style={{ width: 28, height: 28, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", background: meta.bg }}>
-              <meta.icon size={13} style={{ color: meta.color }} />
+            <span className={`inline-flex size-9 shrink-0 items-center justify-center rounded-xl ${meta.tone}`}>
+              <meta.icon className="size-4" strokeWidth={1.75} />
             </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontSize: "13px", lineHeight: 1.45, color: n.read ? "rgba(200,215,235,0.55)" : "#E8EDF5", fontWeight: n.read ? 400 : 500 }}>
-                {n.message}
-              </span>
-              <span style={{ fontSize: "11px", color: "rgba(200,215,235,0.4)" }}>{relativeTime(n.createdAt, now)}</span>
+            <span className="min-w-0 flex-1">
+              <span className={`line-clamp-2 block text-[13px] leading-snug ${n.read ? "text-ink-muted" : "font-medium text-ink"}`}>{n.message}</span>
+              <span className="mt-0.5 block text-[11px] text-ink-subtle">{relativeTime(n.createdAt, now)}</span>
             </span>
-            {!n.read && <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#F5D76E", flexShrink: 0, marginTop: 6 }} />}
+            {!n.read && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand" aria-label="Non lue" />}
           </button>
         );
       })}

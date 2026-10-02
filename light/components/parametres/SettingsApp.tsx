@@ -57,8 +57,9 @@ export default function SettingsApp({
   };
 
   return (
-    <div className="set-root">
+    <div className="set-root animate-rise">
       <style>{STYLES}</style>
+      <p className="set-eyebrow">Mon compte</p>
       <h1 className="set-h1">Paramètres</h1>
       <p className="set-sub">Gérez votre profil, la sécurité de votre compte et ce que la plateforme vous envoie.</p>
 
@@ -98,26 +99,26 @@ export default function SettingsApp({
 function Card({ title, icon: Icon, children, tone }: { title: string; icon: typeof User; children: React.ReactNode; tone?: "danger" }) {
   return (
     <section className={`set-card ${tone === "danger" ? "set-card-danger" : ""}`}>
-      <h2 className="set-h2"><Icon size={17} style={{ color: tone === "danger" ? "#F0928B" : "#F5D76E" }} /> {title}</h2>
+      <h2 className="set-h2"><span style={{ display: "inline-flex", width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", background: tone === "danger" ? "var(--danger-soft)" : "var(--brand-soft)", color: tone === "danger" ? "var(--danger)" : "var(--brand-ink)" }}><Icon size={17} /></span> {title}</h2>
       {children}
     </section>
   );
 }
 
 function Feedback({ error, success }: { error?: string; success?: string }) {
-  if (error) return <p role="alert" className="set-msg" style={{ color: "#F0928B" }}>{error}</p>;
-  if (success) return <p role="status" className="set-msg" style={{ color: "#34D399" }}><Check size={14} /> {success}</p>;
+  if (error) return <p role="alert" className="set-msg" style={{ color: "var(--danger)", background: "var(--danger-soft)" }}>{error}</p>;
+  if (success) return <p role="status" className="set-msg" style={{ color: "var(--success)", background: "var(--success-soft)" }}><Check size={14} /> {success}</p>;
   return null;
 }
 
 function Avatar({ url, initials, size = 88 }: { url: string | null; initials: string; size?: number }) {
   return url ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt="Photo de profil" width={size} height={size} style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: "2px solid rgba(212,175,55,0.35)" }} />
+    <img src={url} alt="Photo de profil" width={size} height={size} style={{ width: size, height: size, borderRadius: size > 60 ? 24 : 14, objectFit: "cover", flexShrink: 0, boxShadow: "0 0 0 3px var(--surface), 0 0 0 4px var(--line)" }} />
   ) : (
     <span style={{
-      width: size, height: size, borderRadius: "50%", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center",
-      background: "linear-gradient(135deg, #D4AF37, #F5D76E)", color: "#0A1628", fontWeight: 800, fontSize: size * 0.36,
+      width: size, height: size, borderRadius: size > 60 ? 24 : 14, flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center",
+      background: "linear-gradient(140deg, #f1d48a, #c9993a)", color: "#2a1d05", fontWeight: 700, fontSize: size * 0.34, fontFamily: "var(--font-display)",
     }}>{initials}</span>
   );
 }
@@ -226,8 +227,8 @@ function ProfileSection({ profile, onSaved }: { profile: SettingsProfile; onSave
           <div style={{ position: "relative" }}>
             <Avatar url={avatarUrl} initials={initials} />
             {avatarBusy && (
-              <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "rgba(10,22,40,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Loader2 size={22} style={{ color: "#F5D76E", animation: "spin 1s linear infinite" }} />
+              <span style={{ position: "absolute", inset: 0, borderRadius: 24, background: "rgba(10,22,40,0.55)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Loader2 size={22} className="animate-spin" style={{ color: "#fff" }} />
               </span>
             )}
           </div>
@@ -270,7 +271,7 @@ function ProfileSection({ profile, onSaved }: { profile: SettingsProfile; onSave
 
         <label className="set-field">
           <span className="set-label" style={{ display: "flex", justifyContent: "space-between" }}>
-            Présentation <span style={{ color: bio.length > MAX_BIO_LENGTH - 30 ? "#F5B544" : "rgba(200,215,235,0.4)", fontWeight: 400 }}>{bio.length}/{MAX_BIO_LENGTH}</span>
+            Présentation <span style={{ color: bio.length > MAX_BIO_LENGTH - 30 ? "var(--warning)" : "var(--ink-subtle)", fontWeight: 400 }}>{bio.length}/{MAX_BIO_LENGTH}</span>
           </span>
           <textarea className="set-input" value={bio} onChange={(e) => setBio(e.target.value)} maxLength={MAX_BIO_LENGTH} rows={3}
             placeholder={profile.role === "ENCADRANT" ? "Vos domaines d'expertise, votre parcours, ce que vous aimez accompagner…" : "Vos compétences, vos centres d'intérêt, ce que vous recherchez dans un projet…"}
@@ -283,18 +284,18 @@ function ProfileSection({ profile, onSaved }: { profile: SettingsProfile; onSave
           <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>
             <Avatar url={avatarUrl} initials={initials} size={48} />
             <div style={{ minWidth: 0 }}>
-              <p style={{ margin: 0, fontWeight: 700, color: "#E8EDF5" }}>{`${firstName} ${lastName}`.trim() || "Votre nom"}</p>
-              <p style={{ margin: "2px 0 0", fontSize: "12px", color: profile.role === "ENCADRANT" ? "#A5B4FC" : "#F5D76E" }}>
+              <p style={{ margin: 0, fontWeight: 700, color: "var(--ink)" }}>{`${firstName} ${lastName}`.trim() || "Votre nom"}</p>
+              <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: profile.role === "STUDENT" ? "var(--gold)" : "var(--brand-ink)" }}>
                 {ROLE_LABELS[profile.role]}{track ? ` · ${TRACK_OPTIONS.find((t) => t.value === track)?.label}` : ""}
               </p>
-              {bio.trim() && <p style={{ margin: "6px 0 0", fontSize: "13px", color: "rgba(232,237,245,0.75)", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{bio.trim()}</p>}
+              {bio.trim() && <p style={{ margin: "6px 0 0", fontSize: "13px", color: "var(--ink-muted)", lineHeight: 1.55, whiteSpace: "pre-wrap" }}>{bio.trim()}</p>}
             </div>
           </div>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", marginTop: "16px" }}>
           <button className="set-btn set-btn-primary" onClick={save} disabled={!dirty || isPending || !firstName.trim()}>
-            {isPending ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Check size={14} />} Enregistrer
+            {isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} Enregistrer
           </button>
           {dirty && !isPending && <span className="set-help" style={{ margin: 0 }}>Modifications non enregistrées</span>}
         </div>
@@ -343,11 +344,11 @@ function EmailCard({ currentEmail, basePath }: { currentEmail: string; basePath:
 
   return (
     <Card title="Adresse email" icon={Mail}>
-      <p className="set-text">Adresse actuelle : <strong style={{ color: "#E8EDF5" }}>{currentEmail}</strong></p>
+      <p className="set-text">Adresse actuelle : <strong style={{ color: "var(--ink)" }}>{currentEmail}</strong></p>
       <form onSubmit={submit} style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
         <input className="set-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Nouvelle adresse email" autoComplete="email" aria-label="Nouvelle adresse email" style={{ flex: 1, minWidth: "220px" }} />
         <button className="set-btn set-btn-primary" type="submit" disabled={busy || !email.trim()}>
-          {busy ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Mail size={14} />} Changer d&apos;adresse
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />} Changer d&apos;adresse
         </button>
       </form>
       <p className="set-help">Par sécurité, le changement ne prend effet qu&apos;après confirmation depuis la nouvelle adresse.</p>
@@ -407,14 +408,14 @@ function PasswordCard({ email }: { email: string }) {
           <label className="set-field">
             <span className="set-label">Confirmation</span>
             <input className="set-input" type={type} value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" required
-              style={confirm && confirm !== next ? { borderColor: "rgba(228,115,107,0.6)" } : undefined} />
+              style={confirm && confirm !== next ? { borderColor: "var(--danger)" } : undefined} />
           </label>
         </div>
         {next && (
           <div style={{ margin: "-4px 0 12px" }} aria-live="polite">
             <div style={{ display: "flex", gap: "4px" }}>
               {[1, 2, 3, 4].map((i) => (
-                <span key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: strength.score >= i ? strength.color : "rgba(255,255,255,0.08)", transition: "background 0.2s ease" }} />
+                <span key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: strength.score >= i ? strength.color : "var(--line)", transition: "background 0.2s ease" }} />
               ))}
             </div>
             <span style={{ fontSize: "12px", color: strength.color }}>Robustesse : {strength.label}</span>
@@ -422,7 +423,7 @@ function PasswordCard({ email }: { email: string }) {
         )}
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <button className="set-btn set-btn-primary" type="submit" disabled={busy || !current || !next || !confirm}>
-            {busy ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <KeyRound size={14} />} Modifier le mot de passe
+            {busy ? <Loader2 size={14} className="animate-spin" /> : <KeyRound size={14} />} Modifier le mot de passe
           </button>
           <button className="set-btn" type="button" onClick={() => setShow((s) => !s)} aria-pressed={show}>
             {show ? <EyeOff size={14} /> : <Eye size={14} />} {show ? "Masquer" : "Afficher"}
@@ -460,7 +461,7 @@ function SessionsCard({ profile }: { profile: SettingsProfile }) {
       {confirming ? (
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <button className="set-btn set-btn-danger" onClick={signOutEverywhere} disabled={busy}>
-            {busy ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <LogOut size={14} />} Oui, tout déconnecter
+            {busy ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />} Oui, tout déconnecter
           </button>
           <button className="set-btn" onClick={() => setConfirming(false)} disabled={busy}>Annuler</button>
         </div>
@@ -510,8 +511,8 @@ function NotificationsSection({ muted, basePath, onChange }: { muted: Notificati
           return (
             <label key={s.kind} className="set-toggle-row">
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#E8EDF5" }}>{s.label}</span>
-                <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.55)" }}>{s.detail}</span>
+                <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "var(--ink)" }}>{s.label}</span>
+                <span style={{ fontSize: "12.5px", color: "var(--ink-muted)" }}>{s.detail}</span>
               </span>
               <input type="checkbox" className="set-switch" role="switch" checked={enabled} onChange={() => toggle(s.kind)} aria-label={`Notifications ${s.label}`} />
             </label>
@@ -519,7 +520,7 @@ function NotificationsSection({ muted, basePath, onChange }: { muted: Notificati
         })}
       </div>
       <p className="set-help" style={{ marginTop: "14px" }}>
-        La section « À traiter » de vos <Link href={notificationsHref} style={{ color: "#F5D76E" }}>notifications</Link> reste toujours visible :
+        La section « À traiter » de vos <Link href={notificationsHref} style={{ color: "var(--brand)", fontWeight: 600 }}>notifications</Link> reste toujours visible :
         elle reflète ce qui attend réellement votre action.
       </p>
       <Feedback error={error} success={saved ? "Préférences enregistrées." : undefined} />
@@ -546,7 +547,7 @@ function DataSection({ profile, stats }: { profile: SettingsProfile; stats: Acco
         <div className="set-tiles">
           {tiles.map((t) => (
             <div key={t.label} className="set-tile">
-              <t.icon size={16} style={{ color: "#F5D76E" }} />
+              <span className="set-tile-icon"><t.icon size={17} /></span>
               <span className="set-tile-value">{t.value}</span>
               <span className="set-tile-label">{t.label}</span>
             </div>
@@ -590,7 +591,7 @@ function DeleteAccountCard({ profile, stats }: { profile: SettingsProfile; stats
 
   return (
     <Card title="Supprimer mon compte" icon={AlertTriangle} tone="danger">
-      <p className="set-text">La suppression est <strong style={{ color: "#F0928B" }}>définitive</strong>. Seront effacés :</p>
+      <p className="set-text">La suppression est <strong style={{ color: "var(--danger)" }}>définitive</strong>. Seront effacés :</p>
       <ul className="set-list">
         <li>votre profil, vos messages, fichiers envoyés, notifications et conversations avec l&apos;assistant IA ;</li>
         {stats.ownedProjects.length > 0 && (
@@ -598,8 +599,8 @@ function DeleteAccountCard({ profile, stats }: { profile: SettingsProfile; stats
             les projets que vous portez, avec leurs étapes et leurs équipes :{" "}
             {stats.ownedProjects.map((p, i) => (
               <span key={p.id}>
-                {i > 0 && ", "}<strong style={{ color: "#E8EDF5" }}>{p.title}</strong>
-                {p.memberCount > 1 && <span style={{ color: "#F5B544" }}> ({p.memberCount - 1} autre{p.memberCount > 2 ? "s" : ""} membre{p.memberCount > 2 ? "s" : ""})</span>}
+                {i > 0 && ", "}<strong style={{ color: "var(--ink)" }}>{p.title}</strong>
+                {p.memberCount > 1 && <span style={{ color: "var(--warning)" }}> ({p.memberCount - 1} autre{p.memberCount > 2 ? "s" : ""} membre{p.memberCount > 2 ? "s" : ""})</span>}
               </span>
             ))}
           </li>
@@ -613,7 +614,7 @@ function DeleteAccountCard({ profile, stats }: { profile: SettingsProfile; stats
         {stats.supervisedProjects > 0 && <li>vos projets encadrés perdront leur encadrant ({stats.supervisedProjects}).</li>}
       </ul>
       {stats.ownedProjects.some((p) => p.memberCount > 1) && (
-        <p className="set-help" style={{ color: "#F5B544" }}>Prévenez les membres de vos équipes avant de supprimer votre compte : leurs projets communs disparaîtront aussi.</p>
+        <p className="set-help" style={{ color: "var(--warning)" }}>Prévenez les membres de vos équipes avant de supprimer votre compte : leurs projets communs disparaîtront aussi.</p>
       )}
 
       {open ? (
@@ -624,7 +625,7 @@ function DeleteAccountCard({ profile, stats }: { profile: SettingsProfile; stats
           </label>
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button className="set-btn set-btn-danger-solid" onClick={remove} disabled={!matches || busy}>
-              {busy ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Trash2 size={14} />} Supprimer définitivement
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />} Supprimer définitivement
             </button>
             <button className="set-btn" onClick={() => { setOpen(false); setConfirm(""); }} disabled={busy}>Annuler</button>
           </div>
@@ -643,62 +644,68 @@ function DeleteAccountCard({ profile, stats }: { profile: SettingsProfile; stats
 // STYLES
 // ============================================================
 const STYLES = `
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  .set-root { max-width: 1040px; margin: 0 auto; padding: 24px 20px 48px; font-family: 'Inter', -apple-system, sans-serif; color: #E8EDF5; }
-  .set-h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.5px; }
-  .set-sub { color: rgba(200,215,235,0.55); font-size: 14px; margin: 0 0 24px; }
-  .set-layout { display: flex; gap: 24px; align-items: flex-start; }
-  .set-nav { width: 250px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 80px; }
-  .set-nav-btn { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid transparent; background: none; color: rgba(200,215,235,0.7); font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s ease; }
-  .set-nav-btn:hover { background: rgba(255,255,255,0.04); color: #E8EDF5; }
-  .set-nav-active { background: rgba(212,175,55,0.1) !important; border-color: rgba(212,175,55,0.25); color: #F5D76E !important; }
-  .set-nav-hint { display: block; font-size: 11px; font-weight: 400; color: rgba(200,215,235,0.4); margin-top: 1px; }
-  .set-card { padding: 20px 22px; border-radius: 18px; background: rgba(255,255,255,0.035); border: 1px solid rgba(180,200,230,0.08); margin-bottom: 16px; }
-  .set-card-danger { border-color: rgba(228,115,107,0.25); background: rgba(228,115,107,0.04); }
-  .set-h2 { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; margin: 0 0 16px; }
-  .set-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
-  .set-field { display: block; margin-bottom: 14px; }
-  .set-label { display: block; font-size: 12px; font-weight: 600; color: rgba(200,215,235,0.6); margin-bottom: 6px; }
-  .set-input { width: 100%; box-sizing: border-box; padding: 11px 14px; border-radius: 12px; border: 1px solid rgba(180,200,230,0.14); background: rgba(255,255,255,0.04); color: #E8EDF5; font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s ease; }
-  .set-input:focus { border-color: rgba(212,175,55,0.5); }
-  .set-input::placeholder { color: rgba(200,215,235,0.3); }
-  .set-help { font-size: 12px; color: rgba(200,215,235,0.45); margin: 8px 0 0; line-height: 1.5; }
-  .set-text { font-size: 14px; color: rgba(200,215,235,0.7); line-height: 1.6; margin: 0 0 14px; }
-  .set-msg { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 12px 0 0; }
-  .set-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 16px; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; border: 1px solid rgba(180,200,230,0.18); background: rgba(255,255,255,0.03); color: rgba(200,215,235,0.85); transition: all 0.2s ease; white-space: nowrap; }
-  .set-btn:hover:not(:disabled) { color: #E8EDF5; border-color: rgba(180,200,230,0.35); }
-  .set-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .set-btn-primary { background: linear-gradient(135deg, #D4AF37, #F5D76E); color: #0A1628 !important; border: none; font-weight: 700; }
-  .set-btn-primary:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(212,175,55,0.25); }
-  .set-btn-danger { color: #F0928B; border-color: rgba(228,115,107,0.35); }
-  .set-btn-danger:hover:not(:disabled) { color: #fff; background: rgba(228,115,107,0.18); border-color: rgba(228,115,107,0.5); }
-  .set-btn-danger-solid { background: #D9534F; color: #fff; border: none; font-weight: 700; }
-  .set-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 50px; border: 1px solid rgba(180,200,230,0.14); background: rgba(255,255,255,0.03); color: rgba(200,215,235,0.75); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
-  .set-chip-active { border-color: rgba(99,102,241,0.55); background: rgba(99,102,241,0.14); color: #C7D2FE; }
-  .set-chip-tag { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 6px; background: rgba(99,102,241,0.2); color: #A5B4FC; }
-  .set-preview { padding: 14px 16px; border-radius: 14px; border: 1px dashed rgba(180,200,230,0.15); background: rgba(10,22,40,0.35); }
-  .set-dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 0 0 16px; }
-  .set-dl div { padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.03); }
-  .set-dl dt { font-size: 11px; color: rgba(200,215,235,0.45); margin-bottom: 3px; }
-  .set-dl dd { margin: 0; font-size: 13px; font-weight: 600; color: #E8EDF5; }
-  .set-toggle-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(180,200,230,0.06); cursor: pointer; }
-  .set-switch { appearance: none; -webkit-appearance: none; width: 42px; height: 24px; border-radius: 12px; background: rgba(255,255,255,0.12); position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s ease; margin: 0; }
-  .set-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #E8EDF5; transition: transform 0.2s ease; }
-  .set-switch:checked { background: linear-gradient(135deg, #D4AF37, #F5D76E); }
-  .set-switch:checked::after { transform: translateX(18px); background: #0A1628; }
-  .set-switch:focus-visible { outline: 2px solid #F5D76E; outline-offset: 2px; }
-  .set-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-  .set-tile { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.03); }
-  .set-tile-value { font-size: 24px; font-weight: 800; color: #E8EDF5; }
-  .set-tile-label { font-size: 12px; color: rgba(200,215,235,0.55); }
-  .set-list { margin: 0 0 12px; padding-left: 20px; color: rgba(200,215,235,0.7); font-size: 13px; line-height: 1.7; }
-  @media (max-width: 820px) {
+  .set-root { max-width: 1100px; margin: 0 auto; color: var(--ink); }
+  .set-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-subtle); margin: 0; }
+  .set-h1 { font-family: var(--font-display); font-size: 30px; font-weight: 700; margin: 6px 0 8px; letter-spacing: -0.02em; color: var(--ink); line-height: 1.15; }
+  .set-sub { color: var(--ink-muted); font-size: 14px; margin: 0 0 28px; line-height: 1.6; }
+  .set-layout { display: flex; gap: 28px; align-items: flex-start; }
+  .set-nav { width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 88px; padding: 8px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
+  .set-nav-btn { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 14px; border: none; background: none; color: var(--ink-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; font-family: inherit; transition: background-color 0.15s ease, color 0.15s ease; }
+  .set-nav-btn svg { flex-shrink: 0; }
+  .set-nav-btn:hover { background: var(--surface-muted); color: var(--ink); }
+  .set-nav-active, .set-nav-active:hover { background: var(--brand); color: #fff; box-shadow: var(--shadow-brand); }
+  .set-nav-hint { display: block; font-size: 11.5px; font-weight: 400; color: var(--ink-subtle); margin-top: 1px; }
+  .set-nav-active .set-nav-hint { color: rgba(255,255,255,0.75); }
+  .set-card { padding: 24px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); margin-bottom: 18px; }
+  .set-card-danger { border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
+  .set-h2 { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0 0 18px; color: var(--ink); }
+  .set-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+  .set-field { display: block; margin-bottom: 16px; }
+  .set-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  .set-input { width: 100%; box-sizing: border-box; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+  .set-input:hover { border-color: var(--line-strong); }
+  .set-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 12%, transparent); }
+  .set-input::placeholder { color: var(--ink-subtle); }
+  .set-help { font-size: 12px; color: var(--ink-subtle); margin: 8px 0 0; line-height: 1.55; }
+  .set-text { font-size: 14px; color: var(--ink-muted); line-height: 1.65; margin: 0 0 16px; }
+  .set-msg { display: flex; align-items: center; gap: 6px; font-size: 13px; margin: 14px 0 0; padding: 10px 14px; border-radius: 12px; }
+  .set-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; border: 1px solid var(--line); background: var(--surface); color: var(--ink); box-shadow: var(--shadow-card); transition: all 0.15s ease; white-space: nowrap; text-decoration: none; }
+  .set-btn:hover:not(:disabled) { background: var(--surface-muted); border-color: var(--line-strong); }
+  .set-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .set-btn-primary { background: var(--brand); color: #fff !important; border-color: transparent; box-shadow: var(--shadow-brand); }
+  .set-btn-primary:hover:not(:disabled) { background: var(--brand-strong); border-color: transparent; }
+  .set-btn-danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
+  .set-btn-danger:hover:not(:disabled) { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 50%, var(--line)); }
+  .set-btn-danger-solid { background: var(--danger); color: #fff; border-color: transparent; }
+  .set-btn-danger-solid:hover:not(:disabled) { background: var(--danger); filter: brightness(0.95); border-color: transparent; }
+  .set-chip { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s ease; }
+  .set-chip:hover { border-color: var(--line-strong); color: var(--ink); }
+  .set-chip-active, .set-chip-active:hover { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
+  .set-chip-tag { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 6px; background: var(--surface-muted); color: var(--ink-muted); }
+  .set-chip-active .set-chip-tag { background: var(--brand); color: #fff; }
+  .set-preview { padding: 16px 18px; border-radius: 16px; border: 1px dashed var(--line-strong); background: var(--surface-muted); }
+  .set-dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 0 0 18px; }
+  .set-dl div { padding: 14px 16px; border-radius: 14px; background: var(--surface-muted); border: 1px solid var(--line); }
+  .set-dl dt { font-size: 12px; color: var(--ink-subtle); margin-bottom: 3px; }
+  .set-dl dd { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .set-toggle-row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); cursor: pointer; transition: border-color 0.15s ease; }
+  .set-toggle-row:hover { border-color: var(--line-strong); }
+  .set-switch { appearance: none; -webkit-appearance: none; width: 44px; height: 26px; border-radius: 13px; background: var(--line-strong); position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s ease; margin: 0; }
+  .set-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(16,24,40,0.2); transition: transform 0.2s ease; }
+  .set-switch:checked { background: var(--brand); }
+  .set-switch:checked::after { transform: translateX(18px); }
+  .set-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .set-tile { display: flex; flex-direction: column; gap: 6px; padding: 16px; border-radius: 16px; background: var(--surface-muted); border: 1px solid var(--line); }
+  .set-tile-icon { display: inline-flex; width: 36px; height: 36px; border-radius: 10px; align-items: center; justify-content: center; background: var(--brand-soft); color: var(--brand-ink); }
+  .set-tile-value { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.1; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .set-tile-label { font-size: 12.5px; color: var(--ink-muted); }
+  .set-list { margin: 0 0 14px; padding-left: 20px; list-style: disc; color: var(--ink-muted); font-size: 13.5px; line-height: 1.75; }
+  @media (max-width: 860px) {
     .set-layout { flex-direction: column; }
-    .set-nav { width: 100%; flex-direction: row; overflow-x: auto; position: static; padding-bottom: 4px; }
+    .set-nav { width: 100%; flex-direction: row; overflow-x: auto; position: static; }
     .set-nav-btn { flex-shrink: 0; padding: 9px 14px; }
     .set-nav-hint { display: none; }
     .set-grid-2 { grid-template-columns: 1fr; }
-    .set-h1 { font-size: 23px; }
-    .set-root { padding: 16px 16px 40px; }
+    .set-h1 { font-size: 25px; }
   }
 `;

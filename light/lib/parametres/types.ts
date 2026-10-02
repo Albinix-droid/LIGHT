@@ -68,6 +68,6 @@ export function passwordStrength(password: string) {
   if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
   if (/\d/.test(password) && /[^A-Za-z0-9]/.test(password)) score++;
   const labels = ["Trop court", "Faible", "Correct", "Bon", "Excellent"];
-  const colors = ["#E4736B", "#E4736B", "#F5B544", "#A3E635", "#34D399"];
+  const colors = ["var(--danger)", "var(--danger)", "var(--warning)", "#65a30d", "var(--success)"];
   return { score, label: labels[score], color: colors[score] };
 }

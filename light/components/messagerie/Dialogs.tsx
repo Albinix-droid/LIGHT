@@ -27,7 +27,7 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
     <div className="msg-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="msg-modal" role="dialog" aria-modal="true" aria-label={title}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
-          <h2 style={{ fontSize: "17px", fontWeight: 700, color: "#E8EDF5", margin: 0 }}>{title}</h2>
+          <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--ink)", margin: 0 }}>{title}</h2>
           <button className="msg-icon-btn" onClick={onClose} aria-label="Fermer"><X size={16} /></button>
         </div>
         {children}
@@ -43,8 +43,8 @@ export function Avatar({ initials, size = 36, role }: { initials: string; size?:
       className="msg-avatar"
       style={{
         width: size, height: size, fontSize: Math.round(size * 0.34),
-        background: encadrant ? "linear-gradient(135deg, #818CF8, #6366F1)" : "linear-gradient(135deg, #D4AF37, #F5D76E)",
-        color: encadrant ? "#fff" : "#0A1628",
+        background: encadrant ? "linear-gradient(140deg, #4d7cff, #1f4fd8)" : "linear-gradient(140deg, #f1d48a, #c9993a)",
+        color: encadrant ? "#fff" : "#2a1d05",
       }}
     >
       {initials}
@@ -53,7 +53,7 @@ export function Avatar({ initials, size = 36, role }: { initials: string; size?:
 }
 
 function ErrorText({ error }: { error: string }) {
-  return error ? <p role="alert" style={{ color: "#F0928B", fontSize: "13px", margin: "10px 0 0" }}>{error}</p> : null;
+  return error ? <p role="alert" style={{ color: "var(--danger)", fontSize: "13px", margin: "10px 0 0" }}>{error}</p> : null;
 }
 
 // Recherche d'utilisateurs (sélection simple ou multiple)
@@ -92,7 +92,7 @@ function UserPicker({
   return (
     <div>
       <div style={{ position: "relative" }}>
-        <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "rgba(200,215,235,0.35)" }} />
+        <Search size={15} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--ink-subtle)" }} />
         <input
           className="msg-input"
           value={query}
@@ -101,7 +101,7 @@ function UserPicker({
           autoFocus={autoFocus}
           style={{ paddingLeft: "36px" }}
         />
-        {loading && <Loader2 size={15} style={{ position: "absolute", right: "12px", top: "50%", marginTop: "-7px", animation: "spin 1s linear infinite", color: "#F5D76E" }} />}
+        {loading && <Loader2 size={15} style={{ position: "absolute", right: "12px", top: "50%", marginTop: "-7px", animation: "spin 1s linear infinite", color: "var(--brand)" }} />}
       </div>
       {selected.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "10px" }}>
@@ -114,7 +114,7 @@ function UserPicker({
       )}
       <div style={{ marginTop: "10px", maxHeight: "240px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px" }} className="msg-scroll">
         {query.trim().length >= 2 && !loading && visible.length === 0 && (
-          <p style={{ fontSize: "13px", color: "rgba(200,215,235,0.4)", textAlign: "center", padding: "14px 0", margin: 0 }}>Aucun utilisateur trouvé.</p>
+          <p style={{ fontSize: "13px", color: "var(--ink-subtle)", textAlign: "center", padding: "14px 0", margin: 0 }}>Aucun utilisateur trouvé.</p>
         )}
         {visible.map((u) => {
           const isSelected = selected.some((s) => s.id === u.id);
@@ -122,10 +122,10 @@ function UserPicker({
             <button key={u.id} type="button" className={`msg-row ${isSelected ? "msg-row-active" : ""}`} onClick={() => onToggle(u)}>
               <Avatar initials={u.initials} size={32} role={u.role} />
               <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                <span style={{ display: "block", fontSize: "14px", color: "#E8EDF5", fontWeight: 500 }}>{u.name}</span>
-                <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)" }}>{ROLE_LABELS[u.role]} · {u.email}</span>
+                <span style={{ display: "block", fontSize: "14px", color: "var(--ink)", fontWeight: 500 }}>{u.name}</span>
+                <span style={{ fontSize: "12px", color: "var(--ink-subtle)" }}>{ROLE_LABELS[u.role]} · {u.email}</span>
               </span>
-              {isSelected && <Check size={16} style={{ color: "#F5D76E" }} />}
+              {isSelected && <Check size={16} style={{ color: "var(--brand)" }} />}
             </button>
           );
         })}
@@ -152,11 +152,11 @@ export function NewDirectDialog({ onClose, onOpen }: { onClose: () => void; onOp
 
   return (
     <Modal title="Nouveau message privé" onClose={onClose}>
-      <p style={{ fontSize: "13px", color: "rgba(200,215,235,0.5)", margin: "0 0 12px" }}>
+      <p style={{ fontSize: "13px", color: "var(--ink-muted)", margin: "0 0 12px" }}>
         Écrivez à un étudiant ou à un encadrant de la plateforme.
       </p>
       <UserPicker selected={[]} onToggle={pick} autoFocus />
-      {isPending && <p style={{ fontSize: "13px", color: "#F5D76E", margin: "10px 0 0" }}>Ouverture de la conversation…</p>}
+      {isPending && <p style={{ fontSize: "13px", color: "var(--brand)", margin: "10px 0 0" }}>Ouverture de la conversation…</p>}
       <ErrorText error={error} />
     </Modal>
   );
@@ -219,7 +219,7 @@ export function NewGroupDialog({
 
       <ErrorText error={error} />
       <button className="msg-btn msg-btn-primary" onClick={submit} disabled={isPending || !name.trim() || members.length === 0} style={{ width: "100%", marginTop: "16px" }}>
-        {isPending ? <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> : <Users size={16} />}
+        {isPending ? <Loader2 size={16} className="animate-spin" /> : <Users size={16} />}
         Créer le groupe{members.length > 0 ? ` (${members.length + 1} membres)` : ""}
       </button>
     </Modal>
@@ -270,12 +270,12 @@ export function NewChannelDialog({ onClose, onOpen }: { onClose: () => void; onO
       <label className="msg-label" htmlFor="channel-description">Description (facultatif)</label>
       <input id="channel-description" className="msg-input" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={200} placeholder="Annonces, questions, entraide…" />
 
-      <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)", margin: "10px 0 0" }}>
+      <p style={{ fontSize: "12px", color: "var(--ink-subtle)", margin: "10px 0 0" }}>
         Le canal est visible par tous : étudiants et encadrants peuvent le rejoindre depuis « Parcourir les canaux ».
       </p>
       <ErrorText error={error} />
       <button className="msg-btn msg-btn-primary" onClick={submit} disabled={isPending || !name.trim()} style={{ width: "100%", marginTop: "16px" }}>
-        {isPending ? <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> : <Hash size={16} />}
+        {isPending ? <Loader2 size={16} className="animate-spin" /> : <Hash size={16} />}
         Créer le canal {track}
       </button>
     </Modal>
@@ -316,9 +316,9 @@ export function BrowseChannelsDialog({ onClose, onOpen }: { onClose: () => void;
         ))}
       </div>
       {channels === null ? (
-        <p style={{ textAlign: "center", padding: "20px 0" }}><Loader2 size={20} style={{ animation: "spin 1s linear infinite", color: "#F5D76E" }} /></p>
+        <p style={{ textAlign: "center", padding: "20px 0" }}><Loader2 size={20} style={{ animation: "spin 1s linear infinite", color: "var(--brand)" }} /></p>
       ) : visible.length === 0 ? (
-        <p style={{ fontSize: "13px", color: "rgba(200,215,235,0.45)", textAlign: "center", padding: "20px 0", margin: 0 }}>
+        <p style={{ fontSize: "13px", color: "var(--ink-subtle)", textAlign: "center", padding: "20px 0", margin: 0 }}>
           Aucun canal pour le moment. Les encadrants créent les canaux GL et SR.
         </p>
       ) : (
@@ -327,14 +327,14 @@ export function BrowseChannelsDialog({ onClose, onOpen }: { onClose: () => void;
             <div key={c.id} className="msg-row" style={{ cursor: "default" }}>
               <span className="msg-track">{c.track}</span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: "block", fontSize: "14px", color: "#E8EDF5", fontWeight: 600 }}>{c.name}</span>
-                <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)" }}>
+                <span style={{ display: "block", fontSize: "14px", color: "var(--ink)", fontWeight: 600 }}>{c.name}</span>
+                <span style={{ fontSize: "12px", color: "var(--ink-subtle)" }}>
                   {c.memberCount} membre{c.memberCount > 1 ? "s" : ""} · créé par {c.createdByName}
                   {c.description ? ` · ${c.description}` : ""}
                 </span>
               </span>
               <button className={`msg-btn ${c.joined ? "" : "msg-btn-primary"}`} onClick={() => join(c)} disabled={busyId === c.id} style={{ padding: "7px 14px" }}>
-                {busyId === c.id ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : c.joined ? "Ouvrir" : "Rejoindre"}
+                {busyId === c.id ? <Loader2 size={14} className="animate-spin" /> : c.joined ? "Ouvrir" : "Rejoindre"}
               </button>
             </div>
           ))}
@@ -389,14 +389,14 @@ export function MembersDialog({
 
   return (
     <Modal title={`${detail.members.length} membre${detail.members.length > 1 ? "s" : ""}`} onClose={onClose}>
-      {detail.description && <p style={{ fontSize: "13px", color: "rgba(200,215,235,0.6)", margin: "0 0 12px" }}>{detail.description}</p>}
+      {detail.description && <p style={{ fontSize: "13px", color: "var(--ink-muted)", margin: "0 0 12px" }}>{detail.description}</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "240px", overflowY: "auto" }} className="msg-scroll">
         {detail.members.map((m) => (
           <div key={m.id} className="msg-row" style={{ cursor: "default" }}>
             <Avatar initials={m.initials} size={32} role={m.role} />
-            <span style={{ flex: 1, fontSize: "14px", color: "#E8EDF5" }}>
+            <span style={{ flex: 1, fontSize: "14px", color: "var(--ink)" }}>
               {m.name}{m.id === meId ? " (vous)" : ""}
-              <span style={{ display: "block", fontSize: "12px", color: "rgba(200,215,235,0.45)" }}>{ROLE_LABELS[m.role]}</span>
+              <span style={{ display: "block", fontSize: "12px", color: "var(--ink-subtle)" }}>{ROLE_LABELS[m.role]}</span>
             </span>
             {m.isAdmin && <span className="msg-badge" title="Administrateur"><Crown size={11} /> Admin</span>}
           </div>
@@ -404,7 +404,7 @@ export function MembersDialog({
       </div>
 
       {canAdd && (
-        <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid rgba(180,200,230,0.08)" }}>
+        <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--line)" }}>
           <span className="msg-label">Ajouter des membres</span>
           <UserPicker selected={adding} onToggle={toggle} excludeIds={detail.members.map((m) => m.id)} />
           {adding.length > 0 && (
@@ -416,15 +416,15 @@ export function MembersDialog({
       )}
 
       {detail.type !== "DIRECT" && (
-        <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid rgba(180,200,230,0.08)" }}>
+        <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--line)" }}>
           {confirmLeave ? (
             <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-              <span style={{ fontSize: "13px", color: "#F0928B", flex: 1 }}>
+              <span style={{ fontSize: "13px", color: "var(--danger)", flex: 1 }}>
                 Quitter {detail.type === "CHANNEL" ? "ce canal" : "ce groupe"} ?
               </span>
               <button className="msg-btn" onClick={() => setConfirmLeave(false)} disabled={isPending}>Annuler</button>
               <button className="msg-btn msg-btn-danger" onClick={leave} disabled={isPending}>
-                {isPending ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <LogOut size={14} />} Quitter
+                {isPending ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />} Quitter
               </button>
             </div>
           ) : (

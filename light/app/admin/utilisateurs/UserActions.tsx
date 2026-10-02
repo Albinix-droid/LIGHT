@@ -5,8 +5,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, UserX, UserCheck, XCircle } from "lucide-react";
+import { Loader2, UserCheck, UserX, XCircle } from "lucide-react";
 import { rejectPendingRole, setUserRole, setUserSuspension } from "@/lib/admin/actions";
+import { Field, Modal, buttonClass, cx, selectClass, textareaClass } from "@/components/ui/kit";
 
 type Role = "STUDENT" | "ENCADRANT" | "ADMIN";
 
@@ -42,91 +43,85 @@ export default function UserActions({
     });
   };
 
-  if (isSelf) return <span className="enc-muted" style={{ fontSize: "12px" }}>Votre compte</span>;
+  if (isSelf) return <span className="text-[12px] text-ink-subtle">Votre compte</span>;
 
   const changeRole = (role: Role) => {
     if (role === user.role) return;
     const label = ROLE_OPTIONS.find((r) => r.value === role)!.label.toLowerCase();
-    const warning = role === "STUDENT"
-      ? ""
-      : "\n\nCe rôle est normalement confirmé avec les identifiants de l'école : ne l'attribuez directement qu'après vérification.";
+    const warning = role === "STUDENT" ? "" : "\n\nCe rôle est normalement confirmé avec les identifiants de l'école : ne l'attribuez directement qu'après vérification.";
     if (!window.confirm(`Attribuer le rôle ${label} à ${user.name} ?${warning}`)) return;
     run(() => setUserRole(user.id, role));
   };
 
   return (
-    <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "flex-end", gap: "6px" }}>
-      <div style={{ display: "inline-flex", gap: "6px", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
-        {pending && <Loader2 size={14} style={{ animation: "spin 1s linear infinite", color: "#F5D76E" }} />}
+    <div className="inline-flex flex-col items-end gap-1.5">
+      <div className="inline-flex flex-wrap items-center justify-end gap-1.5">
+        {pending && <Loader2 className="size-4 animate-spin text-brand" />}
         <select
-          className="enc-select"
+          className={cx(selectClass, "h-9 w-auto py-0 pl-3 text-[12.5px]")}
           value={user.role}
           onChange={(e) => changeRole(e.target.value as Role)}
           disabled={pending}
           aria-label={`Rôle de ${user.name}`}
-          style={{ padding: "6px 30px 6px 10px", fontSize: "12px" }}
         >
           {ROLE_OPTIONS.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
         </select>
         {user.pendingRole && (
           <button
-            className="enc-btn adm-btn-sm"
+            className={buttonClass("secondary", "sm")}
             disabled={pending}
             title="Refuser la demande : le compte reste étudiant"
             onClick={() => window.confirm(`Refuser la demande de rôle de ${user.name} ? Le compte restera étudiant.`) && run(() => rejectPendingRole(user.id))}
           >
-            <XCircle size={13} /> Refuser
+            <XCircle /> Refuser
           </button>
         )}
         {user.suspended ? (
-          <button className="enc-btn adm-btn-sm" disabled={pending} onClick={() => run(() => setUserSuspension(user.id, false))}>
-            <UserCheck size={13} /> Réactiver
+          <button className={buttonClass("secondary", "sm")} disabled={pending} onClick={() => run(() => setUserSuspension(user.id, false))}>
+            <UserCheck /> Réactiver
           </button>
         ) : (
-          <button className="enc-btn adm-btn-sm adm-btn-danger" disabled={pending} onClick={() => setSuspendOpen(true)}>
-            <UserX size={13} /> Suspendre
+          <button className={buttonClass("danger", "sm")} disabled={pending} onClick={() => setSuspendOpen(true)}>
+            <UserX /> Suspendre
           </button>
         )}
       </div>
-      {error && <span role="alert" style={{ fontSize: "12px", color: "#F0928B", maxWidth: "280px", textAlign: "right" }}>{error}</span>}
+      {error && !suspendOpen && <span role="alert" className="max-w-[280px] text-right text-[12px] text-danger">{error}</span>}
 
-      {/* ===== SUSPENSION ===== */}
-      {suspendOpen && (
-        <div className="adm-overlay" onClick={() => !pending && setSuspendOpen(false)}>
-          <div className="adm-modal" role="dialog" aria-modal="true" aria-labelledby={`suspend-${user.id}`} onClick={(e) => e.stopPropagation()} style={{ textAlign: "left" }}>
-            <h2 id={`suspend-${user.id}`} className="enc-h2" style={{ fontSize: "17px", marginBottom: "8px" }}>
-              <UserX size={17} style={{ color: "#F0928B" }} /> Suspendre {user.name}
-            </h2>
-            <p className="enc-muted" style={{ fontSize: "13px", lineHeight: 1.6, margin: "0 0 16px" }}>
-              Le compte perd immédiatement l&apos;accès à la plateforme et ne peut plus se connecter. Ses projets et messages sont conservés ; vous pourrez le réactiver à tout moment.
-            </p>
-            <label className="adm-label" htmlFor={`reason-${user.id}`}>Motif (visible dans le journal)</label>
+      <Modal
+        open={suspendOpen}
+        onClose={() => !pending && setSuspendOpen(false)}
+        icon={UserX}
+        title={`Suspendre ${user.name}`}
+        description="Le compte perd immédiatement l'accès à la plateforme et ne peut plus se connecter. Ses projets et messages sont conservés ; vous pourrez le réactiver à tout moment."
+        footer={
+          <>
+            <button className={buttonClass("secondary")} onClick={() => setSuspendOpen(false)} disabled={pending}>Annuler</button>
+            <button
+              className={buttonClass("danger")}
+              disabled={pending || !reason.trim()}
+              onClick={() => run(() => setUserSuspension(user.id, true, reason), () => { setSuspendOpen(false); setReason(""); })}
+            >
+              {pending ? <Loader2 className="animate-spin" /> : <UserX />} Suspendre le compte
+            </button>
+          </>
+        }
+      >
+        <div className="text-left">
+          <Field label="Motif" htmlFor={`reason-${user.id}`} hint="Visible dans le journal d'administration." error={error || undefined}>
             <textarea
               id={`reason-${user.id}`}
-              className="enc-input"
+              className={textareaClass}
               rows={3}
               maxLength={300}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Ex. usurpation d'identité, comportement inapproprié…"
-              style={{ resize: "vertical" }}
               autoFocus
             />
-            {error && <p role="alert" style={{ fontSize: "12px", color: "#F0928B", margin: "10px 0 0" }}>{error}</p>}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "18px" }}>
-              <button className="enc-btn" onClick={() => setSuspendOpen(false)} disabled={pending}>Annuler</button>
-              <button
-                className="enc-btn adm-btn-danger"
-                disabled={pending || !reason.trim()}
-                onClick={() => run(() => setUserSuspension(user.id, true, reason), () => { setSuspendOpen(false); setReason(""); })}
-              >
-                {pending ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <UserX size={14} />}
-                Suspendre le compte
-              </button>
-            </div>
-          </div>
+          </Field>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

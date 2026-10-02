@@ -1,10 +1,12 @@
 // app/admin/utilisateurs/page.tsx
 // GESTION DES UTILISATEURS : recherche, rôles, confirmations en attente, suspensions
 
-import Link from "next/link";
-import { Search, Users, BadgeCheck } from "lucide-react";
+import { BadgeCheck, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { listUsers, type UserFilter } from "@/lib/admin/queries";
+import Avatar from "@/components/ui/Avatar";
+import { Badge, EmptyState, LinkTabs, PageHeader, SearchForm } from "@/components/ui/kit";
+import { Table, Td, Th, Tr } from "@/components/ui/Table";
 import { formatDate, roleBadge } from "../format";
 import UserActions from "./UserActions";
 
@@ -34,105 +36,90 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
   };
 
   return (
-    <div className="enc-page">
-      <div style={{ marginBottom: "20px" }}>
-        <h1 className="enc-h1">Utilisateurs</h1>
-        <p className="enc-sub">
-          {users.length === 200 ? "200 premiers résultats" : `${users.length} compte${users.length > 1 ? "s" : ""}`}
-          {q ? ` pour « ${q} »` : ""}
-        </p>
-      </div>
+    <div className="mx-auto max-w-[1440px]">
+      <PageHeader
+        eyebrow="Administration"
+        title="Utilisateurs"
+        description={`${users.length === 200 ? "200 premiers résultats" : `${users.length} compte${users.length > 1 ? "s" : ""}`}${q ? ` pour « ${q} »` : ""}`}
+      />
 
-      {/* ===== RECHERCHE & FILTRES ===== */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", marginBottom: "18px" }}>
-        <form action="/admin/utilisateurs" style={{ flex: "1 1 260px", position: "relative" }}>
-          {filter !== "all" && <input type="hidden" name="filtre" value={filter} />}
-          <Search size={15} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "rgba(200,215,235,0.35)" }} />
-          <input name="q" defaultValue={q} className="enc-input" placeholder="Nom, email ou matricule…" style={{ paddingLeft: "38px" }} />
-        </form>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-          {FILTERS.map((f) => (
-            <Link key={f.id} href={hrefFor(f.id)} className={`adm-pill ${filter === f.id ? "adm-pill-active" : ""}`}>
-              {f.label}
-            </Link>
-          ))}
-        </div>
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <SearchForm action="/admin/utilisateurs" defaultValue={q} placeholder="Nom, email ou matricule…" hidden={{ filtre: filter !== "all" ? filter : undefined }} className="min-w-[240px] flex-1" />
+        <LinkTabs label="Filtrer les comptes" activeHref={hrefFor(filter)} items={FILTERS.map((f) => ({ href: hrefFor(f.id), label: f.label }))} />
       </div>
 
       {users.length === 0 ? (
-        <div className="enc-card enc-empty" style={{ padding: "60px 20px" }}>
-          <Users size={36} style={{ color: "rgba(212,175,55,0.4)", marginBottom: "12px" }} />
-          <p style={{ margin: 0 }}>Aucun compte ne correspond à cette recherche.</p>
-        </div>
+        <EmptyState icon={Users} title="Aucun compte trouvé" description="Aucun compte ne correspond à cette recherche." />
       ) : (
-        <div className="adm-table-wrap">
-          <table className="adm-table">
-            <thead>
-              <tr>
-                <th>Utilisateur</th>
-                <th>Rôle</th>
-                <th>Profil école</th>
-                <th>Activité</th>
-                <th>Inscription</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id} style={u.suspendedAt ? { opacity: 0.7 } : undefined}>
-                  <td>
-                    <span style={{ display: "block", fontWeight: 600, color: "#E8EDF5" }}>{`${u.firstName} ${u.lastName}`.trim()}</span>
-                    <span className="enc-muted" style={{ fontSize: "12px" }}>{u.email}</span>
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+        <Table minWidth={920}>
+          <thead>
+            <tr>
+              <Th>Utilisateur</Th>
+              <Th>Rôle</Th>
+              <Th>Profil école</Th>
+              <Th>Activité</Th>
+              <Th>Inscription</Th>
+              <Th align="right">Actions</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => {
+              const name = `${u.firstName} ${u.lastName}`.trim();
+              const teams = Math.max(0, u._count.memberships - u._count.ownedProjects);
+              return (
+                <Tr key={u.id} className={u.suspendedAt ? "opacity-70" : ""}>
+                  <Td>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={name} url={u.avatarUrl} size="md" />
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-ink">{name}</p>
+                        <p className="truncate text-[12px] text-ink-muted">{u.email}</p>
+                      </div>
+                    </div>
+                  </Td>
+                  <Td>
+                    <div className="flex flex-wrap gap-1.5">
                       {roleBadge(u.role)}
-                      {u.pendingRole && (
-                        <span className="enc-badge" style={{ background: "rgba(245,158,11,0.12)", color: "#F5B544" }}>
-                          {u.pendingRole === "ADMIN" ? "Admin" : "Encadrant"} en attente
-                        </span>
-                      )}
+                      {u.pendingRole && <Badge tone="warning">{u.pendingRole === "ADMIN" ? "Admin" : "Encadrant"} en attente</Badge>}
                       {u.suspendedAt && (
-                        <span className="enc-badge" style={{ background: "rgba(228,115,107,0.12)", color: "#F0928B" }} title={u.suspendedReason ?? undefined}>
-                          Suspendu
+                        <span title={u.suspendedReason ?? undefined}>
+                          <Badge tone="danger">Suspendu</Badge>
                         </span>
                       )}
                     </div>
-                  </td>
-                  <td>
+                  </Td>
+                  <Td>
                     {u.matricule ? (
                       <>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontFamily: "ui-monospace, monospace", fontSize: "12px", color: "#E8EDF5" }}>
-                          {u.verifiedAt && <BadgeCheck size={13} style={{ color: "#34D399" }} aria-label="Identité confirmée" />}
+                        <span className="inline-flex items-center gap-1.5 font-mono text-[12px] text-ink">
+                          {u.verifiedAt && <BadgeCheck className="size-3.5 text-success" aria-label="Identité confirmée" />}
                           {u.matricule}
                         </span>
-                        <span className="enc-muted" style={{ display: "block", fontSize: "12px" }}>
-                          {[u.grade, u.department].filter(Boolean).join(" · ") || "—"}
-                        </span>
+                        <span className="block text-[12px] text-ink-muted">{[u.grade, u.department].filter(Boolean).join(" · ") || "—"}</span>
                       </>
                     ) : (
-                      <span className="enc-muted">—</span>
+                      <span className="text-ink-subtle">—</span>
                     )}
-                  </td>
-                  <td className="enc-muted" style={{ fontSize: "12px" }}>
+                  </Td>
+                  <Td className="text-[12.5px] text-ink-muted">
                     {u.role === "ENCADRANT"
                       ? `${u._count.supervisedProjects} projet${u._count.supervisedProjects > 1 ? "s" : ""} encadré${u._count.supervisedProjects > 1 ? "s" : ""}`
                       : u.role === "STUDENT"
-                        ? `${u._count.ownedProjects} porté${u._count.ownedProjects > 1 ? "s" : ""} · ${Math.max(0, u._count.memberships - u._count.ownedProjects)} équipe${u._count.memberships - u._count.ownedProjects > 1 ? "s" : ""}`
+                        ? `${u._count.ownedProjects} porté${u._count.ownedProjects > 1 ? "s" : ""} · ${teams} équipe${teams > 1 ? "s" : ""}`
                         : "—"}
-                  </td>
-                  <td className="enc-muted" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>{formatDate(u.createdAt)}</td>
-                  <td style={{ textAlign: "right" }}>
+                  </Td>
+                  <Td className="text-[12.5px] whitespace-nowrap text-ink-muted">{formatDate(u.createdAt)}</Td>
+                  <Td align="right">
                     <UserActions
-                      user={{ id: u.id, name: `${u.firstName} ${u.lastName}`.trim(), role: u.role, pendingRole: u.pendingRole, suspended: !!u.suspendedAt }}
+                      user={{ id: u.id, name, role: u.role, pendingRole: u.pendingRole, suspended: !!u.suspendedAt }}
                       isSelf={u.id === admin.id}
                     />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </Td>
+                </Tr>
+              );
+            })}
+          </tbody>
+        </Table>
       )}
     </div>
   );

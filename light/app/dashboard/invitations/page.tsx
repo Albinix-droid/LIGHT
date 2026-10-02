@@ -16,8 +16,6 @@ export default async function InvitationsPage() {
     markReadForPath(user.id, user.role, "/dashboard/invitations"),
   ]);
   return (
-    <div style={{ minHeight: "100vh", background: "#0A1628" }}>
-      <RequestsCenter requests={requests} variant="student" initialDiscover={discover} />
-    </div>
+    <RequestsCenter requests={requests} variant="student" initialDiscover={discover} />
   );
 }

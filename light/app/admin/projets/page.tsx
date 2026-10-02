@@ -1,12 +1,14 @@
 // app/admin/projets/page.tsx
 // TOUS LES PROJETS DE L'ÉCOLE : avancement, porteur, encadrant
 
-import Link from "next/link";
-import { Search, FolderKanban } from "lucide-react";
+import { FolderKanban } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { listAllProjects } from "@/lib/admin/queries";
 import { STAGES, SECTOR_LABELS, getStageIndex } from "@/lib/parcours";
-import { STEP_STATUS_COLORS } from "@/app/encadrant/projectStatus";
+import ProjectCover from "@/components/ui/ProjectCover";
+import StageTrack from "@/components/ui/StageTrack";
+import { Badge, EmptyState, LinkTabs, PageHeader, SearchForm } from "@/components/ui/kit";
+import { Table, Td, Th, Tr } from "@/components/ui/Table";
 import { formatDate } from "../format";
 
 export const metadata = { title: "Projets" };
@@ -33,81 +35,64 @@ export default async function AdminProjectsPage({ searchParams }: { searchParams
   };
 
   return (
-    <div className="enc-page">
-      <div style={{ marginBottom: "20px" }}>
-        <h1 className="enc-h1">Projets</h1>
-        <p className="enc-sub">{projects.length} projet{projects.length > 1 ? "s" : ""}{q ? ` pour « ${q} »` : ""}</p>
-      </div>
+    <div className="mx-auto max-w-[1440px]">
+      <PageHeader eyebrow="Administration" title="Projets" description={`${projects.length} projet${projects.length > 1 ? "s" : ""}${q ? ` pour « ${q} »` : ""}`} />
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center", marginBottom: "18px" }}>
-        <form action="/admin/projets" style={{ flex: "1 1 260px", position: "relative" }}>
-          {supervision !== "tous" && <input type="hidden" name="encadrant" value={supervision} />}
-          <Search size={15} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "rgba(200,215,235,0.35)" }} />
-          <input name="q" defaultValue={q} className="enc-input" placeholder="Titre du projet ou nom du porteur…" style={{ paddingLeft: "38px" }} />
-        </form>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-          {SUPERVISION_FILTERS.map((f) => (
-            <Link key={f.id} href={hrefFor(f.id)} className={`adm-pill ${supervision === f.id ? "adm-pill-active" : ""}`}>{f.label}</Link>
-          ))}
-        </div>
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <SearchForm
+          action="/admin/projets"
+          defaultValue={q}
+          placeholder="Titre du projet ou nom du porteur…"
+          hidden={{ encadrant: supervision !== "tous" ? supervision : undefined }}
+          className="min-w-[240px] flex-1"
+        />
+        <LinkTabs label="Filtrer par encadrement" activeHref={hrefFor(supervision)} items={SUPERVISION_FILTERS.map((f) => ({ href: hrefFor(f.id), label: f.label }))} />
       </div>
 
       {projects.length === 0 ? (
-        <div className="enc-card enc-empty" style={{ padding: "60px 20px" }}>
-          <FolderKanban size={36} style={{ color: "rgba(212,175,55,0.4)", marginBottom: "12px" }} />
-          <p style={{ margin: 0 }}>Aucun projet ne correspond à cette recherche.</p>
-        </div>
+        <EmptyState icon={FolderKanban} title="Aucun projet trouvé" description="Aucun projet ne correspond à cette recherche." />
       ) : (
-        <div className="adm-table-wrap">
-          <table className="adm-table">
-            <thead>
-              <tr>
-                <th>Projet</th>
-                <th>Porteur</th>
-                <th>Encadrant</th>
-                <th>Parcours</th>
-                <th>Équipe</th>
-                <th>Mis à jour</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((p) => {
-                const current = getStageIndex(p.stage);
-                return (
-                  <tr key={p.id}>
-                    <td>
-                      <span style={{ display: "block", fontWeight: 600, color: "#E8EDF5" }}>{p.title}</span>
-                      <span className="enc-muted" style={{ fontSize: "12px" }}>{p.sector ? SECTOR_LABELS[p.sector] ?? p.sector : "Secteur non renseigné"}</span>
-                    </td>
-                    <td>
-                      <span style={{ display: "block" }}>{`${p.owner.firstName} ${p.owner.lastName}`.trim()}</span>
-                      <span className="enc-muted" style={{ fontSize: "12px" }}>{p.owner.email}</span>
-                    </td>
-                    <td>
-                      {p.supervisor ? (
-                        `${p.supervisor.firstName} ${p.supervisor.lastName}`.trim()
-                      ) : (
-                        <span className="enc-badge" style={{ background: "rgba(99,102,241,0.12)", color: "#A5B4FC" }}>Aucun</span>
-                      )}
-                    </td>
-                    <td style={{ minWidth: "170px" }}>
-                      <div style={{ display: "flex", gap: "3px", marginBottom: "5px" }} aria-label={`Étape actuelle : ${STAGES[current].label}`}>
-                        {STAGES.map((s, i) => {
-                          const status = p.steps.find((x) => x.stage === s.stage)?.status;
-                          const color = status ? STEP_STATUS_COLORS[status] : i <= current ? STEP_STATUS_COLORS.IN_PROGRESS : "rgba(255,255,255,0.08)";
-                          return <span key={s.slug} title={s.label} style={{ flex: 1, height: "5px", borderRadius: "3px", background: color, opacity: i > current ? 0.5 : 1 }} />;
-                        })}
+        <Table minWidth={960}>
+          <thead>
+            <tr>
+              <Th>Projet</Th>
+              <Th>Porteur</Th>
+              <Th>Encadrant</Th>
+              <Th>Parcours</Th>
+              <Th>Équipe</Th>
+              <Th>Mis à jour</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {projects.map((p) => {
+              const current = getStageIndex(p.stage);
+              return (
+                <Tr key={p.id}>
+                  <Td>
+                    <div className="flex items-center gap-3">
+                      <ProjectCover sector={p.sector} title={p.title} variant="tile" className="size-10 rounded-xl" />
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-ink">{p.title}</p>
+                        <p className="truncate text-[12px] text-ink-muted">{p.sector ? SECTOR_LABELS[p.sector] ?? p.sector : "Secteur non renseigné"}</p>
                       </div>
-                      <span className="enc-muted" style={{ fontSize: "12px" }}>{current + 1}/5 · {STAGES[current].label} · {p.progress}%</span>
-                    </td>
-                    <td className="enc-muted" style={{ fontSize: "12px" }}>{p._count.members} membre{p._count.members > 1 ? "s" : ""}</td>
-                    <td className="enc-muted" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>{formatDate(p.updatedAt)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </Td>
+                  <Td>
+                    <p className="text-ink">{`${p.owner.firstName} ${p.owner.lastName}`.trim()}</p>
+                    <p className="text-[12px] text-ink-muted">{p.owner.email}</p>
+                  </Td>
+                  <Td>{p.supervisor ? `${p.supervisor.firstName} ${p.supervisor.lastName}`.trim() : <Badge tone="brand">Aucun</Badge>}</Td>
+                  <Td className="min-w-[180px]">
+                    <StageTrack stage={p.stage} steps={p.steps} />
+                    <p className="mt-1.5 text-[12px] text-ink-muted">{current + 1}/5 · {STAGES[current].label} · {p.progress}%</p>
+                  </Td>
+                  <Td className="text-[12.5px] text-ink-muted">{p._count.members} membre{p._count.members > 1 ? "s" : ""}</Td>
+                  <Td className="text-[12.5px] whitespace-nowrap text-ink-muted">{formatDate(p.updatedAt)}</Td>
+                </Tr>
+              );
+            })}
+          </tbody>
+        </Table>
       )}
     </div>
   );

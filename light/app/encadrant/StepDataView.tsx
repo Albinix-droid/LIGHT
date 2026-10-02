@@ -25,13 +25,18 @@ const label = (v: unknown) => LABELS[str(v)] ?? str(v);
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section style={{ marginBottom: "18px" }}>
-      <h4 style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", color: "#D4AF37", margin: "0 0 10px" }}>
+    <section className="mb-6 last:mb-0">
+      <h4 className="mb-3 flex items-center gap-2 text-[11px] font-bold tracking-[0.14em] text-gold uppercase">
+        <span className="h-px w-4 bg-gold/60" aria-hidden="true" />
         {title}
       </h4>
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>{children}</div>
+      <div className="flex flex-col gap-3.5">{children}</div>
     </section>
   );
+}
+
+function Name({ children }: { children: React.ReactNode }) {
+  return <p className="mb-1 text-[12px] font-medium text-ink-subtle">{children}</p>;
 }
 
 function Field({ name, value }: { name: string; value: unknown }) {
@@ -39,8 +44,8 @@ function Field({ name, value }: { name: string; value: unknown }) {
   if (!text) return null;
   return (
     <div>
-      <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)", margin: "0 0 3px" }}>{name}</p>
-      <p style={{ fontSize: "14px", color: "#E8EDF5", margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{text}</p>
+      <Name>{name}</Name>
+      <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-ink">{text}</p>
     </div>
   );
 }
@@ -51,26 +56,32 @@ function LinkField({ name, value }: { name: string; value: unknown }) {
   if (!text) return null;
   return (
     <div>
-      <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)", margin: "0 0 3px" }}>{name}</p>
+      <Name>{name}</Name>
       {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "14px", color: "#A5B4FC", wordBreak: "break-all" }}>{text}</a>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-[14px] font-medium break-all text-brand underline-offset-2 hover:underline">{text}</a>
       ) : (
-        <p style={{ fontSize: "14px", color: "#E8EDF5", margin: 0, wordBreak: "break-all" }}>{text}</p>
+        <p className="text-[14px] break-all text-ink">{text}</p>
       )}
     </div>
   );
 }
 
-function Tags({ name, items, color = "#F5D76E" }: { name: string; items: string[]; color?: string }) {
+const TAG_TONES = {
+  default: "bg-surface-muted text-ink ring-line",
+  brand: "bg-brand-soft text-brand-ink ring-brand/15",
+  danger: "bg-danger-soft text-danger ring-danger/15",
+  warning: "bg-warning-soft text-warning ring-warning/15",
+  success: "bg-success-soft text-success ring-success/15",
+} as const;
+
+function Tags({ name, items, tone = "default" }: { name: string; items: string[]; tone?: keyof typeof TAG_TONES }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)", margin: "0 0 6px" }}>{name}</p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+      <Name>{name}</Name>
+      <div className="flex flex-wrap gap-1.5">
         {items.map((t, i) => (
-          <span key={i} className="enc-badge" style={{ background: "rgba(255,255,255,0.05)", color, border: "1px solid rgba(180,200,230,0.1)", fontWeight: 500 }}>
-            {t}
-          </span>
+          <span key={i} className={`inline-flex rounded-lg px-2.5 py-1 text-[12.5px] ring-1 ring-inset ${TAG_TONES[tone]}`}>{t}</span>
         ))}
       </div>
     </div>
@@ -81,12 +92,12 @@ function Rows({ name, rows }: { name: string; rows: { main: string; meta?: strin
   if (rows.length === 0) return null;
   return (
     <div>
-      <p style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)", margin: "0 0 6px" }}>{name}</p>
-      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "6px" }}>
+      <Name>{name}</Name>
+      <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
         {rows.map((r, i) => (
-          <li key={i} style={{ padding: "9px 12px", borderRadius: "10px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(180,200,230,0.06)" }}>
-            <span style={{ fontSize: "13px", color: "#E8EDF5" }}>{r.main}</span>
-            {r.meta && <span style={{ fontSize: "12px", color: "rgba(200,215,235,0.45)", marginLeft: "8px" }}>{r.meta}</span>}
+          <li key={i} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 bg-surface px-3.5 py-2.5">
+            <span className="text-[13.5px] text-ink">{r.main}</span>
+            {r.meta && <span className="text-[12px] text-ink-subtle">{r.meta}</span>}
           </li>
         ))}
       </ul>
@@ -97,7 +108,7 @@ function Rows({ name, rows }: { name: string; rows: { main: string; meta?: strin
 function Notes({ items }: { items: unknown[] }) {
   // Les notes sont des chaînes (conception…) ou des objets { content } (idéalisation)
   const notes = items.map((n) => (typeof n === "string" ? n : str((n as Data)?.content))).filter(Boolean);
-  return <Tags name="Notes de travail" items={notes} color="rgba(232,237,245,0.8)" />;
+  return <Tags name="Notes de travail" items={notes} />;
 }
 
 export default function StepDataView({ slug, data }: { slug: StageSlug; data: unknown }) {
@@ -142,16 +153,18 @@ export default function StepDataView({ slug, data }: { slug: StageSlug; data: un
                 d.architecture?.database && `Base de données : ${d.architecture.database}`,
                 d.architecture?.hosting && `Hébergement : ${d.architecture.hosting}`,
               ].filter(Boolean) as string[]}
-              color="#A5B4FC"
+              tone="brand"
             />
-            <Tags name="API et services externes" items={strings(d.architecture?.apis)} color="#A5B4FC" />
+            <Tags name="API et services externes" items={strings(d.architecture?.apis)} tone="brand" />
           </Section>
           <Section title="Maquettes & UX">
             {wireframes.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "10px" }}>
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
                 {wireframes.map((src, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={i} src={src} alt={`Maquette ${i + 1}`} style={{ width: "100%", borderRadius: "10px", border: "1px solid rgba(180,200,230,0.1)" }} />
+                  <div key={i} className="overflow-hidden rounded-xl border border-line bg-surface-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt={`Maquette ${i + 1}`} className="w-full" />
+                  </div>
                 ))}
               </div>
             )}
@@ -162,8 +175,8 @@ export default function StepDataView({ slug, data }: { slug: StageSlug; data: un
           <Section title="Planification">
             <Rows name="Jalons" rows={arr(d.planning?.milestones).map((m) => ({ main: str(m.name), meta: str(m.date) }))} />
             <Tags name="Ressources" items={strings(d.planning?.resources)} />
-            <Tags name="Risques" items={strings(d.planning?.risks)} color="#F0928B" />
-            <Tags name="Contraintes" items={strings(d.planning?.constraints)} color="#F5B544" />
+            <Tags name="Risques" items={strings(d.planning?.risks)} tone="danger" />
+            <Tags name="Contraintes" items={strings(d.planning?.constraints)} tone="warning" />
             <Notes items={arr(d.brainstorming)} />
           </Section>
         </>
@@ -177,7 +190,7 @@ export default function StepDataView({ slug, data }: { slug: StageSlug; data: un
             <LinkField name="Dépôt" value={d.repoUrl} />
             <LinkField name="Documentation technique" value={d.docsUrl} />
             <LinkField name="Documentation API" value={d.apiDocsUrl} />
-            <Tags name="Branches" items={arr(d.branches).map((b) => str(b.name)).filter(Boolean)} color="#A5B4FC" />
+            <Tags name="Branches" items={arr(d.branches).map((b) => str(b.name)).filter(Boolean)} tone="brand" />
           </Section>
           <Section title="Tâches techniques">
             <Rows
@@ -223,7 +236,7 @@ export default function StepDataView({ slug, data }: { slug: StageSlug; data: un
                 `Accessibilité : ${Number(d.accessibilityScore) || 0} %`,
                 `Sécurité : ${Number(d.securityScore) || 0} %`,
               ]}
-              color="#34D399"
+              tone="success"
             />
             <Notes items={arr(d.brainstorming)} />
           </Section>
@@ -243,12 +256,12 @@ export default function StepDataView({ slug, data }: { slug: StageSlug; data: un
             <Tags name="Canaux" items={strings(d.goToMarket?.channels)} />
             <Field name="Plan d'acquisition" value={d.goToMarket?.acquisitionPlan} />
             <Field name="Plan de communication" value={d.communication?.plan} />
-            <Tags name="Réseaux sociaux" items={strings(d.communication?.socialNetworks)} color="#A5B4FC" />
+            <Tags name="Réseaux sociaux" items={strings(d.communication?.socialNetworks)} tone="brand" />
           </Section>
           <Section title="Suivi post-lancement">
             <Rows name="Indicateurs clés" rows={arr(d.postLaunch?.kpis).map((k) => ({ main: str(k.name), meta: `${str(k.value)} (objectif : ${str(k.target)})` }))} />
             <Field name="Retours utilisateurs" value={d.postLaunch?.feedback} />
-            <Tags name="Prochaines étapes" items={strings(d.postLaunch?.nextSteps)} color="#F5B544" />
+            <Tags name="Prochaines étapes" items={strings(d.postLaunch?.nextSteps)} tone="warning" />
           </Section>
           <Section title="Partenaires & documents">
             <Rows name="Partenaires" rows={arr(d.partners).map((p) => ({ main: `${str(p.logo)} ${str(p.name)}`.trim(), meta: [label(p.type), str(p.description)].filter(Boolean).join(" · ") }))} />

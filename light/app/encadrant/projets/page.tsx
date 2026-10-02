@@ -2,63 +2,70 @@
 // PROJETS SUIVIS PAR L'ENCADRANT
 
 import Link from "next/link";
-import { FolderKanban, ArrowRight } from "lucide-react";
+import { FolderKanban, Inbox } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { listSupervisedProjects, fullName } from "@/lib/projects";
 import { STAGES, SECTOR_LABELS, getStageIndex } from "@/lib/parcours";
-import { getFollowUpStatus, STEP_STATUS_COLORS } from "../projectStatus";
+import { formatShortDate } from "@/lib/format";
+import ProjectCover from "@/components/ui/ProjectCover";
+import StageTrack from "@/components/ui/StageTrack";
+import { Badge, EmptyState, PageHeader, buttonClass } from "@/components/ui/kit";
+import { getFollowUpStatus } from "../projectStatus";
+
+export const metadata = { title: "Projets suivis" };
 
 export default async function EncadrantProjectsPage() {
   const user = await requireRole("ENCADRANT");
   const projects = await listSupervisedProjects(user.id);
 
   return (
-    <div className="enc-page">
-      <div style={{ marginBottom: "24px" }}>
-        <h1 className="enc-h1">Projets suivis</h1>
-        <p className="enc-sub">
-          {projects.length === 0
+    <div className="mx-auto max-w-[1440px]">
+      <PageHeader
+        eyebrow="Accompagnement"
+        title="Projets suivis"
+        description={
+          projects.length === 0
             ? "Aucun étudiant ne vous a encore choisi comme encadrant."
-            : `Vous accompagnez ${projects.length} projet${projects.length > 1 ? "s" : ""}.`}
-        </p>
-      </div>
+            : `Vous accompagnez ${projects.length} projet${projects.length > 1 ? "s" : ""}. Suivez leur avancement étape par étape.`
+        }
+      />
 
       {projects.length === 0 ? (
-        <div className="enc-card enc-empty" style={{ padding: "60px 20px" }}>
-          <FolderKanban size={36} style={{ color: "rgba(212,175,55,0.4)", marginBottom: "12px" }} />
-          <p style={{ margin: 0 }}>Les étudiants vous envoient des demandes d'encadrement (menu Demandes). Les projets que vous acceptez apparaîtront ici.</p>
-        </div>
+        <EmptyState
+          icon={FolderKanban}
+          title="Aucun projet suivi"
+          description="Les étudiants vous envoient des demandes d'encadrement. Les projets que vous acceptez apparaîtront ici."
+          action={<Link href="/encadrant/demandes" className={buttonClass("primary")}><Inbox /> Voir les demandes</Link>}
+        />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "16px" }}>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 animate-rise">
           {projects.map((p) => {
             const status = getFollowUpStatus(p);
             const current = getStageIndex(p.stage);
             return (
-              <Link key={p.id} href={`/encadrant/projets/${p.id}`} className="enc-card enc-row" style={{ flexDirection: "column", alignItems: "stretch", gap: "12px", padding: "20px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "10px", alignItems: "flex-start" }}>
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>{p.title}</p>
-                    <p className="enc-muted" style={{ fontSize: "12px", margin: "3px 0 0" }}>
-                      {fullName(p.owner)}{p.sector ? ` · ${SECTOR_LABELS[p.sector] ?? p.sector}` : ""}
-                    </p>
-                  </div>
-                  <span className="enc-badge" style={{ background: status.bg, color: status.color }}>{status.label}</span>
-                </div>
-
-                {/* Frise des 5 étapes */}
-                <div style={{ display: "flex", gap: "4px" }} aria-label={`Étape actuelle : ${STAGES[current].label}`}>
-                  {STAGES.map((s, i) => {
-                    const stepStatus = p.steps.find((x) => x.stage === s.stage)?.status;
-                    const color = stepStatus ? STEP_STATUS_COLORS[stepStatus] : i <= current ? STEP_STATUS_COLORS.IN_PROGRESS : "rgba(255,255,255,0.08)";
-                    return <span key={s.slug} title={s.label} style={{ flex: 1, height: "5px", borderRadius: "3px", background: color, opacity: i > current ? 0.5 : 1 }} />;
-                  })}
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" }}>
-                  <span className="enc-muted">
-                    Étape {current + 1}/5 · {STAGES[current].label} · {p.progress}%
+              <Link
+                key={p.id}
+                href={`/encadrant/projets/${p.id}`}
+                className="group flex flex-col overflow-hidden rounded-[22px] border border-line bg-surface shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-raised"
+              >
+                <div className="relative h-32 overflow-hidden">
+                  <ProjectCover sector={p.sector} title={p.title} className="h-full transition-transform duration-500 ease-out group-hover:scale-[1.04]" />
+                  <span className="absolute top-3 left-3">
+                    <Badge tone={status.tone} className="bg-surface/95 shadow-sm">{status.label}</Badge>
                   </span>
-                  <ArrowRight size={14} style={{ color: "#F5D76E" }} />
+                </div>
+                <div className="flex flex-1 flex-col p-4">
+                  <p className="line-clamp-1 text-[15px] font-semibold text-ink">{p.title}</p>
+                  <p className="mt-0.5 truncate text-[12.5px] text-ink-muted">
+                    {fullName(p.owner)} · {p.sector ? SECTOR_LABELS[p.sector] ?? p.sector : "Secteur non renseigné"}
+                  </p>
+                  <StageTrack stage={p.stage} steps={p.steps} className="mt-4" />
+                  <div className="mt-3 flex items-center justify-between border-t border-line pt-3 text-[12px] text-ink-subtle">
+                    <span>
+                      Étape {current + 1}/5 · <span className="text-ink-muted">{STAGES[current].label}</span>
+                    </span>
+                    <span className="tabular-nums">{p.progress}% · {formatShortDate(p.updatedAt)}</span>
+                  </div>
                 </div>
               </Link>
             );

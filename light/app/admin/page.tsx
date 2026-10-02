@@ -3,149 +3,158 @@
 
 import Link from "next/link";
 import {
-  Users, GraduationCap, ShieldCheck, FolderKanban, UserCheck, KeyRound, ArrowRight, ScrollText, AlertTriangle, CheckSquare, UserX,
+  AlertTriangle, ArrowRight, CheckSquare, FolderKanban, GraduationCap, KeyRound, ScrollText, ShieldCheck, UserCheck, UserX, Users,
 } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { getAdminOverview } from "@/lib/admin/queries";
+import { requestTime } from "@/lib/dashboard/queries";
 import { STAGES } from "@/lib/parcours";
+import Avatar from "@/components/ui/Avatar";
+import { Card, CardHeader, ProgressBar, StatCard, buttonClass } from "@/components/ui/kit";
 import { formatDateTime, roleBadge } from "./format";
 
 export default async function AdminHomePage() {
   const user = await requireRole("ADMIN");
   const o = await getAdminOverview();
-
-  const stats = [
-    { icon: Users, label: "Étudiants", value: o.users.students, color: "#F5D76E", href: "/admin/utilisateurs?filtre=STUDENT" },
-    { icon: GraduationCap, label: "Encadrants", value: o.users.encadrants, color: "#A5B4FC", href: "/admin/utilisateurs?filtre=ENCADRANT" },
-    { icon: ShieldCheck, label: "Administrateurs", value: o.users.admins, color: "#34D399", href: "/admin/utilisateurs?filtre=ADMIN" },
-    { icon: FolderKanban, label: "Projets", value: o.projects.total, color: "#F5B544", href: "/admin/projets" },
-  ];
+  const now = new Date(requestTime());
+  const today = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Douala" }).format(now);
   const maxStage = Math.max(1, ...STAGES.map((s) => o.projects.byStage[s.stage] ?? 0));
 
+  const alerts = [
+    o.pendingStaffCount > 0 && {
+      href: "/admin/utilisateurs?filtre=pending", icon: UserCheck, cls: "bg-warning-soft text-warning ring-warning/20",
+      text: `${o.pendingStaffCount} compte${o.pendingStaffCount > 1 ? "s" : ""} en attente de confirmation`,
+    },
+    o.projects.unsupervised > 0 && {
+      href: "/admin/projets?encadrant=aucun", icon: AlertTriangle, cls: "bg-brand-soft text-brand-ink ring-brand/20",
+      text: `${o.projects.unsupervised} projet${o.projects.unsupervised > 1 ? "s" : ""} sans encadrant`,
+    },
+    o.users.suspended > 0 && {
+      href: "/admin/utilisateurs?filtre=suspended", icon: UserX, cls: "bg-danger-soft text-danger ring-danger/20",
+      text: `${o.users.suspended} compte${o.users.suspended > 1 ? "s" : ""} suspendu${o.users.suspended > 1 ? "s" : ""}`,
+    },
+  ].filter(Boolean) as { href: string; icon: typeof UserCheck; cls: string; text: string }[];
+
   return (
-    <div className="enc-page">
-      {/* ===== EN-TÊTE ===== */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "16px", marginBottom: "24px" }}>
+    <div className="mx-auto max-w-[1440px] space-y-8">
+      <header className="flex flex-wrap items-end justify-between gap-4 animate-rise">
         <div>
-          <h1 className="enc-h1">Bonjour {user.firstName} 👋</h1>
-          <p className="enc-sub">
+          <p className="text-[12px] font-semibold tracking-[0.16em] text-ink-subtle uppercase">{today}</p>
+          <h1 className="mt-1.5 font-display text-[28px] leading-tight font-bold tracking-tight text-ink sm:text-[32px]">Bonjour, {user.firstName}</h1>
+          <p className="mt-2 text-[14px] text-ink-muted">
             {o.users.total} compte{o.users.total > 1 ? "s" : ""} sur la plateforme · {o.users.newThisWeek} nouveau{o.users.newThisWeek > 1 ? "x" : ""} cette semaine
           </p>
         </div>
-        <Link href="/admin/identifiants?nouveau=1" className="enc-btn enc-btn-primary">
-          <KeyRound size={16} />
-          Créer des identifiants
+        <Link href="/admin/identifiants?nouveau=1" className={buttonClass("primary", "lg")}>
+          <KeyRound /> Créer des identifiants
         </Link>
-      </div>
+      </header>
 
-      {/* ===== CHIFFRES CLÉS ===== */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "14px", marginBottom: "20px" }}>
-        {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="enc-card enc-stat enc-row" style={{ display: "block", padding: "18px 20px" }}>
-            <s.icon size={20} style={{ color: s.color }} />
-            <p className="enc-stat-value">{s.value}</p>
-            <p className="enc-stat-label">{s.label}</p>
-          </Link>
-        ))}
-      </div>
-
-      {/* ===== ALERTES ===== */}
-      {(o.pendingStaffCount > 0 || o.users.suspended > 0 || o.projects.unsupervised > 0) && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
-          {o.pendingStaffCount > 0 && (
-            <Link href="/admin/utilisateurs?filtre=pending" className="enc-badge" style={{ background: "rgba(245,158,11,0.12)", color: "#F5B544", textDecoration: "none", padding: "8px 14px", fontSize: "12px" }}>
-              <UserCheck size={14} /> {o.pendingStaffCount} compte{o.pendingStaffCount > 1 ? "s" : ""} en attente de confirmation
+      {alerts.length > 0 && (
+        <div className="flex flex-wrap gap-2.5 animate-rise">
+          {alerts.map((a) => (
+            <Link key={a.href} href={a.href} className={`inline-flex h-10 items-center gap-2 rounded-full px-4 text-[13px] font-semibold ring-1 ring-inset transition-shadow hover:shadow-card ${a.cls}`}>
+              <a.icon className="size-4" strokeWidth={2} /> {a.text}
             </Link>
-          )}
-          {o.projects.unsupervised > 0 && (
-            <Link href="/admin/projets?encadrant=aucun" className="enc-badge" style={{ background: "rgba(99,102,241,0.12)", color: "#A5B4FC", textDecoration: "none", padding: "8px 14px", fontSize: "12px" }}>
-              <AlertTriangle size={14} /> {o.projects.unsupervised} projet{o.projects.unsupervised > 1 ? "s" : ""} sans encadrant
-            </Link>
-          )}
-          {o.users.suspended > 0 && (
-            <Link href="/admin/utilisateurs?filtre=suspended" className="enc-badge" style={{ background: "rgba(228,115,107,0.12)", color: "#F0928B", textDecoration: "none", padding: "8px 14px", fontSize: "12px" }}>
-              <UserX size={14} /> {o.users.suspended} compte{o.users.suspended > 1 ? "s" : ""} suspendu{o.users.suspended > 1 ? "s" : ""}
-            </Link>
-          )}
+          ))}
         </div>
       )}
 
-      <div className="enc-two-cols" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 animate-rise [animation-delay:60ms]">
+        <StatCard icon={Users} tone="gold" label="Étudiants" value={o.users.students} href="/admin/utilisateurs?filtre=STUDENT" />
+        <StatCard icon={GraduationCap} tone="brand" label="Encadrants" value={o.users.encadrants} href="/admin/utilisateurs?filtre=ENCADRANT" />
+        <StatCard icon={ShieldCheck} tone="success" label="Administrateurs" value={o.users.admins} href="/admin/utilisateurs?filtre=ADMIN" />
+        <StatCard icon={FolderKanban} tone="warning" label="Projets" value={o.projects.total} href="/admin/projets" />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2 animate-rise [animation-delay:120ms]">
         {/* ===== CONFIRMATIONS EN ATTENTE ===== */}
-        <section className="enc-card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-            <h2 className="enc-h2"><UserCheck size={16} style={{ color: "#F5D76E" }} /> Confirmations en attente</h2>
-            <Link href="/admin/utilisateurs?filtre=pending" className="enc-muted" style={{ fontSize: "12px", textDecoration: "none" }}>Tout voir</Link>
-          </div>
+        <Card>
+          <CardHeader
+            title="Confirmations en attente"
+            icon={UserCheck}
+            description="Ces personnes doivent saisir le matricule et le code remis par l'école."
+            action={<Link href="/admin/utilisateurs?filtre=pending" className="text-[12.5px] font-semibold text-brand hover:text-brand-strong">Tout voir</Link>}
+          />
           {o.pendingStaff.length === 0 ? (
-            <p className="enc-empty" style={{ padding: "20px 0" }}>Aucun compte encadrant ou administrateur en attente.</p>
+            <p className="rounded-2xl bg-surface-muted py-8 text-center text-[13px] text-ink-muted">Aucun compte encadrant ou administrateur en attente.</p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {o.pendingStaff.map((u) => (
-                <Link key={u.id} href={`/admin/utilisateurs?q=${encodeURIComponent(u.email)}`} className="enc-row">
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#E8EDF5" }}>{`${u.firstName} ${u.lastName}`.trim()}</span>
-                    <span className="enc-muted" style={{ fontSize: "12px" }}>{u.email} · inscrit le {formatDateTime(u.createdAt)}</span>
-                  </span>
-                  {u.pendingRole && roleBadge(u.pendingRole, "demandé")}
-                </Link>
-              ))}
-            </div>
+            <ul className="flex flex-col gap-2">
+              {o.pendingStaff.map((u) => {
+                const name = `${u.firstName} ${u.lastName}`.trim();
+                return (
+                  <li key={u.id}>
+                    <Link href={`/admin/utilisateurs?q=${encodeURIComponent(u.email)}`} className="flex items-center gap-3 rounded-2xl border border-line p-3 transition-all hover:border-line-strong hover:shadow-card">
+                      <Avatar name={name} size="md" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[14px] font-semibold text-ink">{name}</span>
+                        <span className="block truncate text-[12px] text-ink-muted">{u.email} · inscrit le {formatDateTime(u.createdAt)}</span>
+                      </span>
+                      {u.pendingRole && roleBadge(u.pendingRole, "demandé")}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           )}
-          <p className="enc-muted" style={{ fontSize: "12px", margin: "14px 0 0", lineHeight: 1.5 }}>
-            Ces personnes doivent saisir le matricule et le code remis par l&apos;école. {o.credentials.active} identifiant{o.credentials.active > 1 ? "s" : ""} actif{o.credentials.active > 1 ? "s" : ""}, {o.credentials.used} déjà utilisé{o.credentials.used > 1 ? "s" : ""}.
+          <p className="mt-4 flex items-center gap-2 border-t border-line pt-4 text-[12.5px] text-ink-muted">
+            <KeyRound className="size-4 text-gold" strokeWidth={1.75} />
+            {o.credentials.active} identifiant{o.credentials.active > 1 ? "s" : ""} actif{o.credentials.active > 1 ? "s" : ""} · {o.credentials.used} déjà utilisé{o.credentials.used > 1 ? "s" : ""}
           </p>
-        </section>
+        </Card>
 
         {/* ===== PROJETS PAR ÉTAPE ===== */}
-        <section className="enc-card">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-            <h2 className="enc-h2"><FolderKanban size={16} style={{ color: "#F5D76E" }} /> Projets par étape</h2>
-            <Link href="/admin/projets" className="enc-muted" style={{ fontSize: "12px", textDecoration: "none" }}>Tout voir</Link>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <Card>
+          <CardHeader
+            title="Projets par étape"
+            icon={FolderKanban}
+            action={<Link href="/admin/projets" className="text-[12.5px] font-semibold text-brand hover:text-brand-strong">Tout voir</Link>}
+          />
+          <div className="space-y-4">
             {STAGES.map((s, i) => {
               const count = o.projects.byStage[s.stage] ?? 0;
               return (
                 <div key={s.slug}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", marginBottom: "5px" }}>
-                    <span style={{ color: "rgba(232,237,245,0.8)" }}>{i + 1}. {s.label}</span>
-                    <span className="enc-muted">{count}</span>
+                  <div className="mb-1.5 flex justify-between text-[13px]">
+                    <span className="text-ink"><span className="text-ink-subtle">{i + 1}.</span> {s.label}</span>
+                    <span className="font-semibold text-ink tabular-nums">{count}</span>
                   </div>
-                  <div className="enc-progress"><div style={{ width: `${(count / maxStage) * 100}%` }} /></div>
+                  <ProgressBar value={(count / maxStage) * 100} />
                 </div>
               );
             })}
           </div>
-          <p className="enc-muted" style={{ fontSize: "12px", margin: "16px 0 0", display: "flex", alignItems: "center", gap: "6px" }}>
-            <CheckSquare size={13} /> {o.projects.pendingSubmissions} étape{o.projects.pendingSubmissions > 1 ? "s" : ""} en attente de décision d&apos;un encadrant
+          <p className="mt-5 flex items-center gap-2 border-t border-line pt-4 text-[12.5px] text-ink-muted">
+            <CheckSquare className="size-4 text-brand" strokeWidth={1.75} />
+            {o.projects.pendingSubmissions} étape{o.projects.pendingSubmissions > 1 ? "s" : ""} en attente de décision d&apos;un encadrant
           </p>
-        </section>
+        </Card>
       </div>
 
       {/* ===== ACTIVITÉ RÉCENTE ===== */}
-      <section className="enc-card">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-          <h2 className="enc-h2"><ScrollText size={16} style={{ color: "#F5D76E" }} /> Activité récente</h2>
-          <Link href="/admin/journal" className="enc-muted" style={{ fontSize: "12px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-            Journal complet <ArrowRight size={12} />
-          </Link>
-        </div>
+      <Card className="animate-rise [animation-delay:180ms]">
+        <CardHeader
+          title="Activité récente"
+          icon={ScrollText}
+          action={
+            <Link href="/admin/journal" className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-brand hover:text-brand-strong">
+              Journal complet <ArrowRight className="size-3.5" />
+            </Link>
+          }
+        />
         {o.recentLogs.length === 0 ? (
-          <p className="enc-empty" style={{ padding: "20px 0" }}>Aucune action enregistrée pour le moment.</p>
+          <p className="rounded-2xl bg-surface-muted py-8 text-center text-[13px] text-ink-muted">Aucune action enregistrée pour le moment.</p>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <ul className="divide-y divide-line">
             {o.recentLogs.map((l) => (
-              <div key={l.id} className="enc-row" style={{ padding: "10px 14px" }}>
-                <span style={{ flex: 1, minWidth: 0, fontSize: "13px", color: "rgba(232,237,245,0.85)" }}>{l.summary}</span>
-                <span className="enc-muted" style={{ fontSize: "11px", whiteSpace: "nowrap" }}>
-                  {l.adminName ?? "Système"} · {formatDateTime(l.createdAt)}
-                </span>
-              </div>
+              <li key={l.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0">
+                <span className="min-w-0 flex-1 text-[13.5px] text-ink">{l.summary}</span>
+                <span className="text-[12px] text-ink-subtle">{l.adminName ?? "Système"} · {formatDateTime(l.createdAt)}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-      </section>
+      </Card>
     </div>
   );
 }

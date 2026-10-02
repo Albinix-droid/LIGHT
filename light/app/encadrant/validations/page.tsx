@@ -2,15 +2,20 @@
 // FILE DE VALIDATION : étapes soumises par les étudiants, examen détaillé et décision
 
 import Link from "next/link";
-import { CheckSquare, Clock, MessageSquare, History, Inbox, ArrowRight } from "lucide-react";
+import { ArrowRight, CheckSquare, Clock, FileText, History, Inbox, MessageSquare } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { markReadForPath } from "@/lib/notifications/queries";
 import { listPendingSubmissions, listReviewedSubmissions, listStepRounds, fullName } from "@/lib/projects";
 import { STAGES } from "@/lib/parcours";
-import { Stars, formatDate } from "@/app/dashboard/projets/[id]/StepStatusBanner";
+import { formatDate, formatShortDate } from "@/lib/format";
+import Avatar from "@/components/ui/Avatar";
+import Stars from "@/components/ui/Stars";
+import { Alert, Badge, Card, CardHeader, EmptyState, PageHeader, buttonClass, cx } from "@/components/ui/kit";
 import StepDataView from "../StepDataView";
 import ReviewForm from "./ReviewForm";
+
+export const metadata = { title: "Validations" };
 
 const stageOf = (key: string) => STAGES.find((s) => s.stage === key)!;
 
@@ -36,123 +41,124 @@ export default async function ValidationsPage({ searchParams }: { searchParams: 
     markReadForPath(user.id, user.role, "/encadrant/validations"),
     selected ? markReadForPath(user.id, user.role, `/encadrant/validations?id=${selected.id}`) : null,
   ]);
-  const previousRounds = selected
-    ? (await listStepRounds(selected.stepId)).filter((r) => r.id !== selected.id && r.decision)
-    : [];
+  const previousRounds = selected ? (await listStepRounds(selected.stepId)).filter((r) => r.id !== selected.id && r.decision) : [];
 
   return (
-    <div className="enc-page">
-      <div style={{ marginBottom: "24px" }}>
-        <h1 className="enc-h1">Validations</h1>
-        <p className="enc-sub">
-          {pending.length === 0
+    <div className="mx-auto max-w-[1440px]">
+      <PageHeader
+        eyebrow="Accompagnement"
+        title="Validations"
+        description={
+          pending.length === 0
             ? "Aucune étape en attente : vos étudiants sont à jour."
-            : `${pending.length} étape${pending.length > 1 ? "s" : ""} en attente de votre décision, les plus anciennes d'abord.`}
-        </p>
-      </div>
+            : `${pending.length} étape${pending.length > 1 ? "s" : ""} en attente de votre décision, les plus anciennes d'abord.`
+        }
+      />
 
-      <div className="enc-two-cols" style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: "20px", alignItems: "start" }}>
+      <div className="grid items-start gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
         {/* ===== FILE D'ATTENTE ===== */}
-        <div className="enc-card" style={{ padding: "16px", position: "sticky", top: "90px" }}>
-          <h2 className="enc-h2" style={{ marginBottom: "12px", padding: "0 4px" }}>
-            <Inbox size={16} style={{ color: "#F5D76E" }} /> File d&apos;attente
-          </h2>
+        <Card className="lg:sticky lg:top-[88px]" padded={false}>
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
+            <h2 className="flex items-center gap-2 font-display text-[15px] font-semibold text-ink">
+              <Inbox className="size-[18px] text-brand" strokeWidth={1.75} /> File d&apos;attente
+            </h2>
+            {pending.length > 0 && <Badge tone="warning">{pending.length}</Badge>}
+          </div>
           {pending.length === 0 ? (
-            <p className="enc-empty">Rien à examiner pour le moment 🎉</p>
+            <p className="px-5 py-10 text-center text-[13px] text-ink-muted">Rien à examiner pour le moment.</p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <ul className="flex max-h-[calc(100vh-220px)] flex-col gap-1.5 overflow-y-auto p-2.5">
               {pending.map((s) => {
-                const stage = stageOf(s.step.stage);
+                const active = selected?.id === s.id;
                 return (
-                  <Link
-                    key={s.id}
-                    href={`/encadrant/validations?id=${s.id}`}
-                    className={`enc-row ${selected?.id === s.id ? "enc-row-active" : ""}`}
-                    style={{ flexDirection: "column", alignItems: "stretch", gap: "6px" }}
-                  >
-                    <span style={{ fontSize: "14px", fontWeight: 600, color: "#E8EDF5" }}>{s.step.project.title}</span>
-                    <span style={{ fontSize: "12px" }} className="enc-muted">{fullName(s.author)}</span>
-                    <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span className="enc-badge" style={{ background: "rgba(212,175,55,0.12)", color: "#F5D76E" }}>{stage.label}</span>
-                      <span style={{ fontSize: "11px", display: "flex", alignItems: "center", gap: "4px" }} className="enc-muted">
-                        <Clock size={11} /> {formatDate(s.submittedAt.toISOString())}
+                  <li key={s.id}>
+                    <Link
+                      href={`/encadrant/validations?id=${s.id}`}
+                      aria-current={active ? "true" : undefined}
+                      className={cx(
+                        "flex gap-3 rounded-2xl p-3 transition-colors",
+                        active ? "bg-brand-soft ring-1 ring-brand/25 ring-inset" : "hover:bg-surface-muted",
+                      )}
+                    >
+                      <Avatar name={fullName(s.author)} size="md" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13.5px] font-semibold text-ink">{s.step.project.title}</span>
+                        <span className="block truncate text-[12px] text-ink-muted">{fullName(s.author)}</span>
+                        <span className="mt-1.5 flex items-center justify-between gap-2">
+                          <Badge tone="warning">{stageOf(s.step.stage).label}</Badge>
+                          <span className="inline-flex items-center gap-1 text-[11px] text-ink-subtle">
+                            <Clock className="size-3" /> {formatShortDate(s.submittedAt)}
+                          </span>
+                        </span>
                       </span>
-                    </span>
-                  </Link>
+                    </Link>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
-        </div>
+        </Card>
 
         {/* ===== EXAMEN ===== */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px", minWidth: 0 }}>
+        <div className="min-w-0 space-y-6">
           {!selected ? (
-            <div className="enc-card enc-empty" style={{ padding: "60px 20px" }}>
-              <CheckSquare size={36} style={{ color: "rgba(212,175,55,0.4)", marginBottom: "12px" }} />
-              <p style={{ margin: 0 }}>Les étapes soumises par vos étudiants apparaîtront ici.</p>
-            </div>
+            <EmptyState icon={CheckSquare} title="Aucune soumission à examiner" description="Les étapes soumises par vos étudiants apparaîtront ici." />
           ) : (
             <>
-              {/* En-tête */}
-              <div className="enc-card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
-                  <div>
-                    <span className="enc-badge" style={{ background: "rgba(212,175,55,0.12)", color: "#F5D76E", marginBottom: "8px" }}>
+              <Card className="animate-rise">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <Badge tone="brand">
                       Étape {STAGES.findIndex((x) => x.stage === selected.step.stage) + 1}/5 · {stageOf(selected.step.stage).label}
-                    </span>
-                    <h2 style={{ fontSize: "20px", fontWeight: 700, color: "#E8EDF5", margin: "6px 0 2px" }}>{selected.step.project.title}</h2>
-                    <p className="enc-muted" style={{ fontSize: "13px", margin: 0 }}>
-                      {fullName(selected.author)} · soumis le {formatDate(selected.submittedAt.toISOString())}
+                    </Badge>
+                    <h2 className="mt-2.5 font-display text-[22px] leading-tight font-bold tracking-tight text-ink">{selected.step.project.title}</h2>
+                    <p className="mt-1 flex items-center gap-2 text-[13px] text-ink-muted">
+                      <Avatar name={fullName(selected.author)} size="sm" className="!size-6 !rounded-md !text-[9px]" />
+                      {fullName(selected.author)} · soumis le {formatDate(selected.submittedAt)}
                     </p>
                   </div>
-                  <Link href={`/encadrant/projets/${selected.step.project.id}`} className="enc-btn">
-                    Voir le projet <ArrowRight size={14} />
+                  <Link href={`/encadrant/projets/${selected.step.project.id}`} className={buttonClass("secondary")}>
+                    Voir le projet <ArrowRight />
                   </Link>
                 </div>
                 {selected.note && (
-                  <div style={{ marginTop: "16px", padding: "12px 14px", borderRadius: "12px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)" }}>
-                    <p style={{ fontSize: "12px", color: "#A5B4FC", margin: "0 0 4px", display: "flex", alignItems: "center", gap: "6px", fontWeight: 600 }}>
-                      <MessageSquare size={13} /> Message de l&apos;étudiant
+                  <div className="mt-5 rounded-2xl border border-brand/15 bg-brand-soft/60 px-4 py-3.5">
+                    <p className="mb-1 flex items-center gap-1.5 text-[12px] font-semibold text-brand-ink">
+                      <MessageSquare className="size-3.5" strokeWidth={2} /> Message de l&apos;étudiant
                     </p>
-                    <p style={{ fontSize: "14px", color: "#E8EDF5", margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{selected.note}</p>
+                    <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-ink">{selected.note}</p>
                   </div>
                 )}
                 {selected.decision && (
-                  <p style={{ marginTop: "14px", fontSize: "13px", color: selected.decision === "APPROVED" ? "#34D399" : "#F5B544" }}>
+                  <Alert tone={selected.decision === "APPROVED" ? "success" : "warning"} className="mt-5">
                     Décision déjà rendue : {selected.decision === "APPROVED" ? "étape validée" : "modifications demandées"}
-                    {selected.reviewedAt && ` le ${formatDate(selected.reviewedAt.toISOString())}`}.
-                  </p>
+                    {selected.reviewedAt && ` le ${formatDate(selected.reviewedAt)}`}.
+                  </Alert>
                 )}
-              </div>
+              </Card>
 
-              {/* Tours précédents */}
               {previousRounds.length > 0 && (
-                <div className="enc-card">
-                  <h3 className="enc-h2" style={{ marginBottom: "12px" }}>
-                    <History size={16} style={{ color: "#F5D76E" }} /> Tours précédents sur cette étape
-                  </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <Card>
+                  <CardHeader title="Tours précédents sur cette étape" icon={History} />
+                  <div className="space-y-2.5">
                     {previousRounds.map((r) => (
-                      <div key={r.id} style={{ padding: "10px 14px", borderRadius: "12px", background: "rgba(255,255,255,0.03)", borderLeft: `3px solid ${r.decision === "APPROVED" ? "#34D399" : "#F5B544"}` }}>
-                        <p style={{ fontSize: "12px", margin: "0 0 4px", display: "flex", gap: "8px", alignItems: "center" }} className="enc-muted">
-                          {formatDate((r.reviewedAt ?? r.submittedAt).toISOString())} · {r.decision === "APPROVED" ? "Validée" : "Modifications demandées"}
+                      <div key={r.id} className={cx("rounded-xl border-l-[3px] bg-surface-muted px-4 py-3", r.decision === "APPROVED" ? "border-success" : "border-warning")}>
+                        <p className="mb-1 flex flex-wrap items-center gap-2 text-[12px] text-ink-subtle">
+                          {formatDate(r.reviewedAt ?? r.submittedAt)} · {r.decision === "APPROVED" ? "Validée" : "Modifications demandées"}
                           {r.rating ? <Stars rating={r.rating} size={11} /> : null}
                         </p>
-                        <p style={{ fontSize: "13px", color: "rgba(232,237,245,0.85)", margin: 0, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{r.feedback}</p>
+                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-ink">{r.feedback}</p>
                       </div>
                     ))}
                   </div>
-                </div>
+                </Card>
               )}
 
-              {/* Contenu soumis */}
-              <div className="enc-card">
-                <h3 className="enc-h2" style={{ marginBottom: "16px" }}>Contenu soumis</h3>
+              <Card>
+                <CardHeader title="Contenu soumis" icon={FileText} description="Instantané exact de ce que l'étudiant vous a transmis." />
                 <StepDataView slug={stageOf(selected.step.stage).slug} data={selected.data} />
-              </div>
+              </Card>
 
-              {/* Décision */}
               {!selected.decision && (
                 <ReviewForm
                   key={selected.id}
@@ -168,26 +174,24 @@ export default async function ValidationsPage({ searchParams }: { searchParams: 
 
       {/* ===== HISTORIQUE ===== */}
       {reviewed.length > 0 && (
-        <div className="enc-card" style={{ marginTop: "24px" }}>
-          <h2 className="enc-h2" style={{ marginBottom: "12px" }}>
-            <History size={16} style={{ color: "#F5D76E" }} /> Vos dernières décisions
-          </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <Card className="mt-8">
+          <CardHeader title="Vos dernières décisions" icon={History} />
+          <ul className="divide-y divide-line">
             {reviewed.map((r) => (
-              <Link key={r.id} href={`/encadrant/projets/${r.step.project.id}`} className="enc-row">
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", flexShrink: 0, background: r.decision === "APPROVED" ? "#34D399" : "#F5B544" }} />
-                <span style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ fontSize: "14px", color: "#E8EDF5", fontWeight: 500 }}>{r.step.project.title}</span>
-                  <span className="enc-muted" style={{ fontSize: "12px", marginLeft: "8px" }}>
-                    {stageOf(r.step.stage).label} · {fullName(r.author)}
+              <li key={r.id}>
+                <Link href={`/encadrant/projets/${r.step.project.id}`} className="group flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
+                  <span className={cx("size-2 shrink-0 rounded-full", r.decision === "APPROVED" ? "bg-success" : "bg-warning")} aria-hidden="true" />
+                  <span className="min-w-0 flex-1">
+                    <span className="text-[14px] font-medium text-ink group-hover:text-brand">{r.step.project.title}</span>
+                    <span className="ml-2 text-[12.5px] text-ink-muted">{stageOf(r.step.stage).label} · {fullName(r.author)}</span>
                   </span>
-                </span>
-                {r.rating ? <Stars rating={r.rating} size={11} /> : null}
-                <span className="enc-muted" style={{ fontSize: "12px" }}>{r.reviewedAt && formatDate(r.reviewedAt.toISOString())}</span>
-              </Link>
+                  {r.rating ? <Stars rating={r.rating} size={12} /> : null}
+                  <span className="text-[12px] text-ink-subtle">{r.reviewedAt && formatDate(r.reviewedAt)}</span>
+                </Link>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </Card>
       )}
     </div>
   );

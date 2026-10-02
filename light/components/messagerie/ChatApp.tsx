@@ -242,7 +242,7 @@ export default function ChatApp({
       <aside className={`msg-sidebar ${selectedId ? "msg-hide-mobile" : ""}`}>
         <div style={{ padding: "18px 18px 12px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-            <h1 style={{ fontSize: "20px", fontWeight: 700, color: "#E8EDF5", margin: 0 }}>Messagerie</h1>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "20px", fontWeight: 700, color: "var(--ink)", margin: 0, letterSpacing: "-0.01em" }}>Messagerie</h1>
             <button className="msg-icon-btn" onClick={() => setDialog("direct")} aria-label="Nouveau message privé" title="Nouveau message privé">
               <PenSquare size={16} />
             </button>
@@ -265,11 +265,11 @@ export default function ChatApp({
           </div>
 
           <div style={{ position: "relative", marginBottom: "12px" }}>
-            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "rgba(200,215,235,0.35)" }} />
+            <Search size={14} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "var(--ink-subtle)" }} />
             <input className="msg-input" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une conversation" style={{ paddingLeft: "34px", padding: "9px 12px 9px 34px", fontSize: "13px" }} aria-label="Rechercher une conversation" />
           </div>
 
-          <div style={{ display: "flex", gap: "4px" }} role="tablist">
+          <div style={{ display: "flex", gap: "2px", padding: "3px", borderRadius: "12px", background: "color-mix(in srgb, var(--line) 70%, transparent)" }} role="tablist">
             {TABS.map((t) => {
               const count = unreadTotal(t.id);
               return (
@@ -284,7 +284,7 @@ export default function ChatApp({
 
         <div className="msg-scroll" style={{ flex: 1, overflowY: "auto", padding: "0 10px 12px" }}>
           {visible.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "36px 18px", color: "rgba(200,215,235,0.45)", fontSize: "13px", lineHeight: 1.6 }}>
+            <div style={{ textAlign: "center", padding: "36px 18px", color: "var(--ink-subtle)", fontSize: "13px", lineHeight: 1.6 }}>
               {inbox.length === 0 ? (
                 <>
                   Aucune conversation pour le moment.
@@ -305,17 +305,17 @@ export default function ChatApp({
                 ) : c.type === "CHANNEL" ? (
                   <span className="msg-track" style={{ width: 36, height: 36 }}>{c.track}</span>
                 ) : (
-                  <span className="msg-avatar" style={{ width: 36, height: 36, background: "rgba(16,185,129,0.15)", color: "#34D399" }}><Users size={16} /></span>
+                  <span className="msg-avatar" style={{ width: 36, height: 36, background: "var(--success-soft)", color: "var(--success)" }}><Users size={16} /></span>
                 )}
                 <span style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
-                    <span className="msg-ellipsis" style={{ fontSize: "14px", fontWeight: c.unread ? 700 : 600, color: "#E8EDF5" }}>{c.title}</span>
-                    <span style={{ fontSize: "11px", color: c.unread ? "#F5D76E" : "rgba(200,215,235,0.35)", flexShrink: 0 }}>
+                    <span className="msg-ellipsis" style={{ fontSize: "14px", fontWeight: c.unread ? 700 : 600, color: "var(--ink)" }}>{c.title}</span>
+                    <span style={{ fontSize: "11px", color: c.unread ? "var(--brand)" : "var(--ink-subtle)", flexShrink: 0 }}>
                       {c.lastMessage ? shortTime(c.lastMessageAt) : ""}
                     </span>
                   </span>
                   <span style={{ display: "flex", justifyContent: "space-between", gap: "8px", marginTop: "2px" }}>
-                    <span className="msg-ellipsis" style={{ fontSize: "12px", color: c.unread ? "rgba(232,237,245,0.85)" : "rgba(200,215,235,0.45)" }}>
+                    <span className="msg-ellipsis" style={{ fontSize: "12px", color: c.unread ? "var(--ink)" : "var(--ink-subtle)" }}>
                       {c.lastMessage
                         ? `${c.lastMessage.mine ? "Vous" : c.type === "DIRECT" ? "" : c.lastMessage.senderName.split(" ")[0]}${c.lastMessage.mine || c.type !== "DIRECT" ? " : " : ""}${c.lastMessage.content}`
                         : c.subtitle}
@@ -340,8 +340,8 @@ export default function ChatApp({
         )}
         {!selectedId ? (
           <div className="msg-empty">
-            <MessageSquare size={40} style={{ color: "rgba(212,175,55,0.45)", marginBottom: "14px" }} />
-            <p style={{ fontSize: "16px", fontWeight: 600, color: "#E8EDF5", margin: "0 0 6px" }}>Sélectionnez une conversation</p>
+            <MessageSquare size={40} style={{ color: "var(--brand)", marginBottom: "14px" }} />
+            <p style={{ fontSize: "16px", fontWeight: 600, color: "var(--ink)", margin: "0 0 6px" }}>Sélectionnez une conversation</p>
             <p style={{ margin: 0, lineHeight: 1.6 }}>
               Écrivez en privé à un étudiant ou à un encadrant{isStudent ? ", créez un groupe pour votre projet" : ""}
               {isEncadrant ? ", créez un canal pour votre filière" : ""} ou rejoignez un canal GL / SR.
@@ -357,13 +357,13 @@ export default function ChatApp({
               {detail?.type === "CHANNEL" ? (
                 <span className="msg-track" style={{ width: 38, height: 38 }}>{detail.track}</span>
               ) : detail?.type === "GROUP" ? (
-                <span className="msg-avatar" style={{ width: 38, height: 38, background: "rgba(16,185,129,0.15)", color: "#34D399" }}><Users size={17} /></span>
+                <span className="msg-avatar" style={{ width: 38, height: 38, background: "var(--success-soft)", color: "var(--success)" }}><Users size={17} /></span>
               ) : detail ? (
                 <Avatar initials={detail.members.find((m) => m.id !== me.id)?.initials ?? "?"} size={38} role={detail.members.find((m) => m.id !== me.id)?.role} />
               ) : null}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p className="msg-ellipsis" style={{ fontSize: "15px", fontWeight: 700, color: "#E8EDF5", margin: 0 }}>{detail?.title ?? "…"}</p>
-                <p className="msg-ellipsis" style={{ fontSize: "12px", color: "rgba(200,215,235,0.5)", margin: 0 }}>
+                <p className="msg-ellipsis" style={{ fontSize: "15px", fontWeight: 700, color: "var(--ink)", margin: 0 }}>{detail?.title ?? "…"}</p>
+                <p className="msg-ellipsis" style={{ fontSize: "12px", color: "var(--ink-muted)", margin: 0 }}>
                   {detail?.type === "CHANNEL" && detail.track ? `${TRACK_LABELS[detail.track]} · ` : ""}
                   {detail ? detail.subtitle.replace(/^Canal [^·]*· /, "") : ""}
                 </p>
@@ -383,7 +383,7 @@ export default function ChatApp({
             {/* Messages */}
             <div ref={listRef} onScroll={onScroll} className="msg-scroll msg-messages">
               {loadingConversation && messages.length === 0 ? (
-                <div className="msg-empty"><Loader2 size={22} style={{ animation: "spin 1s linear infinite", color: "#F5D76E" }} /></div>
+                <div className="msg-empty"><Loader2 size={22} className="animate-spin" style={{ color: "var(--brand)" }} /></div>
               ) : messages.length === 0 ? (
                 <div className="msg-empty">
                   <p style={{ margin: 0 }}>
@@ -406,7 +406,7 @@ export default function ChatApp({
                         )}
                         <div style={{ maxWidth: "72%", minWidth: 0 }}>
                           {showAuthor && (
-                            <p style={{ fontSize: "12px", fontWeight: 600, margin: "0 0 3px 4px", color: m.sender.role === "ENCADRANT" ? "#A5B4FC" : "#F5D76E" }}>
+                            <p style={{ fontSize: "12px", fontWeight: 600, margin: "0 0 3px 4px", color: m.sender.role === "STUDENT" ? "var(--gold)" : "var(--brand-ink)" }}>
                               {m.sender.name}{m.sender.role === "ENCADRANT" ? " · Encadrant" : ""}
                             </p>
                           )}
@@ -421,7 +421,7 @@ export default function ChatApp({
                               <span className="msg-time">{timeFormat.format(new Date(m.createdAt))}</span>
                             </div>
                           ) : (
-                            <span className="msg-time" style={{ color: "rgba(200,215,235,0.6)", padding: "0 4px" }}>{timeFormat.format(new Date(m.createdAt))}</span>
+                            <span className="msg-time" style={{ color: "var(--ink-muted)", padding: "0 4px" }}>{timeFormat.format(new Date(m.createdAt))}</span>
                           )}
                         </div>
                       </div>
@@ -433,8 +433,8 @@ export default function ChatApp({
 
             {/* Saisie */}
             <footer className="msg-composer">
-              {error && <p role="alert" style={{ color: "#F0928B", fontSize: "12px", margin: "0 0 8px" }}>{error}</p>}
-              {uploads.notice && <p role="status" style={{ color: "#F5B544", fontSize: "12px", margin: "0 0 8px" }}>{uploads.notice}</p>}
+              {error && <p role="alert" style={{ color: "var(--danger)", fontSize: "12px", margin: "0 0 8px" }}>{error}</p>}
+              {uploads.notice && <p role="status" style={{ color: "var(--warning)", fontSize: "12px", margin: "0 0 8px" }}>{uploads.notice}</p>}
               <PendingTray files={uploads.files} onRemove={uploads.remove} />
               <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
                 <input
@@ -482,10 +482,10 @@ export default function ChatApp({
                   style={{ resize: "none", minHeight: "44px", maxHeight: "140px", fieldSizing: "content" } as React.CSSProperties}
                 />
                 <button className="msg-send" onClick={send} disabled={!canSend} aria-label="Envoyer" title={uploads.uploading ? "Envoi des fichiers en cours…" : undefined}>
-                  {sending ? <Loader2 size={18} style={{ animation: "spin 1s linear infinite" }} /> : <Send size={18} />}
+                  {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                 </button>
               </div>
-              <p style={{ fontSize: "11px", color: "rgba(200,215,235,0.3)", margin: "6px 0 0" }}>Entrée pour envoyer · Maj + Entrée pour aller à la ligne · glissez ou collez des fichiers pour les joindre</p>
+              <p style={{ fontSize: "11px", color: "var(--ink-subtle)", margin: "6px 0 0" }}>Entrée pour envoyer · Maj + Entrée pour aller à la ligne · glissez ou collez des fichiers pour les joindre</p>
             </footer>
           </>
         )}
@@ -522,129 +522,133 @@ export default function ChatApp({
 // STYLES (bleu nuit & or, cohérents avec la plateforme)
 // ============================================================
 const STYLES = `
-  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   .msg-app {
-    display: flex; height: calc(100vh - 150px); min-height: 520px; font-family: 'Inter', -apple-system, sans-serif;
-    border-radius: 20px; overflow: hidden; border: 1px solid rgba(180,200,230,0.08); background: rgba(10,22,40,0.75);
+    display: flex; height: calc(100vh - 140px); min-height: 520px; color: var(--ink);
+    border-radius: 24px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-card);
   }
-  .msg-sidebar { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; border-right: 1px solid rgba(180,200,230,0.08); background: rgba(255,255,255,0.02); }
-  .msg-thread { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  .msg-thread-header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid rgba(180,200,230,0.08); }
-  .msg-messages { flex: 1; overflow-y: auto; padding: 12px 20px 16px; }
-  .msg-composer { padding: 12px 20px 14px; border-top: 1px solid rgba(180,200,230,0.08); }
-  .msg-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; color: rgba(200,215,235,0.45); font-size: 13px; max-width: 420px; margin: 0 auto; }
+  .msg-sidebar { width: 344px; flex-shrink: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--surface-muted); }
+  .msg-thread { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--surface); }
+  .msg-thread-header { display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid var(--line); }
+  .msg-messages { flex: 1; overflow-y: auto; padding: 12px 22px 18px; background:
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--ink-subtle) 18%, transparent) 1px, transparent 0) 0 0 / 22px 22px, var(--canvas); }
+  .msg-composer { padding: 14px 22px 16px; border-top: 1px solid var(--line); background: var(--surface); }
+  .msg-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; color: var(--ink-muted); font-size: 13.5px; max-width: 420px; margin: 0 auto; line-height: 1.6; }
 
   .msg-conv {
-    width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px; border: 1px solid transparent;
-    background: none; cursor: pointer; text-align: left; font-family: inherit; transition: background 0.2s ease; margin-bottom: 2px;
+    width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: none;
+    background: none; cursor: pointer; text-align: left; font-family: inherit; transition: background-color 0.15s ease; margin-bottom: 2px;
   }
-  .msg-conv:hover { background: rgba(255,255,255,0.04); }
-  .msg-conv-active { background: rgba(212,175,55,0.1) !important; border-color: rgba(212,175,55,0.2); }
+  .msg-conv:hover { background: var(--surface); }
+  .msg-conv-active, .msg-conv-active:hover { background: var(--surface); box-shadow: var(--shadow-card), inset 3px 0 0 var(--brand); }
   .msg-row {
-    width: 100%; display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 12px; border: 1px solid transparent;
-    background: rgba(255,255,255,0.02); cursor: pointer; font-family: inherit; transition: background 0.2s ease;
+    width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line);
+    background: var(--surface); cursor: pointer; font-family: inherit; transition: border-color 0.15s ease, background-color 0.15s ease; color: var(--ink);
   }
-  button.msg-row:hover { background: rgba(255,255,255,0.05); }
-  .msg-row-active { background: rgba(212,175,55,0.1); border-color: rgba(212,175,55,0.25); }
+  button.msg-row:hover { border-color: var(--line-strong); background: var(--surface-muted); }
+  .msg-row-active { background: var(--brand-soft); border-color: var(--brand); }
 
-  .msg-avatar { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .msg-avatar { border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; font-family: var(--font-display); }
   .msg-track {
-    border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px;
-    font-size: 12px; font-weight: 800; letter-spacing: 0.5px; background: rgba(99,102,241,0.15); color: #A5B4FC; border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px;
+    font-size: 12px; font-weight: 800; letter-spacing: 0.04em; background: var(--brand-soft); color: var(--brand-ink);
   }
   .msg-count {
-    min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #E4736B; color: #fff; font-size: 10px; font-weight: 700;
-    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    min-width: 19px; height: 19px; padding: 0 6px; border-radius: 10px; background: var(--brand); color: #fff; font-size: 10.5px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-variant-numeric: tabular-nums;
   }
-  .msg-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 600; background: rgba(212,175,55,0.12); color: #F5D76E; }
+  .msg-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 50px; font-size: 11px; font-weight: 600; background: var(--gold-soft); color: var(--gold); }
   .msg-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
 
   .msg-tab {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 50px; font-size: 12px; font-weight: 600;
-    border: 1px solid rgba(180,200,230,0.1); background: transparent; color: rgba(200,215,235,0.55); cursor: pointer; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 9px; font-size: 12.5px; font-weight: 600;
+    border: none; background: transparent; color: var(--ink-muted); cursor: pointer; font-family: inherit; transition: background-color 0.15s ease, color 0.15s ease;
   }
-  .msg-tab-active { background: rgba(212,175,55,0.14); border-color: rgba(212,175,55,0.3); color: #F5D76E; }
+  .msg-tab:hover { color: var(--ink); }
+  .msg-tab-active, .msg-tab-active:hover { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-card); }
+  .msg-tab-active .msg-count { background: var(--brand); }
 
-  .msg-day { display: flex; align-items: center; gap: 12px; margin: 18px 0 8px; color: rgba(200,215,235,0.4); font-size: 11px; font-weight: 600; text-transform: capitalize; }
-  .msg-day::before, .msg-day::after { content: ''; flex: 1; height: 1px; background: rgba(180,200,230,0.08); }
+  .msg-day { display: flex; align-items: center; gap: 12px; margin: 20px 0 10px; color: var(--ink-subtle); font-size: 11.5px; font-weight: 600; text-transform: capitalize; }
+  .msg-day span { padding: 3px 12px; border-radius: 50px; background: var(--surface); border: 1px solid var(--line); }
+  .msg-day::before, .msg-day::after { content: ''; flex: 1; height: 1px; background: var(--line); }
   .msg-line { display: flex; gap: 8px; align-items: flex-end; }
   .msg-line-mine { justify-content: flex-end; }
   .msg-bubble {
-    padding: 9px 13px 7px; border-radius: 16px 16px 16px 5px; background: rgba(255,255,255,0.06); border: 1px solid rgba(180,200,230,0.08);
-    color: #E8EDF5; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+    padding: 9px 14px 7px; border-radius: 18px 18px 18px 6px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card);
+    color: var(--ink); font-size: 14px; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
   }
-  .msg-bubble-mine { border-radius: 16px 16px 5px 16px; background: linear-gradient(135deg, #D4AF37, #F5D76E); color: #0A1628; border: none; }
-  .msg-time { display: block; text-align: right; font-size: 10px; margin-top: 2px; opacity: 0.55; }
+  .msg-bubble-mine { border-radius: 18px 18px 6px 18px; background: linear-gradient(135deg, #3a6cf5, #1f4fd8); color: #fff; border: none; box-shadow: 0 6px 16px -8px rgba(31,79,216,0.6); }
+  .msg-time { display: block; text-align: right; font-size: 10.5px; margin-top: 2px; opacity: 0.6; font-variant-numeric: tabular-nums; }
 
   .msg-input {
-    width: 100%; padding: 11px 14px; border-radius: 12px; border: 1px solid rgba(180,200,230,0.12); background: rgba(255,255,255,0.04);
-    color: #E8EDF5; font-size: 14px; outline: none; font-family: inherit; box-sizing: border-box; transition: border-color 0.2s ease;
+    width: 100%; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink); font-size: 14px; outline: none; font-family: inherit; box-sizing: border-box; transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
-  .msg-input:focus { border-color: rgba(212,175,55,0.4); }
-  .msg-input::placeholder { color: rgba(200,215,235,0.3); }
-  select.msg-input option { background: #0A1628; }
-  .msg-label { display: block; font-size: 12px; font-weight: 600; color: rgba(200,215,235,0.55); margin-bottom: 6px; }
+  .msg-input:hover { border-color: var(--line-strong); }
+  .msg-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 12%, transparent); }
+  .msg-input::placeholder { color: var(--ink-subtle); }
+  .msg-label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
 
   .msg-btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 16px; border-radius: 50px; font-size: 13px;
-    font-weight: 600; cursor: pointer; font-family: inherit; border: 1px solid rgba(180,200,230,0.15); background: rgba(255,255,255,0.03);
-    color: rgba(200,215,235,0.8); transition: all 0.2s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 12px; font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: inherit; border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink); box-shadow: var(--shadow-card); transition: all 0.15s ease; white-space: nowrap;
   }
-  .msg-btn:hover:not(:disabled) { color: #E8EDF5; border-color: rgba(180,200,230,0.3); }
-  .msg-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .msg-btn-small { padding: 6px 11px; font-size: 12px; }
-  .msg-btn-primary { background: linear-gradient(135deg, #D4AF37, #F5D76E); color: #0A1628; border: none; font-weight: 700; }
-  .msg-btn-primary:hover:not(:disabled) { color: #0A1628; box-shadow: 0 6px 24px rgba(212,175,55,0.25); }
-  .msg-btn-danger { color: #F0928B; border-color: rgba(228,115,107,0.3); }
-  .msg-btn-danger:hover:not(:disabled) { color: #fff; background: rgba(228,115,107,0.2); }
+  .msg-btn:hover:not(:disabled) { background: var(--surface-muted); border-color: var(--line-strong); }
+  .msg-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg-btn-small { height: 32px; padding: 0 11px; font-size: 12px; border-radius: 10px; }
+  .msg-btn-primary { background: var(--brand); color: #fff; border-color: transparent; box-shadow: var(--shadow-brand); }
+  .msg-btn-primary:hover:not(:disabled) { background: var(--brand-strong); border-color: transparent; }
+  .msg-btn-danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
+  .msg-btn-danger:hover:not(:disabled) { background: var(--danger-soft); }
   .msg-icon-btn {
-    width: 34px; height: 34px; border-radius: 50%; border: none; background: rgba(255,255,255,0.05); color: rgba(200,215,235,0.7);
-    display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+    width: 38px; height: 38px; border-radius: 12px; border: none; background: transparent; color: var(--ink-muted);
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: background-color 0.15s ease, color 0.15s ease;
   }
-  .msg-icon-btn:hover { background: rgba(212,175,55,0.14); color: #F5D76E; }
+  .msg-icon-btn:hover { background: var(--surface-muted); color: var(--ink); }
   .msg-send {
-    width: 44px; height: 44px; border-radius: 50%; border: none; flex-shrink: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #D4AF37, #F5D76E); color: #0A1628; transition: transform 0.2s ease;
+    width: 46px; height: 46px; border-radius: 14px; border: none; flex-shrink: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--brand); color: #fff; box-shadow: var(--shadow-brand); transition: transform 0.15s ease, background-color 0.15s ease;
   }
-  .msg-send:hover:not(:disabled) { transform: scale(1.06); }
+  .msg-send:hover:not(:disabled) { background: var(--brand-strong); transform: translateY(-1px); }
   .msg-attach {
-    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
-    border: 1px solid rgba(180,200,230,0.15); background: rgba(255,255,255,0.04); color: rgba(200,215,235,0.75); transition: all 0.2s ease;
+    width: 46px; height: 46px; border-radius: 14px; flex-shrink: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); transition: all 0.15s ease;
   }
-  .msg-attach:hover:not(:disabled) { color: #F5D76E; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1); }
+  .msg-attach:hover:not(:disabled) { color: var(--brand); border-color: var(--brand); background: var(--brand-soft); }
   .msg-attach:disabled { opacity: 0.4; cursor: not-allowed; }
   .msg-file-card {
-    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid rgba(180,200,230,0.1);
-    background: rgba(255,255,255,0.05); text-decoration: none; width: min(320px, 100%); box-sizing: border-box; transition: border-color 0.2s ease;
+    display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line);
+    background: var(--surface); text-decoration: none; width: min(320px, 100%); box-sizing: border-box; transition: border-color 0.15s ease; box-shadow: var(--shadow-card);
   }
-  .msg-file-card:hover { border-color: rgba(212,175,55,0.45) !important; }
-  .msg-image-btn { transition: opacity 0.2s ease; }
-  .msg-image-btn:hover { opacity: 0.88; }
+  .msg-file-card:hover { border-color: var(--brand) !important; }
+  .msg-image-btn { transition: opacity 0.15s ease; }
+  .msg-image-btn:hover { opacity: 0.9; }
   .msg-drop {
-    position: absolute; inset: 10px; z-index: 20; border-radius: 16px; border: 2px dashed rgba(212,175,55,0.6); background: rgba(10,22,40,0.88);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; color: #F5D76E; pointer-events: none; text-align: center; padding: 20px;
+    position: absolute; inset: 12px; z-index: 20; border-radius: 18px; border: 2px dashed var(--brand); background: color-mix(in srgb, var(--surface) 92%, transparent);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--brand); pointer-events: none; text-align: center; padding: 20px;
   }
-  .msg-send:disabled { opacity: 0.4; cursor: not-allowed; }
-  .msg-link { background: none; border: none; color: #F5D76E; font-weight: 600; cursor: pointer; font-family: inherit; font-size: 13px; padding: 0; }
+  .msg-send:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+  .msg-link { background: none; border: none; color: var(--brand); font-weight: 600; cursor: pointer; font-family: inherit; font-size: 13px; padding: 0; }
   .msg-chip {
     display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 50px; font-size: 12px; font-weight: 600;
-    background: rgba(212,175,55,0.12); color: #F5D76E; border: 1px solid rgba(212,175,55,0.25); cursor: pointer; font-family: inherit;
+    background: var(--brand-soft); color: var(--brand-ink); border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent); cursor: pointer; font-family: inherit;
   }
   .msg-choice {
-    display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border-radius: 12px; cursor: pointer; font-family: inherit;
-    border: 2px solid rgba(180,200,230,0.1); background: rgba(255,255,255,0.03); color: rgba(200,215,235,0.7); text-align: left;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 14px; border-radius: 14px; cursor: pointer; font-family: inherit;
+    border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-muted); text-align: left; transition: border-color 0.15s ease;
   }
-  .msg-choice-active { border-color: rgba(99,102,241,0.6); background: rgba(99,102,241,0.12); color: #C7D2FE; }
+  .msg-choice:hover { border-color: var(--line-strong); }
+  .msg-choice-active, .msg-choice-active:hover { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-ink); }
 
-  .msg-overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .msg-modal { width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 24px; border-radius: 20px; background: #0F1F38; border: 1px solid rgba(180,200,230,0.12); box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
+  .msg-overlay { position: fixed; inset: 0; z-index: 2000; background: rgba(5,9,18,0.55); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .msg-modal { width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 26px; border-radius: 24px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: var(--shadow-raised); animation: var(--animate-rise); }
 
-  .msg-scroll::-webkit-scrollbar { width: 5px; }
-  .msg-scroll::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.25); border-radius: 3px; }
+  .msg-scroll::-webkit-scrollbar { width: 6px; }
+  .msg-scroll::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
 
   .msg-show-mobile { display: none; }
   @media (max-width: 860px) {
-    .msg-app { height: calc(100vh - 120px); }
+    .msg-app { height: calc(100vh - 110px); border-radius: 20px; }
     .msg-sidebar { width: 100%; border-right: none; }
     .msg-hide-mobile { display: none !important; }
     .msg-show-mobile { display: inline-flex; }

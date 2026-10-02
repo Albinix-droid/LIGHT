@@ -9,8 +9,6 @@ export const metadata = { title: "Notifications" };
 export default async function StudentNotificationsPage() {
   const user = await requireUser();
   return (
-    <div style={{ minHeight: "100vh", background: "#0A1628" }}>
-      <NotificationsPage user={user} />
-    </div>
+    <NotificationsPage user={user} />
   );
 }

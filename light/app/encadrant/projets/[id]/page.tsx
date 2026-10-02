@@ -3,23 +3,36 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CheckCircle, Clock, AlertTriangle, Lock, Circle, MessageSquare, ArrowRight, Users } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, ChevronDown, Circle, Clock, Lock, MessageSquare, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { markReadForPath } from "@/lib/notifications/queries";
 import { getSupervisedProject, fullName } from "@/lib/projects";
 import { STAGES, SECTOR_LABELS, getStageIndex } from "@/lib/parcours";
-import { Stars, formatDate } from "@/app/dashboard/projets/[id]/StepStatusBanner";
+import { formatDate } from "@/lib/format";
+import Avatar from "@/components/ui/Avatar";
+import ProjectCover from "@/components/ui/ProjectCover";
+import Stars from "@/components/ui/Stars";
+import { Badge, Card, PageHeader, ProgressBar, buttonClass, cx, type Tone } from "@/components/ui/kit";
 import StepDataView from "../../StepDataView";
 import { getFollowUpStatus } from "../../projectStatus";
 
-const STEP_DISPLAY = {
-  COMPLETED: { label: "Validée", color: "#34D399", Icon: CheckCircle },
-  SUBMITTED: { label: "Soumise · à examiner", color: "#F5B544", Icon: Clock },
-  CHANGES_REQUESTED: { label: "Modifications demandées", color: "#F0928B", Icon: AlertTriangle },
-  IN_PROGRESS: { label: "En cours de rédaction", color: "#F5D76E", Icon: Circle },
-  UPCOMING: { label: "À venir · préparation en cours", color: "rgba(200,215,235,0.5)", Icon: Lock },
-  NOT_STARTED: { label: "Pas encore commencée", color: "rgba(200,215,235,0.35)", Icon: Lock },
-} as const;
+const STEP_DISPLAY: Record<string, { label: string; tone: Tone; Icon: typeof Circle }> = {
+  COMPLETED: { label: "Validée", tone: "success", Icon: CheckCircle2 },
+  SUBMITTED: { label: "Soumise · à examiner", tone: "warning", Icon: Clock },
+  CHANGES_REQUESTED: { label: "Modifications demandées", tone: "danger", Icon: AlertTriangle },
+  IN_PROGRESS: { label: "En cours de rédaction", tone: "brand", Icon: Circle },
+  UPCOMING: { label: "À venir · préparation en cours", tone: "neutral", Icon: Lock },
+  NOT_STARTED: { label: "Pas encore commencée", tone: "neutral", Icon: Lock },
+};
+
+const TILE: Record<Tone, string> = {
+  success: "bg-success-soft text-success",
+  warning: "bg-warning-soft text-warning",
+  danger: "bg-danger-soft text-danger",
+  brand: "bg-brand-soft text-brand-ink",
+  neutral: "bg-surface-muted text-ink-subtle",
+  gold: "bg-gold-soft text-gold",
+};
 
 export default async function EncadrantProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -33,42 +46,47 @@ export default async function EncadrantProjectPage({ params }: { params: Promise
   const team = project.members.filter((m) => m.userId !== project.ownerId);
 
   return (
-    <div className="enc-page" style={{ maxWidth: "960px" }}>
-      <Link href="/encadrant/projets" className="enc-btn" style={{ marginBottom: "18px", padding: "7px 14px" }}>
-        <ArrowLeft size={14} /> Projets suivis
-      </Link>
+    <div className="mx-auto max-w-[1100px]">
+      <PageHeader back={{ href: "/encadrant/projets", label: "Projets suivis" }} title={project.title} />
 
-      {/* ===== EN-TÊTE ===== */}
-      <div className="enc-card" style={{ marginBottom: "20px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", alignItems: "flex-start" }}>
-          <div style={{ minWidth: 0 }}>
-            <h1 className="enc-h1">{project.title}</h1>
-            <p className="enc-sub">
-              Porté par {fullName(project.owner)} ({project.owner.email})
-              {project.sector ? ` · ${SECTOR_LABELS[project.sector] ?? project.sector}` : ""}
-            </p>
-            {team.length > 0 && (
-              <p className="enc-muted" style={{ fontSize: "12px", margin: "6px 0 0", display: "flex", alignItems: "center", gap: "6px" }}>
-                <Users size={13} /> Équipe : {team.map((m) => fullName(m.user)).join(", ")}
-              </p>
-            )}
+      {/* ===== EN-TÊTE DU PROJET ===== */}
+      <Card padded={false} className="mb-8 overflow-hidden animate-rise">
+        <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-start">
+          <ProjectCover sector={project.sector} title={project.title} variant="tile" className="size-16 rounded-2xl" />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge tone={status.tone}>{status.label}</Badge>
+              <Badge>{project.sector ? SECTOR_LABELS[project.sector] ?? project.sector : "Secteur non renseigné"}</Badge>
+            </div>
+            {project.description && <p className="mt-3 text-[14px] leading-relaxed text-ink-muted">{project.description}</p>}
+            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 text-[13px]">
+              <span className="inline-flex items-center gap-2.5">
+                <Avatar name={fullName(project.owner)} size="sm" />
+                <span>
+                  <span className="block font-semibold text-ink">{fullName(project.owner)}</span>
+                  <span className="block text-[12px] text-ink-subtle">Porteur · {project.owner.email}</span>
+                </span>
+              </span>
+              {team.length > 0 && (
+                <span className="inline-flex items-center gap-2 text-ink-muted">
+                  <Users className="size-4" strokeWidth={1.75} />
+                  {team.map((m) => fullName(m.user)).join(", ")}
+                </span>
+              )}
+            </div>
           </div>
-          <span className="enc-badge" style={{ background: status.bg, color: status.color }}>{status.label}</span>
         </div>
-        {project.description && (
-          <p style={{ fontSize: "14px", color: "rgba(232,237,245,0.75)", lineHeight: 1.6, margin: "14px 0 0" }}>{project.description}</p>
-        )}
-        <div style={{ marginTop: "16px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-            <span className="enc-muted">Progression du parcours</span>
-            <span style={{ color: "#F5D76E", fontWeight: 600 }}>{project.progress}%</span>
+        <div className="border-t border-line bg-surface-muted px-6 py-4">
+          <div className="mb-2 flex justify-between text-[12.5px]">
+            <span className="text-ink-muted">Étape {current + 1}/5 · {STAGES[current].label}</span>
+            <span className="font-semibold text-brand tabular-nums">{project.progress}%</span>
           </div>
-          <div className="enc-progress"><div style={{ width: `${project.progress}%` }} /></div>
+          <ProgressBar value={project.progress} />
         </div>
-      </div>
+      </Card>
 
       {/* ===== FRISE DES ÉTAPES ===== */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <ol className="relative space-y-4 before:absolute before:top-6 before:bottom-6 before:left-[27px] before:w-px before:bg-line">
         {STAGES.map((stage, index) => {
           const step = project.steps.find((s) => s.stage === stage.stage);
           // Les étapes à venir peuvent déjà contenir un brouillon de l'étudiant
@@ -78,65 +96,66 @@ export default async function EncadrantProjectPage({ params }: { params: Promise
           const rounds = step?.submissions.filter((s) => s.decision) ?? [];
 
           return (
-            <div key={stage.slug} className="enc-card" style={{ padding: "18px 20px", opacity: key === "NOT_STARTED" ? 0.55 : key === "UPCOMING" ? 0.8 : 1 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-                <div style={{
-                  width: "38px", height: "38px", borderRadius: "12px", flexShrink: 0, display: "flex",
-                  alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.05)",
-                }}>
-                  <display.Icon size={18} style={{ color: display.color }} />
-                </div>
-                <div style={{ flex: 1, minWidth: "180px" }}>
-                  <p style={{ fontSize: "15px", fontWeight: 600, color: "#E8EDF5", margin: 0 }}>{index + 1}. {stage.label}</p>
-                  <p style={{ fontSize: "12px", color: display.color, margin: "2px 0 0" }}>
-                    {display.label}
-                    {key === "COMPLETED" && step?.completedAt && ` le ${formatDate(step.completedAt.toISOString())}`}
-                    {pending && ` depuis le ${formatDate(pending.submittedAt.toISOString())}`}
-                  </p>
-                </div>
-                {pending && (
-                  <Link href={`/encadrant/validations?id=${pending.id}`} className="enc-btn enc-btn-primary">
-                    Examiner <ArrowRight size={14} />
-                  </Link>
-                )}
-              </div>
-
-              {/* Historique des échanges sur l'étape */}
-              {rounds.length > 0 && (
-                <div style={{ marginTop: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {rounds.map((r) => (
-                    <div key={r.id} style={{ padding: "10px 14px", borderRadius: "12px", background: "rgba(255,255,255,0.03)", borderLeft: `3px solid ${r.decision === "APPROVED" ? "#34D399" : "#F5B544"}` }}>
-                      {r.note && (
-                        <p style={{ fontSize: "12px", color: "#A5B4FC", margin: "0 0 6px", display: "flex", gap: "6px", alignItems: "flex-start" }}>
-                          <MessageSquare size={12} style={{ marginTop: "2px", flexShrink: 0 }} />
-                          <span style={{ whiteSpace: "pre-wrap" }}>{fullName(r.author)} : {r.note}</span>
-                        </p>
-                      )}
-                      <p className="enc-muted" style={{ fontSize: "12px", margin: "0 0 4px", display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-                        {r.reviewedAt && formatDate(r.reviewedAt.toISOString())} · {r.decision === "APPROVED" ? "Validée" : "Modifications demandées"} par {fullName(r.reviewer) || "l'encadrant"}
-                        {r.rating ? <Stars rating={r.rating} size={11} /> : null}
-                      </p>
-                      <p style={{ fontSize: "13px", color: "rgba(232,237,245,0.85)", margin: 0, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{r.feedback}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Contenu actuel de l'étape (brouillon compris) */}
-              {step && (
-                <details style={{ marginTop: "14px" }}>
-                  <summary style={{ cursor: "pointer", fontSize: "13px", color: "#F5D76E", fontWeight: 600 }}>
-                    Voir le contenu actuel de l&apos;étape
-                  </summary>
-                  <div style={{ marginTop: "14px", paddingTop: "14px", borderTop: "1px solid rgba(180,200,230,0.08)" }}>
-                    <StepDataView slug={stage.slug} data={step.data} />
+            <li key={stage.slug} className={cx("relative flex gap-4", key === "NOT_STARTED" && "opacity-60")}>
+              <span className={cx("relative z-10 inline-flex size-14 shrink-0 items-center justify-center rounded-2xl ring-4 ring-canvas", TILE[display.tone])}>
+                <display.Icon className="size-5" strokeWidth={1.75} />
+              </span>
+              <Card className="min-w-0 flex-1" padded={false}>
+                <div className="flex flex-wrap items-center gap-3 p-5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-semibold tracking-[0.14em] text-ink-subtle uppercase">Étape {index + 1}</p>
+                    <p className="font-display text-[16px] font-semibold text-ink">{stage.label}</p>
+                    <p className="mt-0.5 text-[12.5px] text-ink-muted">
+                      {display.label}
+                      {key === "COMPLETED" && step?.completedAt && ` le ${formatDate(step.completedAt)}`}
+                      {pending && ` depuis le ${formatDate(pending.submittedAt)}`}
+                    </p>
                   </div>
-                </details>
-              )}
-            </div>
+                  {pending && (
+                    <Link href={`/encadrant/validations?id=${pending.id}`} className={buttonClass("primary")}>
+                      Examiner <ArrowRight />
+                    </Link>
+                  )}
+                </div>
+
+                {/* Historique des échanges sur l'étape */}
+                {rounds.length > 0 && (
+                  <div className="space-y-2.5 border-t border-line px-5 py-4">
+                    {rounds.map((r) => (
+                      <div key={r.id} className={cx("rounded-xl border-l-[3px] bg-surface-muted px-4 py-3", r.decision === "APPROVED" ? "border-success" : "border-warning")}>
+                        {r.note && (
+                          <p className="mb-2 flex gap-2 text-[12.5px] text-brand-ink">
+                            <MessageSquare className="mt-0.5 size-3.5 shrink-0" strokeWidth={2} />
+                            <span className="whitespace-pre-wrap">{fullName(r.author)} : {r.note}</span>
+                          </p>
+                        )}
+                        <p className="mb-1 flex flex-wrap items-center gap-2 text-[12px] text-ink-subtle">
+                          {r.reviewedAt && formatDate(r.reviewedAt)} · {r.decision === "APPROVED" ? "Validée" : "Modifications demandées"} par {fullName(r.reviewer) || "l'encadrant"}
+                          {r.rating ? <Stars rating={r.rating} size={11} /> : null}
+                        </p>
+                        <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-ink">{r.feedback}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Contenu actuel de l'étape (brouillon compris) */}
+                {step && (
+                  <details className="group border-t border-line">
+                    <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3.5 text-[13px] font-semibold text-brand hover:bg-surface-muted [&::-webkit-details-marker]:hidden">
+                      Voir le contenu actuel de l&apos;étape
+                      <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="border-t border-line px-5 py-5">
+                      <StepDataView slug={stage.slug} data={step.data} />
+                    </div>
+                  </details>
+                )}
+              </Card>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </div>
   );
 }

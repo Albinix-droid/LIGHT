@@ -23,13 +23,29 @@ export default function ProjectCover({
   sector,
   title,
   className = "",
+  variant = "cover",
 }: {
   sector: string | null | undefined;
   title: string;
   className?: string;
+  // tile : petite vignette carrée (listes), icône du secteur centrée
+  variant?: "cover" | "tile";
 }) {
   const { from, to, icon: Icon } = sectorStyle(sector);
   const initial = title.trim()[0]?.toUpperCase() ?? "•";
+
+  if (variant === "tile") {
+    return (
+      <span
+        className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden ${className}`}
+        style={{ backgroundImage: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
+        aria-hidden="true"
+      >
+        <span className="absolute -top-1/2 -right-1/3 size-full rounded-full bg-white/20 blur-md" />
+        <Icon className="relative size-[45%] text-white" strokeWidth={1.75} />
+      </span>
+    );
+  }
 
   return (
     <div
