@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="14" fill="#0b1324"/>
+  <g transform="translate(3.2 2.2) scale(0.9)">
+  <defs>
+    <linearGradient id="lg" x1="14" y1="6" x2="50" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6dd8f"/><stop offset="0.5" stop-color="#d9a93c"/><stop offset="1" stop-color="#a87422"/>
+    </linearGradient>
+    <mask id="lm" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+      <rect width="64" height="64" fill="#fff"/>
+      <path d="M26.5 45.5 C 27 39, 31 34.5, 33.4 28 L 35 22.5" stroke="#000" stroke-width="6.4" stroke-linecap="round"/>
+      <path d="M29.8 23.4 L 36 12.8 L 41 24.6 Z" fill="#000" stroke="#000" stroke-width="2.4" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <!-- Verre de l'ampoule -->
+  <path d="M24.5 46.5 C24.5 40.5 13.5 36.5 13.5 24.5 A18.5 18.5 0 0 1 50.5 24.5 C50.5 36.5 39.5 40.5 39.5 46.5" stroke="url(#lg)" stroke-width="2.6" stroke-linecap="round"/>
+  <!-- Afrique, percée par la route -->
+  <path d="M22.42 11.45 L28.47 11.00 L28.77 12.32 L32.17 12.81 L34.06 13.04 L35.95 13.19 L36.93 13.27 L37.54 14.21 L38.03 15.91 L38.71 17.80 L39.54 19.09 L40.90 20.60 L44.00 20.52 L43.32 22.34 L41.73 24.23 L40.30 25.55 L39.62 26.49 L39.47 27.55 L39.92 28.95 L39.92 30.65 L38.03 31.97 L37.76 32.47 L37.99 33.67 L36.93 34.81 L36.33 36.24 L35.19 37.30 L34.29 37.83 L32.17 38.13 L31.57 37.83 L30.81 35.79 L30.09 33.30 L29.07 31.41 L29.60 28.31 L29.22 27.21 L28.17 24.83 L28.28 23.47 L27.83 23.24 L26.88 23.36 L25.90 22.56 L24.54 22.90 L23.10 22.98 L21.78 23.32 L20.53 22.60 L19.62 21.77 L18.94 20.83 L18.04 19.43 L18.57 18.18 L18.38 17.05 L19.13 15.12 L20.99 13.49 L21.74 12.28 Z" fill="url(#lg)" mask="url(#lm)"/>
+  <!-- Route : deux bords pleins et une ligne médiane en pointillés -->
+  <mask id="lr" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+    <rect width="64" height="64" fill="#fff"/>
+    <path d="M26.5 45.5 C 27 39, 31 34.5, 33.4 28 L 35 22.5" stroke="#000" stroke-width="3" stroke-linecap="butt"/>
+  </mask>
+  <path d="M26.5 45.5 C 27 39, 31 34.5, 33.4 28 L 35 22.5" stroke="url(#lg)" stroke-width="5" stroke-linecap="butt" mask="url(#lr)"/>
+  <path d="M26.5 45.5 C 27 39, 31 34.5, 33.4 28 L 35 22.5" stroke="url(#lg)" stroke-width="0.9" stroke-dasharray="1.8 1.8"/>
+  <path d="M29.8 23.4 L 36 12.8 L 41 24.6 Z" fill="url(#lg)"/>
+  <!-- Culot -->
+  <rect x="23.5" y="49" width="17" height="3" rx="1.5" fill="url(#lg)"/>
+  <rect x="24.5" y="53.5" width="15" height="3" rx="1.5" fill="url(#lg)"/>
+  <path d="M27 58 H37 A5 5 0 0 1 27 58 Z" fill="url(#lg)"/>
+</g>
+</svg>
