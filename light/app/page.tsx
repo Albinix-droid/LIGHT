@@ -507,8 +507,8 @@ export default function HomePage() {
                   Mon idée : une appli qui relie les agriculteurs aux acheteurs de Douala. Par où commencer ?
                 </div>
                 <div className="flex gap-3">
-                  <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(140deg,#4d7cff,#1f4fd8)] text-white">
-                    <Sparkles className="size-4" aria-hidden="true" />
+                  <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(140deg,#1a2a52,#0b1324)] ring-1 ring-[#ecd08a]/20">
+                    <LogoMark className="size-6" glow={false} />
                   </span>
                   <div className="rounded-2xl rounded-tl-md bg-white/[0.07] px-4 py-3 text-[13.5px] leading-relaxed text-white/85">
                     Précisez d&apos;abord le problème : quelles pertes subissent aujourd&apos;hui les agriculteurs ? Puis identifions vos premiers clients et

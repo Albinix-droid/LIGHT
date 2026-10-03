@@ -10,6 +10,7 @@ import {
   Sparkles, Plus, Send, Square, Trash2, Globe, Loader2, MessageSquare, FolderKanban, AlertCircle, ExternalLink,
   Search, TrendingUp, Wallet, Rocket, CheckCircle2, Presentation, Menu, X,
 } from "lucide-react";
+import { LogoMark } from "@/components/ui/Logo";
 import { deleteAssistantThread, getAssistantThread } from "@/lib/assistant/actions";
 import { QUICK_PROMPTS } from "@/lib/assistant/prompt";
 import { ASSISTANT_MAX_MESSAGE_LENGTH } from "@/lib/assistant/limits";
@@ -211,7 +212,7 @@ export default function AssistantApp({
       <aside className={`ai-sidebar ${historyOpen ? "ai-sidebar-open" : ""}`}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
           <span style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "var(--font-display)", fontSize: "16px", fontWeight: 700, color: "var(--ink)" }}>
-            <span style={{ display: "inline-flex", width: 30, height: 30, borderRadius: 9, alignItems: "center", justifyContent: "center", background: "linear-gradient(140deg, #4d7cff, #1f4fd8)", color: "#fff" }}><Sparkles size={15} /></span> Mentor IA
+            <span style={{ display: "inline-flex", width: 30, height: 30, borderRadius: 9, alignItems: "center", justifyContent: "center", background: "linear-gradient(140deg, #1a2a52, #0b1324)" }}><LogoMark className="size-[22px]" glow={false} /></span> Mentor IA
           </span>
           <button className="ai-icon-btn ai-mobile-only" onClick={() => setHistoryOpen(false)} aria-label="Fermer l'historique"><X size={15} /></button>
         </div>
@@ -273,7 +274,7 @@ export default function AssistantApp({
         <div ref={listRef} onScroll={onScroll} className="ai-scroll ai-messages">
           {empty ? (
             <div className="ai-welcome">
-              <div className="ai-orb"><Sparkles size={28} /></div>
+              <div className="ai-orb"><LogoMark className="size-12" /></div>
               <h1 style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 700, color: "var(--ink)", margin: "0 0 10px", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
                 Bonjour {firstName}, je suis votre mentor entrepreneurial
               </h1>
@@ -299,7 +300,7 @@ export default function AssistantApp({
           ) : (
             messages.map((m) => (
               <div key={m.id} className={`ai-row ${m.role === "user" ? "ai-row-user" : ""}`}>
-                {m.role === "assistant" && <div className="ai-avatar"><Sparkles size={15} /></div>}
+                {m.role === "assistant" && <div className="ai-avatar"><LogoMark className="size-6" glow={false} /></div>}
                 <div className={m.role === "user" ? "ai-bubble-user" : "ai-bubble-assistant"}>
                   {m.role === "user" ? (
                     m.content
@@ -384,7 +385,7 @@ export default function AssistantApp({
 // STYLES
 // ============================================================
 const STYLES = `
-  @keyframes aiPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(31,79,216,0.3); } 50% { box-shadow: 0 0 0 16px rgba(31,79,216,0); } }
+  @keyframes aiPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(217,169,60,0.32); } 50% { box-shadow: 0 0 0 16px rgba(217,169,60,0); } }
   @keyframes aiFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   .ai-app { display: flex; height: calc(100vh - 140px); min-height: 540px; color: var(--ink); border-radius: 24px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-card); position: relative; }
@@ -410,7 +411,7 @@ const STYLES = `
   .ai-select:focus { border-color: var(--brand); }
 
   .ai-welcome { max-width: 780px; margin: 0 auto; text-align: center; padding: 28px 8px; animation: aiFade 0.5s ease both; }
-  .ai-orb { width: 72px; height: 72px; border-radius: 24px; margin: 0 auto 22px; display: flex; align-items: center; justify-content: center; background: linear-gradient(140deg, #4d7cff 0%, #1f4fd8 60%, #173fae 100%); color: #fff; animation: aiPulse 2.8s ease-in-out infinite; }
+  .ai-orb { width: 72px; height: 72px; border-radius: 24px; margin: 0 auto 22px; display: flex; align-items: center; justify-content: center; background: linear-gradient(140deg, #1a2a52 0%, #0b1324 100%); box-shadow: inset 0 0 0 1px rgba(236, 208, 138, 0.18); animation: aiPulse 2.8s ease-in-out infinite; }
   .ai-quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; text-align: left; }
   .ai-quick { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; text-align: left; box-shadow: var(--shadow-card); transition: all 0.15s ease; }
   .ai-quick:hover:not(:disabled) { border-color: var(--line-strong); transform: translateY(-2px); box-shadow: var(--shadow-raised); }
@@ -418,7 +419,7 @@ const STYLES = `
 
   .ai-row { display: flex; gap: 12px; margin-bottom: 22px; animation: aiFade 0.3s ease both; max-width: 860px; margin-left: auto; margin-right: auto; }
   .ai-row-user { justify-content: flex-end; }
-  .ai-avatar { width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(140deg, #4d7cff, #1f4fd8); color: #fff; }
+  .ai-avatar { width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(140deg, #1a2a52, #0b1324); box-shadow: inset 0 0 0 1px rgba(236, 208, 138, 0.14); }
   .ai-bubble-user { max-width: 75%; padding: 11px 16px; border-radius: 18px 18px 6px 18px; background: linear-gradient(135deg, #3a6cf5, #1f4fd8); color: #fff; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; box-shadow: 0 6px 16px -8px rgba(31,79,216,0.6); }
   .ai-bubble-assistant { flex: 1; min-width: 0; color: var(--ink); font-size: 14.5px; line-height: 1.75; padding: 16px 20px; border-radius: 6px 18px 18px 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-card); }
   .ai-status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--brand); font-weight: 500; }
