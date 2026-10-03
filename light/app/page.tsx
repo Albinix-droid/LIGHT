@@ -15,7 +15,6 @@ import { createClient } from "@/lib/supabase/client";
 import Logo, { LogoMark } from "@/components/ui/Logo";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import Avatar from "@/components/ui/Avatar";
-import ProgressRing from "@/components/ui/ProgressRing";
 import ProjectCover from "@/components/ui/ProjectCover";
 import { SECTOR_LABELS } from "@/lib/parcours";
 import HeroBackground from "./_accueil/HeroBackground";
@@ -294,75 +293,35 @@ export default function HomePage() {
       <header className="relative isolate flex min-h-[100svh] items-center overflow-hidden bg-sidebar pt-28 pb-40 text-white sm:pb-48">
         <HeroBackground />
 
-        <div className="mx-auto grid w-full max-w-[1200px] items-center gap-14 px-5 sm:px-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+        {/* Le slogan, seul et centré */}
+        <div className="mx-auto w-full max-w-[1000px] px-5 text-center sm:px-8">
           <div className="animate-rise">
             <Eyebrow icon={Sparkles} dark>La plateforme entrepreneuriale pour étudiants</Eyebrow>
-            <h1 className="mt-6 font-display text-[44px] leading-[1.03] font-extrabold tracking-tight sm:text-[64px]">
+            <h1 className="mt-7 font-display text-[46px] leading-[1.02] font-extrabold tracking-tight sm:text-[72px] lg:text-[88px]">
               Un étudiant, un projet,
               <br />
-              <span className="bg-[linear-gradient(120deg,#f1d48a,#c9993a)] bg-clip-text text-transparent">une entreprise.</span>
+              <span className="bg-[linear-gradient(120deg,#f6dd8f,#d9a93c_55%,#c9993a)] bg-clip-text text-transparent">une entreprise.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-[17.5px] leading-relaxed text-white/75">
+            <p className="mx-auto mt-7 max-w-2xl text-[17.5px] leading-relaxed text-white/80 sm:text-[19px]">
               L&apos;application intelligente qui guide les entrepreneurs de l&apos;idée à la réussite.
             </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/register" className="inline-flex h-12 items-center gap-2 rounded-xl bg-white px-6 text-[14.5px] font-semibold text-[#14244f] shadow-lg transition-transform hover:-translate-y-px">
+            <div className="mt-10 flex flex-wrap justify-center gap-3">
+              <Link href="/register" className="inline-flex h-13 items-center gap-2 rounded-xl bg-white px-7 text-[15px] font-semibold text-[#14244f] shadow-lg transition-transform hover:-translate-y-px">
                 Commençons ! <ArrowRight className="size-[18px]" aria-hidden="true" />
               </Link>
-              <Link href="#parcours" className="inline-flex h-12 items-center rounded-xl px-6 text-[14.5px] font-semibold text-white ring-1 ring-white/30 backdrop-blur-sm transition-colors hover:bg-white/10">
+              <Link href="#parcours" className="inline-flex h-13 items-center rounded-xl px-7 text-[15px] font-semibold text-white ring-1 ring-white/30 backdrop-blur-sm transition-colors hover:bg-white/10">
                 Découvrir le parcours
               </Link>
             </div>
-            <dl className="mt-12 flex flex-wrap gap-x-10 gap-y-4 border-t border-white/10 pt-6">
+            <dl className="mx-auto mt-14 flex max-w-xl flex-wrap justify-center gap-x-12 gap-y-4 border-t border-white/10 pt-7">
               {[["5", "étapes guidées"], ["1", "encadrant de l'école"], ["24 h/24", "mentor IA"]].map(([value, label]) => (
                 <div key={label}>
                   <dt className="sr-only">{label}</dt>
-                  <dd className="font-display text-[24px] font-bold">{value}</dd>
+                  <dd className="font-display text-[26px] font-bold">{value}</dd>
                   <dd className="text-[13px] text-white/60">{label}</dd>
                 </div>
               ))}
             </dl>
-          </div>
-
-          {/* Aperçu de l'interface */}
-          <div className="relative hidden animate-rise [animation-delay:150ms] lg:block" aria-hidden="true">
-            <div className="absolute -inset-6 rounded-[36px] bg-white/[0.05] ring-1 ring-white/15 backdrop-blur-md" />
-            <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(118deg,#162f86_0%,#1f4fd8_48%,#3a78f2_100%)] p-6 shadow-2xl">
-              <div className="absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(236,208,138,0.8),transparent)]" />
-              <p className="text-[11px] font-semibold tracking-[0.14em] text-white/65 uppercase">Synthèse du projet</p>
-              <div className="mt-4 flex items-center gap-4">
-                <ProgressRing value={60} size={70} stroke={6} trackClassName="stroke-white/15" barClassName="stroke-white">
-                  <span className="font-display text-[15px] font-bold">60%</span>
-                </ProgressRing>
-                <div>
-                  <p className="text-[11px] font-semibold tracking-[0.12em] text-white/65 uppercase">Étape 4 sur 5</p>
-                  <p className="font-display text-[19px] font-semibold">Tests</p>
-                  <p className="text-[12px] text-white/70">Validée par l&apos;encadrant</p>
-                </div>
-              </div>
-              <div className="mt-5 flex gap-1.5">
-                {[1, 1, 1, 0.45, 0.15].map((o, i) => <span key={i} className="h-1.5 flex-1 rounded-full bg-white" style={{ opacity: o }} />)}
-              </div>
-            </div>
-            <div className="relative mt-4 grid grid-cols-2 gap-4">
-              <div className="rounded-[20px] bg-white p-4 text-[#0e1726] shadow-xl">
-                <p className="text-[11px] font-semibold tracking-[0.12em] text-[#8a94a6] uppercase">Encadrant</p>
-                <div className="mt-3 flex items-center gap-3">
-                  <Avatar name="Marie Ngo" size="md" />
-                  <div>
-                    <p className="text-[13px] font-semibold">Marie Ngo</p>
-                    <p className="flex gap-0.5">{[1, 2, 3, 4, 5].map((n) => <Star key={n} className={`size-3 ${n <= 4 ? "fill-[#1f4fd8] text-[#1f4fd8]" : "text-[#d5dce8]"}`} />)}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-[20px] bg-white p-4 text-[#0e1726] shadow-xl">
-                <p className="text-[11px] font-semibold tracking-[0.12em] text-[#8a94a6] uppercase">Mentor IA</p>
-                <div className="mt-3 flex items-center gap-3">
-                  <span className="inline-flex size-10 items-center justify-center rounded-xl bg-[#1f4fd8] text-white"><Sparkles className="size-5" /></span>
-                  <p className="text-[12.5px] leading-snug text-[#556074]">Analyse de marché prête</p>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </header>

@@ -52,13 +52,14 @@ export default function HeroBackground() {
         ))}
       </motion.div>
 
-      {/* Voile bleu nuit : texte lisible à gauche, photo plus visible à droite */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[linear-gradient(95deg,rgba(11,19,36,0.94)_0%,rgba(11,19,36,0.78)_42%,rgba(11,19,36,0.45)_100%)]" />
+      {/* Voile bleu nuit : plus dense au centre, derrière le slogan, la photo respire sur les bords */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[rgba(11,19,36,0.55)]" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_55%_at_50%_45%,rgba(11,19,36,0.6),transparent)]" />
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-48 bg-[linear-gradient(180deg,transparent,rgba(11,19,36,0.85))]" />
 
       {/* Indicateurs */}
       <div className="absolute bottom-24 left-1/2 z-10 hidden w-full max-w-[1200px] -translate-x-1/2 px-5 sm:bottom-32 sm:px-8 md:block">
-        <div className="flex items-center gap-5">
+        <div className="flex items-center justify-center gap-5">
           <div className="flex gap-2" role="tablist" aria-label="Photos d'ambiance">
             {HERO_SLIDES.map((slide, i) => (
               <button
