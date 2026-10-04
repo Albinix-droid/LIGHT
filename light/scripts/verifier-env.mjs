@@ -17,7 +17,7 @@ const REQUIRED = {
     DATABASE_URL: 'connexion PostgreSQL (pooler en mode transaction, port 6543)',
 };
 const OPTIONAL = {
-    ANTHROPIC_API_KEY: "l'assistant IA affichera « non configuré »",
+    GEMINI_API_KEY: "le mentor IA affichera « non configuré »",
     DIRECT_URL: 'uniquement nécessaire pour lancer les migrations (npm run db:migrate)',
 };
 

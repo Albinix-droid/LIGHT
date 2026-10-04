@@ -1,12 +1,11 @@
 // app/api/assistant/route.ts
-// ASSISTANT IA : réponse en streaming du mentor entrepreneurial (Claude)
+// ASSISTANT IA : réponse en streaming du mentor entrepreneurial (Google Gemini)
 // Flux NDJSON renvoyé au navigateur, un objet JSON par ligne :
 //   { type: "thread", threadId, title }   conversation créée ou reprise
 //   { type: "status", value: "search" }   l'assistant fait une recherche web
 //   { type: "text", delta }               morceau de réponse
 //   { type: "done", messageId, sources }  fin de la réponse (sources web citées)
 //   { type: "error", message }            erreur lisible par l'étudiant
-import Anthropic from '@anthropic-ai/sdk';
 import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { ASSISTANT_SYSTEM_PROMPT } from '@/lib/assistant/prompt';
@@ -16,38 +15,88 @@ import { ASSISTANT_DAILY_LIMIT, ASSISTANT_MAX_MESSAGE_LENGTH } from '@/lib/assis
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const MODEL = 'claude-opus-5';
-const MAX_HISTORY = 30; // messages précédents renvoyés à Claude
-const MAX_CONTINUATIONS = 4; // reprises après une pause de la recherche web (pause_turn)
-
-let anthropic: Anthropic | null = null;
-function getClient() {
-    // Identifiants lus dans l'environnement : ANTHROPIC_API_KEY (ou un profil `ant auth login` en local)
-    anthropic ??= new Anthropic();
-    return anthropic;
-}
+// Modèle Gemini, modifiable sans toucher au code (variable GEMINI_MODEL).
+// Si le modèle demandé n'existe plus, on bascule sur l'alias qui suit toujours le dernier « Flash ».
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const FALLBACK_MODEL = 'gemini-flash-latest';
+const MAX_HISTORY = 30; // messages précédents renvoyés au modèle
+// Recherche Google intégrée à Gemini (sources citées) ; GEMINI_WEB_SEARCH=false pour la couper
+const WEB_SEARCH = process.env.GEMINI_WEB_SEARCH !== 'false';
+const BLOCKED_REASONS = ['SAFETY', 'PROHIBITED_CONTENT', 'BLOCKLIST', 'RECITATION', 'SPII'];
 
 const json = (status: number, body: object) =>
     new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
 
-// Traduit les erreurs de l'API en messages compréhensibles (du plus précis au plus général)
+// Erreur de l'API Gemini, avec son code HTTP pour choisir le bon message (0 : clé absente)
+class GeminiError extends Error {
+    constructor(public status: number, message: string) {
+        super(message);
+    }
+}
+
+const isKeyError = (error: GeminiError) => /api[_ ]?key/i.test(error.message);
+
+// Traduit les erreurs en messages compréhensibles par l'étudiant
 function errorMessage(error: unknown) {
-    if (error instanceof Anthropic.AuthenticationError || error instanceof Anthropic.PermissionDeniedError) {
-        return "L'assistant n'est pas correctement configuré (clé API Anthropic invalide). Prévenez l'administrateur de la plateforme.";
-    }
-    if (error instanceof Anthropic.RateLimitError) {
-        return "L'assistant est très sollicité en ce moment. Réessayez dans une minute.";
-    }
-    if (error instanceof Anthropic.APIConnectionError) {
-        return "Impossible de joindre le service d'intelligence artificielle. Vérifiez la connexion du serveur et réessayez.";
-    }
-    if (error instanceof Anthropic.APIError) {
+    if (error instanceof GeminiError) {
+        if (error.status === 0) return "L'assistant n'est pas encore configuré : la clé GEMINI_API_KEY est absente du serveur.";
+        if ((error.status === 400 && isKeyError(error)) || error.status === 401 || error.status === 403) {
+            return "L'assistant n'est pas correctement configuré (clé API Gemini invalide ou refusée). Prévenez l'administrateur de la plateforme.";
+        }
+        if (error.status === 429) {
+            return "L'assistant a atteint sa limite d'utilisation gratuite pour le moment. Réessayez dans une minute, ou demain si la limite du jour est atteinte.";
+        }
         return "Le service d'intelligence artificielle est momentanément indisponible. Réessayez dans quelques instants.";
     }
-    if (error instanceof Anthropic.AnthropicError) {
-        return "L'assistant n'est pas encore configuré : la clé ANTHROPIC_API_KEY est absente du serveur.";
+    if (error instanceof TypeError) {
+        return "Impossible de joindre le service d'intelligence artificielle. Vérifiez la connexion du serveur et réessayez.";
     }
     return 'Une erreur inattendue est survenue. Réessayez.';
+}
+
+type GeminiContent = { role: 'user' | 'model'; parts: { text: string }[] };
+type GeminiChunk = {
+    candidates?: {
+        content?: { parts?: { text?: string; thought?: boolean }[] };
+        finishReason?: string;
+        groundingMetadata?: { webSearchQueries?: string[]; groundingChunks?: { web?: { uri?: string; title?: string } }[] };
+    }[];
+    promptFeedback?: { blockReason?: string };
+};
+
+// Ouvre le flux de réponse Gemini (Server-Sent Events)
+async function openGeminiStream(model: string, body: object, signal: AbortSignal) {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) throw new GeminiError(0, 'GEMINI_API_KEY manquante');
+    const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body), signal },
+    );
+    if (!response.ok || !response.body) {
+        const detail = await response.text().catch(() => '');
+        throw new GeminiError(response.status, detail.slice(0, 500));
+    }
+    return response.body;
+}
+
+// Lit le flux SSE et renvoie chaque objet JSON reçu
+async function* readChunks(body: ReadableStream<Uint8Array>): AsyncGenerator<GeminiChunk> {
+    const reader = body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let index;
+        while ((index = buffer.indexOf('\n')) >= 0) {
+            const line = buffer.slice(0, index).trim();
+            buffer = buffer.slice(index + 1);
+            if (!line.startsWith('data:')) continue;
+            const data = line.slice(5).trim();
+            if (data) yield JSON.parse(data) as GeminiChunk;
+        }
+    }
 }
 
 export async function POST(request: Request) {
@@ -61,7 +110,7 @@ export async function POST(request: Request) {
         return json(400, { error: `Votre message dépasse ${ASSISTANT_MAX_MESSAGE_LENGTH} caractères.` });
     }
 
-    // Quota quotidien : l'IA a un coût, chaque étudiant dispose d'un nombre de messages par 24 h
+    // Quota quotidien : chaque étudiant dispose d'un nombre de messages par 24 h (le quota gratuit Gemini est partagé)
     const used = await prisma.assistantMessage.count({
         where: { role: 'USER', createdAt: { gte: new Date(Date.now() - 86_400_000) }, thread: { userId: user.id } },
     });
@@ -96,24 +145,23 @@ export async function POST(request: Request) {
         await prisma.assistantMessage.findMany({ where: { threadId: thread.id }, orderBy: { createdAt: 'desc' }, take: MAX_HISTORY })
     ).reverse();
     while (history.length && history[0].role !== 'USER') history.shift();
-    const messages: Anthropic.Beta.BetaMessageParam[] = history.map((m) => ({
-        role: m.role === 'USER' ? 'user' : 'assistant',
-        content: m.content,
+    const contents: GeminiContent[] = history.map((m) => ({
+        role: m.role === 'USER' ? 'user' : 'model',
+        parts: [{ text: m.content }],
     }));
 
     // Dossier du projet, recalculé à chaque message pour refléter l'état actuel des étapes
     const dossier = thread.projectId ? await buildProjectDossier(thread.projectId, user.id) : null;
     const today = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeZone: 'Africa/Douala' }).format(new Date());
-    const system: Anthropic.Beta.BetaTextBlockParam[] = [
-        // Consignes figées en premier : mises en cache d'un message à l'autre
-        { type: 'text', text: ASSISTANT_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
-        {
-            type: 'text',
-            text: `Date du jour : ${today}.\nÉtudiant : ${user.firstName} ${user.lastName}.\n\n${
-                dossier ? `<dossier_projet>\n${dossier}\n</dossier_projet>` : "Aucun projet n'est sélectionné pour cette conversation."
-            }`,
-        },
-    ];
+    const context = `Date du jour : ${today}.\nÉtudiant : ${user.firstName} ${user.lastName}.\n\n${
+        dossier ? `<dossier_projet>\n${dossier}\n</dossier_projet>` : "Aucun projet n'est sélectionné pour cette conversation."
+    }`;
+    const requestBody = (withSearch: boolean) => ({
+        systemInstruction: { parts: [{ text: ASSISTANT_SYSTEM_PROMPT }, { text: context }] },
+        contents,
+        ...(withSearch ? { tools: [{ google_search: {} }] } : {}),
+        generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
+    });
 
     const encoder = new TextEncoder();
     const threadId = thread.id;
@@ -126,61 +174,48 @@ export async function POST(request: Request) {
 
             let text = '';
             const sources = new Map<string, string>();
-            let conversation = messages;
 
             try {
-                for (let turn = 0; turn <= MAX_CONTINUATIONS; turn++) {
-                    const response = getClient().beta.messages.stream(
-                        {
-                            model: MODEL,
-                            max_tokens: 64000,
-                            thinking: { type: 'adaptive' },
-                            // En cas de refus du modèle, l'API relance automatiquement la demande sur le modèle de repli recommandé
-                            betas: ['server-side-fallback-2026-07-01'],
-                            fallbacks: 'default',
-                            cache_control: { type: 'ephemeral' },
-                            system,
-                            tools: [
-                                {
-                                    type: 'web_search_20260209',
-                                    name: 'web_search',
-                                    max_uses: 5,
-                                    user_location: { type: 'approximate', country: 'CM', city: 'Yaoundé', timezone: 'Africa/Douala' },
-                                },
-                            ],
-                            messages: conversation,
-                        },
-                        { signal: request.signal },
-                    );
+                // Ouverture du flux : sans recherche web si l'outil est refusé, puis sur l'alias « Flash » si le modèle est introuvable
+                let response: ReadableStream<Uint8Array> | null = null;
+                const attempts: [string, boolean][] = [[MODEL, WEB_SEARCH], [MODEL, false], [FALLBACK_MODEL, false]];
+                for (const [model, withSearch] of attempts) {
+                    try {
+                        response = await openGeminiStream(model, requestBody(withSearch), request.signal);
+                        break;
+                    } catch (error) {
+                        const retry = error instanceof GeminiError && (error.status === 404 || (error.status === 400 && withSearch && !isKeyError(error)));
+                        if (!retry) throw error;
+                    }
+                }
+                if (!response) throw new GeminiError(404, 'Aucun modèle Gemini disponible');
 
-                    for await (const event of response) {
-                        if (event.type === 'content_block_start') {
-                            const block = event.content_block;
-                            if (block.type === 'server_tool_use') send({ type: 'status', value: 'search' });
-                            if (block.type === 'web_search_tool_result' && Array.isArray(block.content)) {
-                                for (const result of block.content) {
-                                    if (result.type === 'web_search_result') sources.set(result.url, result.title);
-                                }
-                            }
-                        } else if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-                            text += event.delta.text;
-                            send({ type: 'text', delta: event.delta.text });
+                let searching = false;
+                let blocked = false;
+                for await (const chunk of readChunks(response)) {
+                    if (chunk.promptFeedback?.blockReason) blocked = true;
+                    const candidate = chunk.candidates?.[0];
+                    if (!candidate) continue;
+                    const grounding = candidate.groundingMetadata;
+                    if (grounding?.webSearchQueries?.length && !searching) {
+                        searching = true;
+                        send({ type: 'status', value: 'search' });
+                    }
+                    for (const source of grounding?.groundingChunks ?? []) {
+                        if (source.web?.uri) sources.set(source.web.uri, source.web.title || source.web.uri);
+                    }
+                    for (const part of candidate.content?.parts ?? []) {
+                        if (part.text && !part.thought) {
+                            text += part.text;
+                            send({ type: 'text', delta: part.text });
                         }
                     }
-
-                    const final = await response.finalMessage();
-                    if (final.stop_reason === 'refusal') {
-                        const notice = "\n\nJe ne peux pas répondre à cette demande. Reformulez-la en lien avec votre projet entrepreneurial.";
-                        text += notice;
-                        send({ type: 'text', delta: notice });
-                        break;
-                    }
-                    // La recherche web a fait une pause : on relance pour que Claude termine sa réponse
-                    if (final.stop_reason === 'pause_turn') {
-                        conversation = [...conversation, { role: 'assistant', content: final.content }];
-                        continue;
-                    }
-                    break;
+                    if (candidate.finishReason && BLOCKED_REASONS.includes(candidate.finishReason)) blocked = true;
+                }
+                if (blocked) {
+                    const notice = "\n\nJe ne peux pas répondre à cette demande. Reformulez-la en lien avec votre projet entrepreneurial.";
+                    text += notice;
+                    send({ type: 'text', delta: notice });
                 }
             } catch (error) {
                 if (!request.signal.aborted) {
