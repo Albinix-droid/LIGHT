@@ -45,7 +45,8 @@ Project Settings → Environment Variables, pour **Production** et **Preview**. 
 | `SUPABASE_SECRET_KEY` | Clé secrète (service_role) : pièces jointes, photos de profil, suspension de comptes |
 | `DATABASE_URL` | Pooler Supabase en **mode transaction, port 6543**, avec `?pgbouncer=true` |
 | `DIRECT_URL` | Pooler en mode session (port 5432) : migrations uniquement |
-| `ANTHROPIC_API_KEY` | Clé API Anthropic : assistant IA |
+| `GEMINI_API_KEY` | Clé API Google Gemini (gratuite, [aistudio.google.com/apikey](https://aistudio.google.com/apikey)) : mentor IA |
+| `GEMINI_MODEL` | Facultatif : modèle Gemini (`gemini-2.5-flash` par défaut) |
 
 > Sur Vercel, `DATABASE_URL` doit utiliser le **port 6543** (mode transaction). Le mode session (5432) ouvre une connexion par instance de fonction et sature vite le pooler.
 
@@ -92,4 +93,5 @@ Les identifiants suivants se créent dans `/admin/identifiants`.
 
 - Requêtes limitées à **4,5 Mo** par Vercel : les maquettes de l'étape Conception doivent rester sous cette taille. Les pièces jointes de la messagerie, elles, vont directement dans Supabase Storage (jusqu'à 20 Mo).
 - L'assistant IA peut répondre pendant 5 minutes (`maxDuration = 300`), ce qui demande Fluid Compute (activé par défaut sur les nouveaux projets).
+- Le quota gratuit de Gemini est partagé par toute la plateforme (une seule clé) et limité par minute et par jour : au-delà, le mentor affiche un message invitant à réessayer plus tard. Activez la facturation sur la clé si l'usage augmente.
 - Le bucket de stockage `messagerie` est créé automatiquement au premier envoi de fichier.
